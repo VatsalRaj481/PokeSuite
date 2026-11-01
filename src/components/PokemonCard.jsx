@@ -232,25 +232,6 @@ const parseEvolutionTree = (chainNode) => {
   return buildNode(chainNode);
 };
 
-// Checks if the evolution tree is a simple linear sequence
-const getLinearEvolutionStages = (rootNode) => {
-  if (!rootNode) return null;
-  const stages = [];
-  let curr = rootNode;
-  while (curr) {
-    stages.push(curr);
-    if (!curr.evolvesTo || curr.evolvesTo.length === 0) {
-      break;
-    }
-    if (curr.evolvesTo.length > 1) {
-      // Branching chain (like Eevee)
-      return null;
-    }
-    curr = curr.evolvesTo[0];
-  }
-  return stages;
-};
-
 // Stage card component for rendering a single evolution node
 function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
   if (!node) return null;
@@ -261,13 +242,17 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.06 }}
-      whileTap={{ scale: 0.96 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => onSelectPokemon && onSelectPokemon(node.name)}
-      className="flex flex-col items-center p-1 sm:p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none group relative flex-shrink-0"
+      className={`flex flex-col items-center p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none group relative flex-shrink-0 w-24 sm:w-28 md:w-32 ${
+        isCurrent
+          ? "ring-2 ring-theme-accent/60 bg-theme-surface/80 shadow-md"
+          : "hover:bg-theme-surface/40"
+      }`}
       title={`View ${formatPokemonName(node.name)}`}
     >
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center p-1 sm:p-2 flex-shrink-0">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 flex items-center justify-center p-1 flex-shrink-0">
         {/* Subtle Ambient Halo on active / hover */}
         <div
           className={`absolute inset-0 rounded-full filter blur-xl transition-opacity duration-300 pointer-events-none ${
@@ -280,7 +265,7 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
           <img
             src={homeSpriteUrl}
             alt={node.name}
-            className="w-full h-full max-w-[6rem] sm:max-w-[7rem] md:max-w-[8rem] max-h-[6rem] sm:max-h-[7rem] md:max-h-[8rem] object-contain drop-shadow-lg group-hover:scale-108 transition-transform duration-200 z-10"
+            className="w-full h-full object-contain drop-shadow-md group-hover:scale-108 transition-transform duration-200 z-10"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${node.id}.png`;
@@ -291,7 +276,7 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
         )}
       </div>
       <span
-        className={`text-xs sm:text-sm md:text-base font-display font-bold capitalize text-center mt-1.5 transition-colors truncate max-w-[120px] sm:max-w-[140px] ${
+        className={`text-xs sm:text-sm font-sans font-bold capitalize text-center mt-1 transition-colors truncate w-full ${
           isCurrent
             ? "text-theme-accent"
             : "text-theme-primary group-hover:text-theme-accent"
@@ -299,11 +284,11 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
       >
         {formatPokemonName(node.name)}
       </span>
-      <span className="text-[11px] sm:text-xs font-mono-tech text-theme-secondary font-semibold">
+      <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary font-semibold">
         #{String(node.id).padStart(4, "0")}
       </span>
       {isCurrent && (
-        <span className="mt-1 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-display font-bold bg-theme-accent text-white uppercase tracking-wider shadow-sm">
+        <span className="mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-mono-tech font-bold bg-theme-accent text-white uppercase tracking-wider shadow-xs">
           Current
         </span>
       )}
@@ -311,105 +296,57 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
   );
 }
 
-// Recursive component for rendering evolution stages
-function EvolutionNode({ node, currentPokemonId, onSelectPokemon, isRoot = true }) {
+// Fixed-width, beautifully aligned conduit connector between evolution stages
+function EvolutionConnector({ trigger }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-1 sm:px-2 flex-shrink-0 w-20 sm:w-24 md:w-28 select-none my-auto">
+      <span
+        className="px-2 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] sm:text-[10px] font-mono-tech font-bold text-theme-primary text-center tracking-tight truncate max-w-full shadow-2xs mb-1.5"
+        title={trigger || "Evolves"}
+      >
+        {trigger || "Evolves"}
+      </span>
+      <div className="flex items-center w-full gap-0.5">
+        <div className="h-0.5 flex-1 bg-theme-accent/60 rounded-full" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="w-4 h-4 text-theme-accent flex-shrink-0 -ml-1.5"
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// Unified, recursive evolution tree branch component with consistent spacing
+function EvolutionBranch({ node, currentPokemonId, onSelectPokemon }) {
   if (!node) return null;
-  const isCurrent = String(node.id) === String(currentPokemonId);
-  const homeSpriteUrl = node.id
-    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${node.id}.png`
-    : null;
+  const hasChildren = node.evolvesTo && node.evolvesTo.length > 0;
 
   return (
-    <div
-      className={`flex flex-col md:flex-row items-center gap-2 sm:gap-4 my-2 ${
-        isRoot ? "w-full justify-between" : "flex-1 justify-between"
-      } min-w-0`}
-    >
-      {/* Stage Node (Clean, unboxed, sized to cover screen without overflow) */}
-      <motion.div
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.96 }}
-        onClick={() => onSelectPokemon && onSelectPokemon(node.name)}
-        className="flex flex-col items-center p-1 sm:p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none group relative flex-shrink-0 min-w-0"
-        title={`View ${formatPokemonName(node.name)}`}
-      >
-        <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center p-1 sm:p-2 flex-shrink-0">
-          {/* Subtle Ambient Halo on active / hover */}
-          <div
-            className={`absolute inset-0 rounded-full filter blur-xl transition-opacity duration-300 pointer-events-none ${
-              isCurrent
-                ? "bg-theme-accent/25 opacity-100 scale-110"
-                : "bg-theme-accent/15 opacity-0 group-hover:opacity-100 scale-105"
-            }`}
-          />
-          {homeSpriteUrl ? (
-            <img
-              src={homeSpriteUrl}
-              alt={node.name}
-              className="w-full h-full max-w-[6rem] sm:max-w-[7rem] md:max-w-[8rem] max-h-[6rem] sm:max-h-[7rem] md:max-h-[8rem] object-contain drop-shadow-lg group-hover:scale-108 transition-transform duration-200 z-10"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${node.id}.png`;
-              }}
-            />
-          ) : (
-            <div className="text-sm text-theme-secondary font-mono-tech">?</div>
-          )}
-        </div>
-        <span
-          className={`text-xs sm:text-sm md:text-base font-display font-bold capitalize text-center mt-1.5 transition-colors truncate max-w-[120px] sm:max-w-[140px] ${
-            isCurrent
-              ? "text-theme-accent"
-              : "text-theme-primary group-hover:text-theme-accent"
-          }`}
-        >
-          {formatPokemonName(node.name)}
-        </span>
-        <span className="text-[11px] sm:text-xs font-mono-tech text-theme-secondary font-semibold">
-          #{String(node.id).padStart(4, "0")}
-        </span>
-        {isCurrent && (
-          <span className="mt-1 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-display font-bold bg-theme-accent text-white uppercase tracking-wider shadow-sm">
-            Current
-          </span>
-        )}
-      </motion.div>
+    <div className="flex items-center flex-shrink-0">
+      <EvolutionStageCard
+        node={node}
+        currentPokemonId={currentPokemonId}
+        onSelectPokemon={onSelectPokemon}
+      />
 
-      {/* Children branches */}
-      {node.evolvesTo && node.evolvesTo.length > 0 && (
-        <div className="flex flex-col gap-3 sm:gap-4 flex-1 w-full min-w-0">
+      {hasChildren && (
+        <div className="flex flex-col gap-4 sm:gap-6 justify-center flex-shrink-0">
           {node.evolvesTo.map((child) => (
-            <div
-              key={child.name}
-              className="flex flex-col md:flex-row items-center gap-1.5 sm:gap-3 flex-1 w-full justify-between min-w-0"
-            >
-              {/* Expanding conduit connector: horizontal on desktop, vertical on mobile */}
-              <div className="flex md:flex-col items-center justify-center gap-1 px-1 sm:px-2 py-1 text-center flex-1 min-w-[36px] sm:min-w-[48px]">
-                <div className="h-0.5 w-full bg-gradient-to-r from-theme-accent/20 via-theme-accent to-theme-accent/20 hidden md:block mb-1" />
-                <span className="text-[10px] sm:text-xs font-mono-tech font-bold text-theme-accent uppercase tracking-tight text-center truncate max-w-full">
-                  {child.trigger || "Evolves"}
-                </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-theme-accent/80 rotate-90 md:rotate-0 transition-transform flex-shrink-0"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div className="w-0.5 h-3 bg-gradient-to-b from-theme-accent to-transparent block md:hidden mt-0.5" />
-              </div>
-
-              {/* Recursive child branch */}
-              <EvolutionNode
+            <div key={child.name} className="flex items-center flex-shrink-0">
+              <EvolutionConnector trigger={child.trigger} />
+              <EvolutionBranch
                 node={child}
                 currentPokemonId={currentPokemonId}
                 onSelectPokemon={onSelectPokemon}
-                isRoot={false}
               />
             </div>
           ))}
@@ -2728,65 +2665,25 @@ function PokemonCard({
             )}
           </div>
 
-          <div className="w-full py-2 sm:py-4">
+          <div className="w-full py-2 sm:py-4 flex items-center justify-center overflow-x-auto">
             {evolutionTree ? (
               evolutionTree.evolvesTo &&
               evolutionTree.evolvesTo.length === 0 &&
               !evolutionTree.trigger ? (
-                <div className="p-4 bg-theme-surface border border-theme rounded-xl text-xs font-display text-theme-secondary italic text-center">
+                <div className="p-4 bg-theme-surface border border-theme rounded-xl text-xs font-sans text-theme-secondary italic text-center">
                   This species has no recorded evolution chain.
                 </div>
-              ) : (() => {
-                const linearStages = getLinearEvolutionStages(evolutionTree);
-                if (linearStages && linearStages.length > 1) {
-                  return (
-                    <div className="flex flex-col md:flex-row items-center justify-between w-full px-2 sm:px-4">
-                      {linearStages.map((stageNode, idx) => (
-                        <React.Fragment key={stageNode.name}>
-                          {idx > 0 && (
-                            <div className="flex md:flex-col items-center justify-center gap-1 px-1 sm:px-2 py-1 text-center flex-1 min-w-[36px] sm:min-w-[48px] w-full md:w-auto my-1 md:my-0">
-                              <div className="h-0.5 w-full bg-gradient-to-r from-theme-accent/20 via-theme-accent to-theme-accent/20 hidden md:block mb-1" />
-                              <span className="text-[10px] sm:text-xs font-mono-tech font-bold text-theme-accent uppercase tracking-tight text-center truncate max-w-full">
-                                {stageNode.trigger || "Evolves"}
-                              </span>
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-4 h-4 sm:w-5 sm:h-5 text-theme-accent/80 rotate-90 md:rotate-0 transition-transform flex-shrink-0"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <div className="w-0.5 h-3 bg-gradient-to-b from-theme-accent to-transparent block md:hidden mt-0.5" />
-                            </div>
-                          )}
-                          <EvolutionStageCard
-                            node={stageNode}
-                            currentPokemonId={pokemon.id}
-                            onSelectPokemon={onSelectPokemon}
-                          />
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="flex justify-between items-center w-full px-1 sm:px-2">
-                    <EvolutionNode
-                      node={evolutionTree}
-                      currentPokemonId={pokemon.id}
-                      onSelectPokemon={onSelectPokemon}
-                    />
-                  </div>
-                );
-              })()
+              ) : (
+                <div className="inline-flex items-center justify-center min-w-max mx-auto py-2 px-2 sm:px-4">
+                  <EvolutionBranch
+                    node={evolutionTree}
+                    currentPokemonId={pokemon.id}
+                    onSelectPokemon={onSelectPokemon}
+                  />
+                </div>
+              )
             ) : (
-              <div className="p-4 text-xs font-display text-theme-secondary italic text-center">
+              <div className="p-4 text-xs font-sans text-theme-secondary italic text-center">
                 {loadingEvolution
                   ? "Loading evolution chain..."
                   : "No evolution chain recorded for this species."}
