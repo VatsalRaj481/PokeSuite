@@ -299,20 +299,24 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
 // Fixed-width, beautifully aligned conduit connector between evolution stages
 function EvolutionConnector({ trigger }) {
   return (
-    <div className="flex flex-col items-center justify-center px-1 sm:px-2 flex-shrink-0 w-20 sm:w-24 md:w-28 select-none my-auto">
+    <div className="flex flex-col items-center justify-center px-1 sm:px-2 flex-shrink-0 min-w-[96px] sm:min-w-[112px] md:min-w-[124px] max-w-[148px] select-none my-auto">
       <span
-        className="px-2 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] sm:text-[10px] font-mono-tech font-bold text-theme-primary text-center tracking-tight truncate max-w-full shadow-2xs mb-1.5"
+        className="px-2 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] sm:text-[10px] font-mono-tech font-bold text-theme-primary text-center tracking-tight capitalize max-w-full shadow-2xs mb-1.5 whitespace-nowrap overflow-hidden text-ellipsis"
         title={trigger || "Evolves"}
       >
         {trigger || "Evolves"}
       </span>
-      <div className="flex items-center w-full gap-0.5">
-        <div className="h-0.5 flex-1 bg-theme-accent/60 rounded-full" />
+      <div className="flex items-center w-full">
+        <div
+          className="h-[2px] flex-1 rounded-l-full"
+          style={{ backgroundColor: "var(--color-accent-red)" }}
+        />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="w-4 h-4 text-theme-accent flex-shrink-0 -ml-1.5"
+          className="w-4 h-4 flex-shrink-0 -ml-1"
+          style={{ color: "var(--color-accent-red)" }}
         >
           <path
             fillRule="evenodd"
