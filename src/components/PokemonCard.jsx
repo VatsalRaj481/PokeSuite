@@ -360,6 +360,127 @@ function EvolutionBranch({ node, currentPokemonId, onSelectPokemon }) {
   );
 }
 
+// Vertical conduit connector for mobile layout
+function EvolutionConnectorVertical({ trigger }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-2 select-none w-full">
+      <div
+        className="w-[2px] h-3.5 rounded-full"
+        style={{ backgroundColor: "var(--color-accent-red)" }}
+      />
+      <span
+        className="px-2.5 py-1 my-1 rounded-full bg-theme-surface border border-theme text-[9.5px] font-mono-tech font-bold text-theme-primary text-center tracking-tight capitalize shadow-2xs max-w-[220px] truncate"
+        title={trigger || "Evolves"}
+      >
+        {trigger || "Evolves"}
+      </span>
+      <div className="flex flex-col items-center">
+        <div
+          className="w-[2px] h-3.5 rounded-full"
+          style={{ backgroundColor: "var(--color-accent-red)" }}
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="w-4 h-4 -mt-1"
+          style={{ color: "var(--color-accent-red)" }}
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// Mobile-optimized vertical evolution tree component (prevents horizontal scrolling)
+function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
+  if (!node) return null;
+  const hasChildren = node.evolvesTo && node.evolvesTo.length > 0;
+  const isBranching = hasChildren && node.evolvesTo.length > 1;
+
+  return (
+    <div className="flex flex-col items-center w-full">
+      <EvolutionStageCard
+        node={node}
+        currentPokemonId={currentPokemonId}
+        onSelectPokemon={onSelectPokemon}
+      />
+
+      {hasChildren && !isBranching && (
+        <div className="flex flex-col items-center w-full">
+          <EvolutionConnectorVertical trigger={node.evolvesTo[0].trigger} />
+          <MobileEvolutionTree
+            node={node.evolvesTo[0]}
+            currentPokemonId={currentPokemonId}
+            onSelectPokemon={onSelectPokemon}
+          />
+        </div>
+      )}
+
+      {isBranching && (
+        <div className="w-full flex flex-col items-center mt-2">
+          <div
+            className="w-[2px] h-3 rounded-full mb-1"
+            style={{ backgroundColor: "var(--color-accent-red)" }}
+          />
+          <span className="px-2.5 py-0.5 rounded-full bg-theme-surface/90 border border-theme text-[9px] font-mono-tech text-theme-secondary uppercase tracking-wider mb-2.5 shadow-2xs">
+            {node.evolvesTo.length} Evolutionary Branches
+          </span>
+          <div className="grid grid-cols-2 gap-2.5 w-full max-w-xs sm:max-w-sm">
+            {node.evolvesTo.map((child) => (
+              <div
+                key={child.name}
+                className="flex flex-col items-center bg-theme-surface/35 border border-theme/60 rounded-2xl p-2.5"
+              >
+                <span
+                  className="px-2 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] font-mono-tech font-bold text-theme-primary text-center truncate max-w-full shadow-2xs mb-1"
+                  title={child.trigger || "Evolves"}
+                >
+                  {child.trigger || "Evolves"}
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-3.5 h-3.5 mb-1"
+                  style={{ color: "var(--color-accent-red)" }}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <EvolutionStageCard
+                  node={child}
+                  currentPokemonId={currentPokemonId}
+                  onSelectPokemon={onSelectPokemon}
+                />
+                {/* Check if branch evolves again, e.g. Wurmple -> Silcoon -> Beautifly or Applin -> Dipplin -> Hydrapple */}
+                {child.evolvesTo && child.evolvesTo.length > 0 && (
+                  <div className="flex flex-col items-center w-full">
+                    <EvolutionConnectorVertical trigger={child.evolvesTo[0].trigger} />
+                    <EvolutionStageCard
+                      node={child.evolvesTo[0]}
+                      currentPokemonId={currentPokemonId}
+                      onSelectPokemon={onSelectPokemon}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PokemonCard({
   pokemon,
   layout = "vertical",
@@ -2672,7 +2793,7 @@ function PokemonCard({
       {/* Full-Width Lower Deck: Evolution Chain & Move Learnset */}
       <div className="flex flex-col gap-6 sm:gap-8 w-full border-t border-theme pt-6 sm:pt-8">
         {/* Evolution Chain Section */}
-        <div className="bg-theme-bg border border-theme rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+        <div className="bg-theme-bg border border-theme rounded-2xl p-3 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-display font-bold text-theme-secondary flex items-center gap-2 uppercase tracking-wider">
               <span>Evolution Chain</span>
@@ -2684,24 +2805,51 @@ function PokemonCard({
             )}
           </div>
 
-          <div className="w-full py-2 sm:py-4 flex items-center justify-center overflow-x-auto">
+          <div className="w-full py-2 sm:py-4 flex items-center justify-center">
             {loadingEvolution ? (
               <div className="p-4 text-xs font-sans text-theme-secondary italic text-center animate-pulse">
                 Loading evolution chain...
               </div>
             ) : (
-              <div className="inline-flex items-center justify-center min-w-max mx-auto py-2 px-2 sm:px-4">
-                <EvolutionBranch
-                  node={
-                    evolutionTree || {
-                      id: pokemon.id,
-                      name: pokemon.name,
-                      evolvesTo: [],
+              <div className="w-full">
+                {/* Desktop layout: Horizontal Tree View with overflow scroll */}
+                <div className="hidden md:flex items-center justify-center min-w-max mx-auto py-2 px-2 sm:px-4 overflow-x-auto">
+                  <EvolutionBranch
+                    node={
+                      evolutionTree || {
+                        id: pokemon.id,
+                        name: pokemon.name,
+                        evolvesTo: [],
+                      }
                     }
-                  }
-                  currentPokemonId={pokemon.id}
-                  onSelectPokemon={onSelectPokemon}
-                />
+                    currentPokemonId={pokemon.id}
+                    onSelectPokemon={onSelectPokemon}
+                  />
+                </div>
+
+                {/* Mobile layout: Vertical Pipeline View (avoids horizontal scrolling) */}
+                <div className="flex md:hidden flex-col items-center justify-center w-full py-2 px-1">
+                  <MobileEvolutionTree
+                    node={
+                      evolutionTree || {
+                        id: pokemon.id,
+                        name: pokemon.name,
+                        evolvesTo: [],
+                      }
+                    }
+                    currentPokemonId={pokemon.id}
+                    onSelectPokemon={onSelectPokemon}
+                  />
+                </div>
+
+                {/* Single stage indicator if Pokémon has no evolutions */}
+                {evolutionTree &&
+                  (!evolutionTree.evolvesTo || evolutionTree.evolvesTo.length === 0) &&
+                  !evolutionTree.trigger && (
+                    <p className="text-xs font-sans text-theme-secondary italic text-center mt-2 select-none">
+                      This Pokémon does not evolve.
+                    </p>
+                  )}
               </div>
             )}
           </div>
@@ -2787,7 +2935,7 @@ function PokemonCard({
 
             {/* Sub-bar: Category Pills (Physical, Special, Status) & Active Filters Reset */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-theme/50">
-              <div className="flex items-center gap-1 bg-theme-surface/70 p-1 rounded-xl border border-theme">
+              <div className="flex items-center gap-1 bg-theme-surface/70 p-1 rounded-xl border border-theme overflow-x-auto max-w-full">
                 <span className="text-[10px] font-sans font-bold text-theme-secondary uppercase tracking-wider px-1.5 hidden sm:inline">
                   Category:
                 </span>
@@ -2891,12 +3039,23 @@ function PokemonCard({
           {/* Structured High-Readability Moves Data Table */}
           {currentMoveList.length > 0 ? (
             <div className="border border-theme rounded-xl overflow-hidden bg-theme-surface/35 shadow-xs">
-              {/* Table Column Header */}
-              <div className="grid grid-cols-12 gap-2 px-3 sm:px-4 py-2 bg-theme-surface border-b border-theme text-[10px] font-mono-tech uppercase tracking-wider text-theme-secondary font-bold select-none items-center">
-                <div className="col-span-2 sm:col-span-2 md:col-span-1">Level</div>
-                <div className="col-span-5 sm:col-span-5 md:col-span-5">Move</div>
-                <div className="col-span-2 sm:col-span-2 md:col-span-3 text-center sm:text-left">Category</div>
-                <div className="col-span-3 sm:col-span-3 md:col-span-3 text-right sm:text-left">Type</div>
+              {/* Table Column Header: Mobile (< sm) */}
+              <div className="flex sm:hidden items-center justify-between px-3 py-2 bg-theme-surface border-b border-theme text-[10px] font-mono-tech uppercase tracking-wider text-theme-secondary font-bold select-none">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-12 text-left">Level</span>
+                  <span>Move / Category</span>
+                </div>
+                <div className="flex items-center gap-2 pr-5">
+                  <span>Type</span>
+                </div>
+              </div>
+
+              {/* Table Column Header: Desktop (sm:) */}
+              <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-2 bg-theme-surface border-b border-theme text-[10px] font-mono-tech uppercase tracking-wider text-theme-secondary font-bold select-none items-center">
+                <div className="col-span-2 md:col-span-1">Level</div>
+                <div className="col-span-4 md:col-span-5">Move</div>
+                <div className="col-span-3 md:col-span-3 text-left">Category</div>
+                <div className="col-span-3 md:col-span-3 text-left">Type</div>
               </div>
 
               {/* Scrollable Move Rows */}
@@ -2919,72 +3078,69 @@ function PokemonCard({
                       <button
                         type="button"
                         onClick={() => handleMoveClick(m.name, m.url)}
-                        className="w-full px-3 sm:px-4 py-2.5 grid grid-cols-12 gap-2 items-center text-left transition-colors cursor-pointer group"
+                        className="w-full px-3 sm:px-4 py-2.5 text-left transition-colors cursor-pointer group"
                       >
-                        {/* Col 1: Level / Method */}
-                        <div className="col-span-2 sm:col-span-2 md:col-span-1 flex items-center">
-                          {isSearching || activeMoveTab === "all" ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center truncate">
-                              {m.level ? `Lv. ${m.level}` : (m.method?.toUpperCase() || "MOVE")}
+                        {/* Mobile Row (< sm): Flex with guaranteed fixed-width slots (no overlapping) */}
+                        <div className="flex sm:hidden items-center gap-2.5 w-full">
+                          {/* Col 1: Level / Method Badge - Dedicated w-12 flex-shrink-0 */}
+                          <div className="w-12 flex-shrink-0 flex items-center justify-start">
+                            <span className="w-full py-0.5 px-1 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center truncate">
+                              {isSearching || activeMoveTab === "all"
+                                ? (m.level ? `Lv.${m.level}` : (m.method?.slice(0, 4).toUpperCase() || "MOVE"))
+                                : activeMoveTab === "level-up"
+                                ? (m.level !== undefined ? `Lv.${m.level}` : "—")
+                                : activeMoveTab === "machine"
+                                ? "TM"
+                                : activeMoveTab === "egg"
+                                ? "Egg"
+                                : "Tutor"}
                             </span>
-                          ) : activeMoveTab === "level-up" ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center min-w-[42px]">
-                              {m.level !== undefined ? `Lv. ${m.level}` : "—"}
-                            </span>
-                          ) : (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-semibold bg-theme-input/60 border border-theme/40 text-theme-secondary text-center">
-                              {activeMoveTab === "machine" ? "TM" : activeMoveTab === "egg" ? "Egg" : "Tutor"}
-                            </span>
-                          )}
-                        </div>
+                          </div>
 
-                        {/* Col 2: Move Name & Pre-Evo inheritance note */}
-                        <div className="col-span-5 sm:col-span-5 md:col-span-5 flex items-center gap-1.5 min-w-0 pr-2">
-                          <span className="text-xs sm:text-sm font-sans font-semibold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate">
-                            {m.name.replace(/-/g, " ")}
-                          </span>
-                          {m.fromPreEvo && !isSearching && activeMoveTab !== "all" && (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-tech text-theme-secondary/80 bg-theme-input/60 border border-theme/40 hidden md:inline flex-shrink-0">
-                              via {formatPokemonName(m.fromPreEvo)}
+                          {/* Col 2: Move Name & Category Subtitle - flex-1 min-w-0 */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <span className="text-xs font-sans font-bold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate">
+                              {m.name.replace(/-/g, " ")}
                             </span>
-                          )}
-                        </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {meta?.damageClass && (
+                                <span
+                                  className={`px-1.5 py-0.2 rounded text-[8.5px] font-mono-tech font-bold uppercase tracking-tight border ${
+                                    meta.damageClass === "physical"
+                                      ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                                      : meta.damageClass === "special"
+                                      ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
+                                      : "bg-slate-500/15 text-slate-300 border-slate-500/30"
+                                  }`}
+                                >
+                                  {meta.damageClass}
+                                </span>
+                              )}
+                              {m.fromPreEvo && !isSearching && activeMoveTab !== "all" && (
+                                <span className="text-[8.5px] font-mono-tech text-theme-secondary/80 truncate">
+                                  via {formatPokemonName(m.fromPreEvo)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
 
-                        {/* Col 3: Category Badge (Physical / Special / Status) */}
-                        <div className="col-span-2 sm:col-span-2 md:col-span-3 flex items-center justify-center sm:justify-start">
-                          {meta?.damageClass ? (
-                            <span
-                              className={`w-18 sm:w-20 text-center py-0.5 rounded text-[10px] font-mono-tech font-bold uppercase border tracking-tight ${
-                                meta.damageClass === "physical"
-                                  ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                                  : meta.damageClass === "special"
-                                  ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
-                                  : "bg-slate-500/15 text-slate-300 border-slate-500/30"
-                              }`}
-                            >
-                              {meta.damageClass}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono-tech text-theme-secondary/60">
-                              —
-                            </span>
-                          )}
-                        </div>
+                          {/* Col 3: Type Badge - flex-shrink-0 */}
+                          <div className="flex-shrink-0">
+                            {meta?.type ? (
+                              <TypeBadge type={meta.type} size="sm" />
+                            ) : (
+                              <span className="text-[10px] font-mono-tech text-theme-secondary/60">
+                                —
+                              </span>
+                            )}
+                          </div>
 
-                        {/* Col 4: Type Badge + Chevron */}
-                        <div className="col-span-3 sm:col-span-3 md:col-span-3 flex items-center justify-end sm:justify-between gap-1.5">
-                          {meta?.type ? (
-                            <TypeBadge type={meta.type} size="sm" />
-                          ) : (
-                            <span className="text-[10px] font-mono-tech text-theme-secondary/60">
-                              —
-                            </span>
-                          )}
+                          {/* Col 4: Chevron indicator - flex-shrink-0 */}
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            className={`w-4 h-4 text-theme-secondary/70 transform transition-transform duration-200 flex-shrink-0 ${
+                            className={`w-3.5 h-3.5 text-theme-secondary/70 transform transition-transform duration-200 flex-shrink-0 ${
                               isExpanded ? "rotate-180 text-theme-accent" : "rotate-0"
                             }`}
                           >
@@ -2994,6 +3150,84 @@ function PokemonCard({
                               clipRule="evenodd"
                             />
                           </svg>
+                        </div>
+
+                        {/* Desktop Row (sm:): Structured 12-column grid */}
+                        <div className="hidden sm:grid grid-cols-12 gap-2 items-center w-full">
+                          {/* Col 1: Level / Method */}
+                          <div className="col-span-2 md:col-span-1 flex items-center">
+                            {isSearching || activeMoveTab === "all" ? (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center truncate">
+                                {m.level ? `Lv. ${m.level}` : (m.method?.toUpperCase() || "MOVE")}
+                              </span>
+                            ) : activeMoveTab === "level-up" ? (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center min-w-[42px]">
+                                {m.level !== undefined ? `Lv. ${m.level}` : "—"}
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-semibold bg-theme-input/60 border border-theme/40 text-theme-secondary text-center">
+                                {activeMoveTab === "machine" ? "TM" : activeMoveTab === "egg" ? "Egg" : "Tutor"}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Col 2: Move Name & Pre-Evo inheritance note */}
+                          <div className="col-span-4 md:col-span-5 flex items-center gap-1.5 min-w-0 pr-2">
+                            <span className="text-xs sm:text-sm font-sans font-semibold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate">
+                              {m.name.replace(/-/g, " ")}
+                            </span>
+                            {m.fromPreEvo && !isSearching && activeMoveTab !== "all" && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-tech text-theme-secondary/80 bg-theme-input/60 border border-theme/40 hidden md:inline flex-shrink-0">
+                                via {formatPokemonName(m.fromPreEvo)}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Col 3: Category Badge */}
+                          <div className="col-span-3 md:col-span-3 flex items-center justify-start">
+                            {meta?.damageClass ? (
+                              <span
+                                className={`px-2.5 py-0.5 rounded text-[10px] font-mono-tech font-bold uppercase border tracking-tight ${
+                                  meta.damageClass === "physical"
+                                    ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                                    : meta.damageClass === "special"
+                                    ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
+                                    : "bg-slate-500/15 text-slate-300 border-slate-500/30"
+                                }`}
+                              >
+                                {meta.damageClass}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-mono-tech text-theme-secondary/60">
+                                —
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Col 4: Type Badge + Chevron */}
+                          <div className="col-span-3 md:col-span-3 flex items-center justify-between gap-1.5">
+                            {meta?.type ? (
+                              <TypeBadge type={meta.type} size="sm" />
+                            ) : (
+                              <span className="text-[10px] font-mono-tech text-theme-secondary/60">
+                                —
+                              </span>
+                            )}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className={`w-4 h-4 text-theme-secondary/70 transform transition-transform duration-200 flex-shrink-0 ${
+                                isExpanded ? "rotate-180 text-theme-accent" : "rotate-0"
+                              }`}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
                         </div>
                       </button>
 
