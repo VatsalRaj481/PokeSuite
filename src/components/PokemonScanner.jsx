@@ -221,7 +221,7 @@ function PokemonScanner({
       initial={{ opacity: 0, scale: 0.95, y: 15 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 18 }}
-      className="w-full max-w-md sm:max-w-lg bg-theme-surface rounded-3xl border-2 border-theme shadow-2xl p-6 sm:p-8 mb-8 flex flex-col items-center relative overflow-hidden select-none"
+      className="w-full max-w-md sm:max-w-lg bg-theme-surface rounded-2xl border border-theme shadow-2xl p-6 sm:p-8 mb-8 flex flex-col items-center relative overflow-hidden select-none"
     >
       
       <div className="w-full flex items-center justify-between mb-4 sm:mb-5">
@@ -233,7 +233,7 @@ function PokemonScanner({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onClose}
-          className="p-2 rounded-full bg-theme-surface-hover text-theme-secondary hover:text-theme-primary border border-theme hover:border-theme-accent cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px]"
+          className="p-2 rounded-lg bg-theme-surface-hover text-theme-secondary hover:text-theme-primary border border-theme hover:border-theme-accent cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px]"
           title="Close Scanner"
           aria-label="Close Scanner"
         >
@@ -287,7 +287,7 @@ function PokemonScanner({
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
             onClick={captureAndScan}
-            className="flex-1 px-6 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-2xl font-bold font-display shadow-md hover:shadow-lg focus:outline-none cursor-pointer"
+            className="flex-1 px-6 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-lg font-bold font-display shadow-md hover:shadow-lg focus:outline-none cursor-pointer"
             disabled={
               isScanning || !isCameraActive || cooldownUntil > Date.now()
             }
@@ -300,7 +300,7 @@ function PokemonScanner({
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
             onClick={onClose}
-            className="px-6 py-3.5 bg-theme-accent hover:opacity-90 text-white rounded-2xl font-bold font-display shadow-md hover:shadow-lg focus:outline-none cursor-pointer"
+            className="px-6 py-3.5 bg-theme-accent hover:opacity-90 text-white rounded-lg font-bold font-display shadow-md hover:shadow-lg focus:outline-none cursor-pointer"
             disabled={isScanning}
           >
             Close

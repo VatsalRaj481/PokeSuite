@@ -4,42 +4,52 @@
 
 /* Fonts custom bindings */
 .font-display {
-  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-family: 'Fredoka', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .font-retro {
   font-family: 'Press Start 2P', monospace;
 }
 
+.font-mono-tech {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 /* Theme Color Variables definition */
 :root {
-  --color-background: #020617; /* Deep Navy/Black */
-  --color-surface: #0f172a; /* Slate 900 */
-  --color-surface-hover: #1e293b; /* Slate 800 */
-  --color-text-primary: #ffffff; /* White */
-  --color-text-secondary: #94a3b8; /* Slate 400 */
-  --color-border: #1e293b; /* Slate 800 */
-  --color-border-hover: #334155; /* Slate 700 */
-  --color-accent-red: #A01C2C; /* Rich Jewel Pokedex Red */
-  --color-accent-gold: #D4AF37; /* Gold Foil */
-  --color-accent-gold-bg: rgba(212, 175, 55, 0.15);
-  --color-input-bg: #020617; /* Input field black */
-  --color-watermark: rgba(30, 41, 59, 0.1);
+  --color-background: #0f172a;       /* Solid Pokémon Slate 900 */
+  --color-surface: #1e293b;          /* Solid Elevated Slate 800 */
+  --color-surface-hover: #27354f;    /* Interactive Slate Surface */
+  --color-surface-glass: rgba(30, 41, 59, 0.85);
+  --color-text-primary: #f8fafc;     /* Clean White */
+  --color-text-secondary: #94a3b8;   /* Slate 400 */
+  --color-border: #334155;           /* Clean Definition Border */
+  --color-border-hover: #475569;     /* Subtle Highlight Border */
+  --color-accent-red: #e11d48;       /* Iconic Pokédex Crimson */
+  --color-accent-glow: rgba(225, 29, 72, 0.35);
+  --color-accent-gold: #f59e0b;       /* Goldenrod */
+  --color-accent-gold-bg: rgba(245, 158, 11, 0.12);
+  --color-input-bg: #0b1120;         /* Recessed Field Well */
+  --color-watermark: rgba(148, 163, 184, 0.12);
+  --shadow-elevation: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="light"] {
-  --color-background: #f7f1e6;       /* Warm off-white/cream */
-  --color-surface: #fffdf8;          /* Warm near-white surface */
-  --color-surface-hover: #faf5ea;    /* Warm hover surface */
-  --color-text-primary: #2a2118;     /* Warm near-black text */
-  --color-text-secondary: #6b5c47;   /* Warm brown-gray text */
-  --color-border: #e8dcc8;           /* Warm tan/beige border */
-  --color-border-hover: #d8c8af;     /* Warm tan hover border */
-  --color-accent-red: #a11a29;       /* Rich contrast brand red */
-  --color-accent-gold: #d4a33a;      /* Warm gold/amber accent */
-  --color-accent-gold-bg: rgba(212, 163, 58, 0.14); /* Soft gold fill */
-  --color-input-bg: #faf5ea;         /* Warm input field background */
-  --color-watermark: rgba(216, 196, 168, 0.35); /* Warm watermark stroke */
+  --color-background: #f8fafc;       /* Solid Clean Pokémon Light */
+  --color-surface: #ffffff;          /* Pure White Card Surface */
+  --color-surface-hover: #f1f5f9;    /* Soft Slate 100 Hover */
+  --color-surface-glass: rgba(255, 255, 255, 0.9);
+  --color-text-primary: #0f172a;     /* Deep Slate 900 */
+  --color-text-secondary: #64748b;   /* Slate 500 */
+  --color-border: #e2e8f0;           /* Soft Slate 200 Border */
+  --color-border-hover: #cbd5e1;     /* Slate 300 Hover */
+  --color-accent-red: #e11d48;       /* Pokédex Crimson */
+  --color-accent-glow: rgba(225, 29, 72, 0.2);
+  --color-accent-gold: #d97706;       /* Amber */
+  --color-accent-gold-bg: rgba(217, 119, 6, 0.1);
+  --color-input-bg: #f1f5f9;         /* Crisp Recessed Field */
+  --color-watermark: rgba(100, 116, 139, 0.12);
+  --shadow-elevation: 0 8px 20px -4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 
 /* Theme Mapping Helper Classes */
@@ -75,7 +85,6 @@
   background-color: var(--color-input-bg);
 }
 
-/* Accent Mapping Helpers */
 .text-theme-accent {
   color: var(--color-accent-red);
 }
@@ -88,7 +97,6 @@
   border-color: var(--color-accent-red);
 }
 
-/* Gold/Foil Accents */
 .text-theme-gold {
   color: var(--color-accent-gold);
 }
@@ -105,23 +113,44 @@
   color: var(--color-watermark);
 }
 
-.bg-theme-border { background-color: var(--color-border); }
-
-/* Global Transition system for smooth Theme Toggle */
-body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+/* Glassmorphism & Pokédex Hardware Shadows */
+.pokedex-chassis {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-elevation);
+  border: 1px solid var(--color-border);
 }
 
-/* Animations Keyframes */
+.glass-panel {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+}
+
+/* Hologram Projection Grid */
+.hologram-grid {
+  background-image: 
+    radial-gradient(circle at center, rgba(56, 189, 248, 0.08) 0%, transparent 70%),
+    linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 20px 20px, 20px 20px;
+}
+
+/* Transitions */
+body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Animation Keyframes */
 @keyframes poke-ball-spin {
   0% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1.08); }
   100% { transform: rotate(360deg); }
 }
 
 @keyframes button-blink {
-  0%, 100% { background-color: #ef4444; box-shadow: 0 0 2px #ef4444; }
-  50% { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px #ef4444); }
+  50% { opacity: 0.6; filter: drop-shadow(0 0 2px #ef4444); }
 }
 
 @keyframes laser-sweep {
@@ -133,7 +162,7 @@ body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
 @keyframes card-fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.98);
+    transform: translateY(16px) scale(0.985);
   }
   100% {
     opacity: 1;
@@ -147,17 +176,74 @@ body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
 
 @keyframes float-bob {
   0% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
   100% { transform: translateY(0); }
 }
 
-/* Animation Classes */
+@keyframes lens-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  }
+}
+
+@keyframes soundwave-pulse {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+/* Authentic Pokémon Shiny Starburst Keyframes */
+@keyframes shiny-sparkle-burst {
+  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--tx, 40px) * 0.3), calc(var(--ty, -40px) * 0.3)) scale(1.4) rotate(45deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(var(--tx, 80px), var(--ty, -80px)) scale(1) rotate(var(--rot, 180deg));
+  }
+  100% {
+    transform: translate(calc(var(--tx, 80px) * 1.25), calc(var(--ty, -80px) * 1.25)) scale(0) rotate(calc(var(--rot, 180deg) + 90deg));
+    opacity: 0;
+  }
+}
+
+@keyframes shiny-flash-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-shiny-sparkle {
+  animation: shiny-sparkle-burst 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.animate-shiny-flash {
+  animation: shiny-flash-ring 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animation utility classes */
 .animate-pokeball-spin {
   animation: poke-ball-spin 1.5s infinite linear;
 }
 
 .animate-btn-blink {
-  animation: button-blink 1s infinite alternate;
+  animation: button-blink 1.2s infinite ease-in-out;
 }
 
 .animate-laser {
@@ -165,37 +251,41 @@ body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
 }
 
 .animate-card-in {
-  animation: card-fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: card-fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-stat-grow {
-  animation: stat-bar-grow 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: stat-bar-grow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-float {
-  animation: float-bob 3s ease-in-out infinite;
+  animation: float-bob 3.5s ease-in-out infinite;
 }
 
-/* Custom Scrollbar */
+.animate-lens {
+  animation: lens-pulse 3s infinite ease-in-out;
+}
+
+/* Modern Rounded Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #dc2626;
-  border-radius: 10px;
+  background: var(--color-border);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b91c1c;
+  background: var(--color-border-hover);
 }
 
-/* Accessibility: respect user preferences for reduced motion */
+/* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-delay: -1ms !important;
@@ -207,15 +297,11 @@ body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
     transition-delay: 0s !important;
   }
   
-  .animate-stat-grow {
-    animation: none !important;
-  }
-  
-  .animate-pokeball-spin {
-    animation: none !important;
-  }
-  
-  .animate-laser {
+  .animate-stat-grow,
+  .animate-pokeball-spin,
+  .animate-laser,
+  .animate-float,
+  .animate-lens {
     animation: none !important;
   }
 }

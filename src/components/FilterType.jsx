@@ -24,6 +24,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
   const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedGeneration, setSelectedGeneration] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCollection, setSelectedCollection] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverCoords, setPopoverCoords] = useState(null);
 
@@ -70,7 +71,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
   ];
 
   // Count of active filters for the badge
-  const activeFilterCount = [selectedType, selectedRegion, selectedGeneration, selectedCategory].filter(Boolean).length;
+  const activeFilterCount = [selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection].filter(Boolean).length;
 
   // Recalculate position on resize or scroll when open
   useEffect(() => {
@@ -146,7 +147,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
   // Handles form submission to trigger search/filter
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearchAndFilter(nameQuery, selectedType, selectedRegion, selectedGeneration, selectedCategory);
+    onSearchAndFilter(nameQuery, selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection);
     setIsPopoverOpen(false);
   };
 
@@ -155,10 +156,11 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
     setSelectedRegion("");
     setSelectedGeneration("");
     setSelectedCategory("");
+    setSelectedCollection("");
   };
 
   const selectClasses =
-    "w-full px-4 py-2.5 bg-theme-input border-2 border-theme hover:border-theme-accent rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent font-display capitalize cursor-pointer transition-all duration-200";
+    "w-full px-4 py-2.5 bg-theme-input border-2 border-theme hover:border-theme-accent rounded-lg text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent font-display capitalize cursor-pointer transition-all duration-200";
 
   const labelClasses =
     "block text-xs font-display font-semibold text-theme-secondary uppercase tracking-wide mb-1.5";
@@ -169,20 +171,20 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
       className={
         compact
           ? "flex flex-row items-center gap-1.5 sm:gap-2 w-full relative overflow-visible"
-          : "flex flex-row items-center gap-2 sm:gap-3 w-full bg-theme-surface border border-theme p-2.5 sm:p-5 rounded-2xl sm:rounded-3xl shadow-lg relative overflow-visible"
+          : "flex flex-row items-center gap-2 sm:gap-3 w-full bg-theme-surface/90 glass-panel border border-theme p-2 sm:p-2.5 rounded-xl shadow-lg relative overflow-visible"
       }
     >
       {/* Search Input */}
       <div className="flex-1 relative min-w-0">
         <input
           type="text"
-          placeholder="Search by name or number..."
+          placeholder="Search by species name or ID..."
           value={nameQuery}
           onChange={(e) => setNameQuery(e.target.value)}
           className={
             compact
-              ? "w-full pl-8 sm:pl-9 pr-3 py-2 bg-theme-input border border-theme hover:border-theme-accent rounded-xl focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent text-theme-primary placeholder-slate-400 font-display text-xs sm:text-sm transition-all duration-200"
-              : "w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-theme-input border-2 border-theme hover:border-theme-accent rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent text-theme-primary placeholder-slate-400 font-display text-sm sm:text-base transition-all duration-200"
+              ? "w-full pl-8 sm:pl-9 pr-7 py-2 bg-theme-input border border-theme hover:border-theme-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent text-theme-primary placeholder-slate-400 font-display text-xs sm:text-sm transition-all duration-200"
+              : "w-full pl-9 sm:pl-11 pr-8 py-2.5 sm:py-2.5 bg-theme-input border border-theme hover:border-theme-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent focus:border-transparent text-theme-primary placeholder-slate-400 font-display text-sm sm:text-base transition-all duration-200"
           }
           aria-label="Search or filter Pokémon by name or ID"
           disabled={isLoading}
@@ -203,6 +205,16 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
             />
           </svg>
         </div>
+        {nameQuery && (
+          <button
+            type="button"
+            onClick={() => setNameQuery("")}
+            className="absolute top-1/2 -translate-y-1/2 right-2.5 text-theme-secondary hover:text-theme-primary p-1 rounded-md text-xs font-bold focus:outline-none cursor-pointer"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Filters Button + Popover */}
@@ -221,8 +233,8 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
           }}
           className={
             compact
-              ? "flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-theme-surface-hover border border-theme text-theme-primary rounded-xl font-display font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200 hover:border-theme-accent focus:outline-none focus:ring-2 focus:ring-theme-accent min-h-[36px]"
-              : "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-theme-surface-hover border border-theme text-theme-primary rounded-xl sm:rounded-2xl font-display font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200 hover:border-theme-accent focus:outline-none focus:ring-2 focus:ring-theme-accent min-h-[42px]"
+              ? "flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-theme-surface-hover border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200 hover:border-theme-accent focus:outline-none focus:ring-2 focus:ring-theme-accent min-h-[36px]"
+              : "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-theme-surface-hover border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200 hover:border-theme-accent focus:outline-none focus:ring-2 focus:ring-theme-accent min-h-[40px]"
           }
           aria-label="Toggle filter options"
           aria-expanded={isPopoverOpen}
@@ -246,7 +258,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
           </svg>
           <span className="font-display hidden sm:inline">Filters</span>
           {activeFilterCount > 0 && (
-            <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 text-[10px] sm:text-[11px] font-bold text-white bg-theme-accent rounded-full font-display leading-none">
+            <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 text-[10px] sm:text-[11px] font-bold text-white bg-theme-accent rounded-md font-display leading-none">
               {activeFilterCount}
             </span>
           )}
@@ -267,7 +279,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   onKeyDown={handlePopoverKeyDown}
                   style={popoverCoords || {}}
-                  className="fixed bg-theme-surface border border-theme rounded-2xl shadow-2xl p-4 z-[9999] max-h-[calc(100vh-5rem)] overflow-y-auto"
+                  className="fixed bg-theme-surface border border-theme rounded-xl shadow-2xl p-4 z-[9999] max-h-[calc(100vh-5rem)] overflow-y-auto"
                 >
                   <div className="flex flex-col gap-3 sm:gap-4">
                     {/* Type Select */}
@@ -296,6 +308,37 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                               {t.name.charAt(0).toUpperCase() + t.name.slice(1)}
                             </option>
                           ))}
+                      </select>
+                    </div>
+
+                    {/* Living Dex Collection Select */}
+                    <div>
+                      <label htmlFor="filter-collection" className={labelClasses}>
+                        Trainer Living Dex
+                      </label>
+                      <select
+                        id="filter-collection"
+                        value={selectedCollection}
+                        onChange={(e) => setSelectedCollection(e.target.value)}
+                        className={selectClasses}
+                        aria-label="Filter by trainer collection status"
+                        disabled={isLoading}
+                      >
+                        <option value="" className="bg-theme-input text-theme-secondary">
+                          All Pokémon
+                        </option>
+                        <option value="caught" className="bg-theme-input text-theme-primary">
+                          Caught in Dex
+                        </option>
+                        <option value="uncaught" className="bg-theme-input text-theme-primary">
+                          Missing / Unregistered
+                        </option>
+                        <option value="shiny" className="bg-theme-input text-theme-primary">
+                          Caught Shiny
+                        </option>
+                        <option value="wishlist" className="bg-theme-input text-theme-primary">
+                          Shiny Wishlist
+                        </option>
                       </select>
                     </div>
 
@@ -388,7 +431,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                         type="button"
                         onClick={handleClearAll}
                         disabled={activeFilterCount === 0}
-                        className="flex-1 py-2 text-xs sm:text-sm font-display font-semibold text-theme-accent hover:text-theme-primary bg-transparent border border-theme hover:border-theme-accent rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                        className="flex-1 py-2 text-xs sm:text-sm font-display font-semibold text-theme-accent hover:text-theme-primary bg-transparent border border-theme hover:border-theme-accent rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-accent"
                         aria-label="Clear all filters"
                       >
                         Clear All
@@ -396,7 +439,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                       <button
                         type="button"
                         onClick={handleSubmit}
-                        className="flex-1 py-2 text-xs sm:text-sm font-display font-bold text-white bg-theme-accent hover:opacity-90 rounded-xl transition-all duration-200 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                        className="flex-1 py-2 text-xs sm:text-sm font-display font-bold text-white bg-theme-accent hover:opacity-90 rounded-lg transition-all duration-200 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-theme-accent"
                         aria-label="Apply filters"
                       >
                         Apply
@@ -418,8 +461,8 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
         type="submit"
         className={
           compact
-            ? "flex-shrink-0 px-3 sm:px-4 py-2 bg-theme-accent hover:opacity-90 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-xl font-bold font-display text-xs sm:text-sm shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-theme-accent flex items-center justify-center gap-1.5 cursor-pointer min-h-[36px]"
-            : "flex-shrink-0 px-3.5 sm:px-5 py-2.5 sm:py-3 w-auto md:w-36 bg-theme-accent hover:opacity-90 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-xl sm:rounded-2xl font-bold font-display text-xs sm:text-sm shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-theme-accent flex items-center justify-center gap-2 cursor-pointer min-h-[42px]"
+            ? "flex-shrink-0 px-3 sm:px-4 py-2 bg-theme-accent hover:opacity-90 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-lg font-bold font-display text-xs sm:text-sm shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-theme-accent flex items-center justify-center gap-1.5 cursor-pointer min-h-[36px]"
+            : "flex-shrink-0 px-3.5 sm:px-5 py-2 sm:py-2.5 w-auto md:w-36 bg-theme-accent hover:opacity-90 disabled:bg-theme-surface-hover disabled:text-theme-secondary text-white rounded-lg font-bold font-display text-xs sm:text-sm shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-theme-accent flex items-center justify-center gap-2 cursor-pointer min-h-[40px]"
         }
         disabled={isLoading}
       >

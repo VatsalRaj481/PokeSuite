@@ -8,6 +8,9 @@ import PokemonCard from "./components/PokemonCard";
 import FilterType from "./components/FilterType";
 import Footer from "./components/Footer";
 import PokemonScanner from "./components/PokemonScanner";
+import TypeBadge from "./components/TypeBadge";
+import ItemsDex from "./components/ItemsDex";
+import BattleLab from "./components/BattleLab";
 
 const formatPokemonName = (rawName) => {
   if (!rawName) return "";
@@ -52,28 +55,6 @@ const formatPokemonName = (rawName) => {
   }
   
   return capitalize(rawName);
-};
-
-// Defines brand-accurate flat type colors with subtle 1px border for consistent rendering
-const typeColors = {
-  normal: "bg-[#A8A77A] text-slate-900 border-[#96956D]",
-  fire: "bg-[#EE8130] text-white border-[#D67026]",
-  water: "bg-[#6390F0] text-white border-[#537DCF]",
-  grass: "bg-[#7AC74C] text-white border-[#68A93E]",
-  electric: "bg-[#F7D02C] text-slate-900 border-[#DEC025]",
-  ice: "bg-[#96D9D6] text-slate-900 border-[#83C1BF]",
-  fighting: "bg-[#C22E28] text-white border-[#A52520]",
-  poison: "bg-[#A33EA1] text-white border-[#8B3489]",
-  ground: "bg-[#E2BF65] text-slate-900 border-[#CDB059]",
-  flying: "bg-[#A98FF3] text-white border-[#947CE2]",
-  psychic: "bg-[#F95587] text-white border-[#DF4876]",
-  bug: "bg-[#A6B91A] text-slate-900 border-[#90A114]",
-  rock: "bg-[#B6A136] text-white border-[#9C8A2C]",
-  ghost: "bg-[#735797] text-white border-[#624A81]",
-  dragon: "bg-[#6F35FC] text-white border-[#5B2BD8]",
-  steel: "bg-[#B7B7CE] text-slate-900 border-[#9E9EAF]",
-  dark: "bg-[#705746] text-white border-[#5C4739]",
-  fairy: "bg-[#D685AD] text-slate-950 border-[#BD7298]",
 };
 
 // Stat configuration duplicating same colors from PokemonCard for comparison
@@ -161,6 +142,7 @@ function App() {
   });
   const [filteredPokemon, setFilteredPokemon] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [selectedSpeciesData, setSelectedSpeciesData] = useState(null);
   const [selectedPokemonDescription, setSelectedPokemonDescription] =
     useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -168,6 +150,34 @@ function App() {
   const [hasFetchedAllPokemon, setHasFetchedAllPokemon] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [filterResetKey, setFilterResetKey] = useState(0);
+
+  // Trainer Living Dex collection state
+  const [trainerCollection, setTrainerCollection] = useState(() => {
+    try {
+      const saved = localStorage.getItem("pokedex_trainer_collection_v1");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleCollectionUpdate = () => {
+      try {
+        const saved = localStorage.getItem("pokedex_trainer_collection_v1");
+        setTrainerCollection(saved ? JSON.parse(saved) : {});
+      } catch (e) {}
+    };
+    window.addEventListener("pokedex_collection_updated", handleCollectionUpdate);
+    return () => window.removeEventListener("pokedex_collection_updated", handleCollectionUpdate);
+  }, []);
+
+  const caughtCount = useMemo(() => {
+    return Object.values(trainerCollection).filter((s) => s === "caught" || s === "shiny").length;
+  }, [trainerCollection]);
+
+  // App Navigation Mode: 'pokedex' | 'items' | 'battle-lab'
+  const [activeAppMode, setActiveAppMode] = useState("pokedex");
 
   // Compare View states
   const [comparedPokemon, setComparedPokemon] = useState([]);
@@ -200,6 +210,45 @@ function App() {
   const loadMoreRef = useRef(null);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
+
+  // Random Showdown animated hero sprite state
+  const [heroPokemon, setHeroPokemon] = useState(() => {
+    const popularHeroPool = [25, 6, 94, 150, 448, 445, 658, 384, 133, 282, 778, 149];
+    const initialId = popularHeroPool[Math.floor(Math.random() * popularHeroPool.length)];
+    const names = {
+      25: "Pikachu",
+      6: "Charizard",
+      94: "Gengar",
+      150: "Mewtwo",
+      448: "Lucario",
+      445: "Garchomp",
+      658: "Greninja",
+      384: "Rayquaza",
+      133: "Eevee",
+      282: "Gardevoir",
+      778: "Mimikyu",
+      149: "Dragonite",
+    };
+    return {
+      id: initialId,
+      name: names[initialId]?.toLowerCase() || String(initialId),
+      displayName: names[initialId] || "Pokémon",
+      isShiny: Math.random() < 0.1,
+    };
+  });
+
+  const randomizeHeroPokemon = useCallback(() => {
+    const totalCount = pokemonList.length > 0 ? Math.min(pokemonList.length, 1025) : 1025;
+    const randomId = Math.floor(Math.random() * totalCount) + 1;
+    const found = pokemonList.find((p) => p.id === randomId);
+    const isShiny = Math.random() < 0.08; // 8% chance of shiny showdown sprite
+    setHeroPokemon({
+      id: randomId,
+      name: found ? found.name : String(randomId),
+      displayName: found ? formatPokemonName(found.name) : "Pokémon",
+      isShiny,
+    });
+  }, [pokemonList]);
 
   // Infinite Scroll Observer
   useEffect(() => {
@@ -234,58 +283,9 @@ function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
 
-  // Dynamic Background style classes based on primary type
+  // Solid background with Pokémon theme
   const getBackgroundStyle = () => {
-    if (!selectedPokemon) {
-      return "bg-theme-bg text-theme-primary";
-    }
-    const type = selectedPokemon.types[0].type.name;
-
-    if (theme === "light") {
-      const lightTypeBgs = {
-        normal: "from-amber-100/30 to-[#f7f1e6]",
-        fire: "from-orange-100/40 to-[#f7f1e6]",
-        water: "from-sky-100/40 to-[#f7f1e6]",
-        grass: "from-emerald-100/40 to-[#f7f1e6]",
-        electric: "from-amber-100/50 to-[#f7f1e6]",
-        ice: "from-cyan-100/40 to-[#f7f1e6]",
-        fighting: "from-rose-100/40 to-[#f7f1e6]",
-        poison: "from-purple-100/40 to-[#f7f1e6]",
-        ground: "from-amber-100/40 to-[#f7f1e6]",
-        flying: "from-indigo-100/35 to-[#f7f1e6]",
-        psychic: "from-pink-100/40 to-[#f7f1e6]",
-        bug: "from-lime-100/40 to-[#f7f1e6]",
-        rock: "from-yellow-100/40 to-[#f7f1e6]",
-        ghost: "from-purple-100/35 to-[#f7f1e6]",
-        dragon: "from-violet-100/40 to-[#f7f1e6]",
-        steel: "from-stone-200/40 to-[#f7f1e6]",
-        dark: "from-stone-300/30 to-[#f7f1e6]",
-        fairy: "from-rose-100/35 to-[#f7f1e6]",
-      };
-      return `bg-gradient-to-b ${lightTypeBgs[type] || lightTypeBgs.normal} text-theme-primary`;
-    }
-
-    const typeBgs = {
-      normal: "from-slate-900/60 to-slate-950",
-      fire: "from-red-950/40 to-slate-950",
-      water: "from-blue-950/40 to-slate-950",
-      grass: "from-green-950/40 to-slate-950",
-      electric: "from-amber-950/30 to-slate-950",
-      ice: "from-cyan-950/40 to-slate-950",
-      fighting: "from-rose-950/40 to-slate-950",
-      poison: "from-purple-950/40 to-slate-950",
-      ground: "from-yellow-950/30 to-slate-950",
-      flying: "from-indigo-950/30 to-slate-950",
-      psychic: "from-pink-950/40 to-slate-950",
-      bug: "from-lime-950/40 to-slate-950",
-      rock: "from-yellow-950/40 to-slate-950",
-      ghost: "from-indigo-950/40 to-slate-950",
-      dragon: "from-violet-950/40 to-slate-950",
-      steel: "from-slate-900 to-slate-950",
-      dark: "from-neutral-900 to-slate-950",
-      fairy: "from-rose-950/35 to-slate-950",
-    };
-    return `bg-gradient-to-b ${typeBgs[type] || typeBgs.normal}`;
+    return "bg-theme-bg text-theme-primary";
   };
 
   useEffect(() => {
@@ -443,10 +443,20 @@ function App() {
 
   const fetchPokemonDescription = useCallback(async (pokemonNameOrId) => {
     try {
-      const speciesRes = await axios.get(
-        `https://pokeapi.co/api/v2/pokemon-species/${pokemonNameOrId.toLowerCase()}/`
-      );
-      const englishDescription = speciesRes.data.flavor_text_entries.find(
+      const cleanName = String(pokemonNameOrId).toLowerCase();
+      const baseName = cleanName.split("-")[0];
+      let speciesRes;
+      try {
+        speciesRes = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon-species/${cleanName}/`
+        );
+      } catch (err) {
+        speciesRes = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon-species/${baseName}/`
+        );
+      }
+      setSelectedSpeciesData(speciesRes.data);
+      const englishDescription = speciesRes.data.flavor_text_entries?.find(
         (entry) => entry.language.name === "en"
       );
       const cleanedDescription = englishDescription
@@ -454,12 +464,13 @@ function App() {
         : "No Pokédex entry recorded for this form.";
       setSelectedPokemonDescription(cleanedDescription);
     } catch (error) {
+      setSelectedSpeciesData(null);
       setSelectedPokemonDescription("No Pokédex entry recorded for this form.");
     }
   }, []);
 
   const handleSearchAndFilter = useCallback(
-    async (nameQuery, typeQuery, selectedRegion, selectedGenerationId, selectedCategory) => {
+    async (nameQuery, typeQuery, selectedRegion, selectedGenerationId, selectedCategory, selectedCollection) => {
       setIsLoading(true);
       setFilteredPokemon([]);
       setSelectedPokemon(null);
@@ -470,7 +481,7 @@ function App() {
       const queryLower = nameQuery ? nameQuery.trim().toLowerCase() : "";
 
       // Fast direct lookup for exact name or ID query
-      if (queryLower && !typeQuery && !selectedRegion && !selectedGenerationId && !selectedCategory) {
+      if (queryLower && !typeQuery && !selectedRegion && !selectedGenerationId && !selectedCategory && !selectedCollection) {
         try {
           const directRes = await axios.get(`https://pokeapi.co/api/v2/pokemon/${queryLower}`);
           if (directRes.data) {
@@ -637,16 +648,54 @@ function App() {
           }
         }
 
-        return matchesName && matchesType && matchesGeneration && matchesRegion && matchesCategory;
+        let matchesCollection = true;
+        if (selectedCollection) {
+          const status = trainerCollection[pokemon.id];
+          if (selectedCollection === "caught") {
+            matchesCollection = status === "caught" || status === "shiny";
+          } else if (selectedCollection === "uncaught") {
+            matchesCollection = !status;
+          } else if (selectedCollection === "shiny") {
+            matchesCollection = status === "shiny";
+          } else if (selectedCollection === "wishlist") {
+            matchesCollection = status === "wishlist";
+          }
+        }
+
+        return matchesName && matchesType && matchesGeneration && matchesRegion && matchesCategory && matchesCollection;
+      });
+
+      // Sort exact matches, default forms, and canon ID first
+      filtered.sort((a, b) => {
+        if (queryLower) {
+          const aExact = a.name.toLowerCase() === queryLower;
+          const bExact = b.name.toLowerCase() === queryLower;
+          if (aExact && !bExact) return -1;
+          if (!aExact && bExact) return 1;
+
+          const aStarts = a.name.toLowerCase().startsWith(queryLower);
+          const bStarts = b.name.toLowerCase().startsWith(queryLower);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+        }
+
+        if (a.is_default && !b.is_default) return -1;
+        if (!a.is_default && b.is_default) return 1;
+
+        return a.id - b.id;
       });
 
       setFilteredPokemon(filtered);
 
-      if (
-        filtered.length === 1 &&
-        nameQuery &&
-        filtered[0].name.toLowerCase() === nameQuery.toLowerCase()
-      ) {
+      // Auto-select exact canonical match if query specifically matches
+      const exactDefaultMatch = filtered.find(
+        (p) => p.name.toLowerCase() === queryLower && p.is_default
+      );
+      if (exactDefaultMatch && queryLower) {
+        setSelectedPokemon(exactDefaultMatch);
+        fetchPokemonDescription(exactDefaultMatch.name);
+        setFilteredPokemon([]);
+      } else if (filtered.length === 1 && queryLower) {
         setSelectedPokemon(filtered[0]);
         fetchPokemonDescription(filtered[0].name);
         setFilteredPokemon([]);
@@ -659,6 +708,7 @@ function App() {
       hasFetchedAllPokemon,
       fetchAllPokemonData,
       fetchPokemonDescription,
+      trainerCollection,
     ]
   );
 
@@ -673,9 +723,10 @@ function App() {
 
   const handlePokemonScanned = useCallback((pokemon) => {
     setSelectedPokemon(pokemon);
+    fetchPokemonDescription(pokemon.name);
     setFilteredPokemon([]);
     setShowScanner(false);
-  }, []);
+  }, [fetchPokemonDescription]);
 
   const handleScanningChange = useCallback((scanning) => {
     setIsScanning(scanning);
@@ -687,15 +738,49 @@ function App() {
   }, []);
 
   const handleGoHome = useCallback(() => {
+    setActiveAppMode("pokedex");
     setFilteredPokemon([]);
     setSelectedPokemon(null);
+    setSelectedSpeciesData(null);
     setSelectedPokemonDescription("");
     setShowScanner(false);
     setIsScanning(false);
     setIsLoading(false);
     setFilterResetKey((currentKey) => currentKey + 1);
+    randomizeHeroPokemon();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [randomizeHeroPokemon]);
+
+  const handleSelectPokemonByName = useCallback(
+    async (nameOrId) => {
+      setIsLoading(true);
+      setActiveAppMode("pokedex");
+      try {
+        const query = String(nameOrId).trim().toLowerCase();
+        const res = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon/${query}`
+        );
+        if (res.data) {
+          setSelectedPokemon(res.data);
+          fetchPokemonDescription(res.data.name);
+          setFilteredPokemon([]);
+          setShowScanner(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      } catch (e) {
+        toast.error(`Could not load details for ${nameOrId}`);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchPokemonDescription]
+  );
+
+  const handleRandomPokemon = useCallback(() => {
+    // Pick random ID between 1 and 1025
+    const randomId = Math.floor(Math.random() * 1025) + 1;
+    handleSelectPokemonByName(String(randomId));
+  }, [handleSelectPokemonByName]);
 
 
 
@@ -752,21 +837,33 @@ function App() {
   return (
     <div className={`min-h-screen flex flex-col items-center transition-all duration-350 relative overflow-hidden ${getBackgroundStyle()}`}>
       
-      {/* Subtle Poké Ball Watermark (colors mapped dynamically via CSS vars) */}
-      <div className="absolute top-12 right-12 w-64 h-64 text-theme-watermark pointer-events-none -z-10 select-none">
-        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" className="w-full h-full">
-          <circle cx="50" cy="50" r="45" />
-          <line x1="5" y1="50" x2="95" y2="50" />
-          <circle cx="50" cy="50" r="15" fill="currentColor" className="opacity-20" />
-          <circle cx="50" cy="50" r="7" fill="none" />
-        </svg>
+      {/* Restored Authentic Dual Poké Ball Background Watermark */}
+      <div className="fixed inset-0 pointer-events-none z-0 select-none overflow-hidden">
+        {/* Top-Right Ambient Poké Ball Motif */}
+        <div className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 w-80 h-80 sm:w-[500px] sm:h-[500px] text-theme-watermark">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" className="w-full h-full">
+            <circle cx="50" cy="50" r="45" />
+            <line x1="5" y1="50" x2="95" y2="50" />
+            <circle cx="50" cy="50" r="14" fill="currentColor" className="opacity-15" />
+            <circle cx="50" cy="50" r="6" fill="none" stroke="currentColor" strokeWidth="3" />
+          </svg>
+        </div>
+        {/* Bottom-Left Ambient Poké Ball Motif */}
+        <div className="absolute -bottom-20 -left-20 sm:-bottom-28 sm:-left-28 w-72 h-72 sm:w-[420px] sm:h-[420px] text-theme-watermark">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" className="w-full h-full">
+            <circle cx="50" cy="50" r="45" />
+            <line x1="5" y1="50" x2="95" y2="50" />
+            <circle cx="50" cy="50" r="14" fill="currentColor" className="opacity-15" />
+            <circle cx="50" cy="50" r="6" fill="none" stroke="currentColor" strokeWidth="3" />
+          </svg>
+        </div>
       </div>
 
       <ToastContainer
         position="top-right"
         autoClose={2500}
         theme="dark"
-        toastClassName="bg-theme-surface border-2 border-theme-accent text-theme-primary rounded-2xl font-display"
+        toastClassName="bg-theme-surface border-2 border-theme-accent text-theme-primary rounded-xl font-display"
       />
 
       {/* Sticky Floating Top Bar */}
@@ -776,14 +873,14 @@ function App() {
             initial={{ y: -80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -80, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="fixed top-0 inset-x-0 z-40 bg-theme-surface/90 backdrop-blur-md border-b border-theme shadow-lg px-3 sm:px-4 py-2 sm:py-2.5"
+            transition={{ type: "spring", stiffness: 220, damping: 22 }}
+            className="fixed top-0 inset-x-0 z-40 bg-theme-surface border-b border-theme shadow-md px-3 sm:px-4 py-2 sm:py-2.5"
           >
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-              {/* Logo + Title */}
               <button
                 onClick={handleGoHome}
                 className="flex items-center gap-2 focus:outline-none cursor-pointer group flex-shrink-0"
+                title="Pokédex Home"
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                   <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -794,42 +891,119 @@ function App() {
                     <circle cx="100" cy="100" r="16" fill="#cbd5e1" stroke="#475569" strokeWidth="4" />
                   </svg>
                 </div>
-                <span className="font-display font-extrabold text-base sm:text-lg text-theme-primary hidden md:inline">
-                  Pokedex
+                <span className="font-display font-extrabold text-base text-theme-primary hidden md:inline">
+                  Pokédex
                 </span>
               </button>
 
-              {/* Centered Filter Control Deck */}
-              <div className="flex-grow max-w-xl min-w-0">
-                <FilterType
-                  compact={true}
-                  key={`sticky-${filterResetKey}`}
-                  types={types}
-                  generations={generations}
-                  regions={regions}
-                  onSearchAndFilter={handleSearchAndFilter}
-                  isLoading={isLoading}
-                />
+              {/* Mode Switcher in Sticky Header */}
+              <div className="flex items-center gap-1 bg-theme-input p-1 rounded-xl border border-theme flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setActiveAppMode("pokedex");
+                    setSelectedPokemon(null);
+                    randomizeHeroPokemon();
+                  }}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                    activeAppMode === "pokedex"
+                      ? "bg-rose-600 text-white font-bold shadow-xs"
+                      : "text-theme-secondary hover:text-theme-primary font-medium"
+                  }`}
+                  title="National Pokédex"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h6m6 0h6" />
+                    <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity={0.2} />
+                  </svg>
+                  <span className="hidden sm:inline">Pokédex</span>
+                </button>
+                <button
+                  onClick={() => setActiveAppMode("items")}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                    activeAppMode === "items"
+                      ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                      : "text-theme-secondary hover:text-theme-primary font-medium"
+                  }`}
+                  title="Trainer's Bag (Items Database)"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+                    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                    <path d="M8 14h8" />
+                  </svg>
+                  <span className="hidden sm:inline">Bag</span>
+                </button>
+                <button
+                  onClick={() => setActiveAppMode("battle-lab")}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                    activeAppMode === "battle-lab"
+                      ? "bg-indigo-600 text-white font-bold shadow-xs"
+                      : "text-theme-secondary hover:text-theme-primary font-medium"
+                  }`}
+                  title="Battle Lab (Competitive)"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+                    <path d="m13 19 6 2 2-6-2-2-6 6Z" />
+                    <path d="M9.5 17.5 21 6V3h-3L6.5 14.5" />
+                    <path d="m11 19-6 2-2-6 2-2 6 6Z" />
+                  </svg>
+                  <span className="hidden sm:inline">Battle Lab</span>
+                </button>
               </div>
 
-              {/* Theme Toggle & Scanner Actions */}
+              {activeAppMode === "pokedex" && (
+                <div className="flex-grow max-w-xl min-w-0 hidden lg:block">
+                  <FilterType
+                    compact={true}
+                    key={`sticky-${filterResetKey}`}
+                    types={types}
+                    generations={generations}
+                    regions={regions}
+                    onSearchAndFilter={handleSearchAndFilter}
+                    isLoading={isLoading}
+                  />
+                </div>
+              )}
+
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={handleRandomPokemon}
+                  className="px-2.5 py-2 bg-theme-surface-hover border border-theme text-theme-primary rounded-lg font-display font-bold text-xs hover:border-theme-accent cursor-pointer flex items-center gap-1.5 min-h-[36px]"
+                  title="Random Pokémon"
+                  aria-label="Random Pokémon"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-theme-accent">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                  </svg>
+                  <span className="hidden sm:inline">Random</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={toggleTheme}
-                  className="p-2 sm:p-2.5 bg-theme-surface-hover border border-theme text-theme-primary rounded-xl shadow-sm hover:border-theme-accent cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px]"
+                  className="p-2 sm:px-3 py-2 bg-theme-surface-hover border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs hover:border-theme-accent cursor-pointer flex items-center gap-1.5 min-h-[36px]"
                   title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
                   aria-label="Toggle Theme"
                 >
                   {theme === "dark" ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0H3m15.364 6.364l-1.591-1.591M6.758 6.758L5.167 5.167m12.728 0l-1.591 1.591M6.758 17.242l-1.591 1.591M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
-                    </svg>
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-amber-400">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0H3m15.364 6.364l-1.591-1.591M6.758 6.758L5.167 5.167m12.728 0l-1.591 1.591M6.758 17.242l-1.591 1.591M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+                      </svg>
+                      <span className="hidden sm:inline">Light</span>
+                    </>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                    </svg>
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                      </svg>
+                      <span className="hidden sm:inline">Dark</span>
+                    </>
                   )}
                 </motion.button>
 
@@ -837,14 +1011,15 @@ function App() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowScanner(true)}
-                  className="p-2 sm:p-2.5 bg-theme-accent text-white rounded-xl shadow-sm hover:opacity-90 cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px]"
-                  title="Scan Pokemon"
+                  className="p-2 sm:px-3 py-2 bg-theme-accent text-white rounded-lg shadow-sm hover:opacity-95 cursor-pointer flex items-center gap-1.5 min-h-[36px]"
+                  title="Open Dex Scanner"
                   aria-label="Scan Pokemon"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
                   </svg>
+                  <span className="hidden sm:inline">Scanner</span>
                 </motion.button>
               </div>
             </div>
@@ -864,7 +1039,7 @@ function App() {
               type="button"
               onClick={handleGoHome}
               className="rounded-full focus:outline-none focus:ring-4 focus:ring-theme-accent/50 cursor-pointer"
-              title="Go to main screen"
+              title="Pokédex Home"
               aria-label="Go to main screen"
             >
               <svg
@@ -880,7 +1055,8 @@ function App() {
               </svg>
             </motion.button>
             <span
-              className="font-display font-extrabold text-2xl sm:text-4xl md:text-5xl tracking-[-0.02em] select-none"
+              onClick={handleGoHome}
+              className="font-display font-extrabold text-2xl sm:text-4xl md:text-5xl tracking-[-0.02em] select-none cursor-pointer"
               style={{
                 backgroundImage: "linear-gradient(to right, var(--color-accent-red), var(--color-text-primary))",
                 WebkitBackgroundClip: "text",
@@ -888,17 +1064,46 @@ function App() {
                 display: "inline-block",
               }}
             >
-              Pokedex
+              Pokédex
             </span>
           </div>
 
-          {/* Header Action Controls: Theme Toggle */}
+          {/* Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleRandomPokemon}
+              className="px-3 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center gap-1.5 min-h-[38px] hover:border-theme-accent"
+              title="Load Random Pokémon"
+              aria-label="Random Pokémon"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-theme-accent">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+              </svg>
+              <span>Random</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowScanner(true)}
+              className="px-3 sm:px-4 py-2 bg-theme-accent text-white font-display font-semibold text-xs rounded-lg shadow-sm hover:opacity-90 cursor-pointer flex items-center gap-1.5 min-h-[38px]"
+              title="Launch Dex Scanner"
+              aria-label="Scan Pokemon"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+              </svg>
+              <span>Scanner</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={toggleTheme}
-              className="px-3 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-xl sm:rounded-2xl shadow-sm hover:border-theme-accent font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center gap-1.5 sm:gap-2 min-h-[38px]"
+              className="px-3 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center gap-1.5 min-h-[38px] hover:border-theme-accent"
               title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
               aria-label="Toggle Theme"
             >
@@ -921,16 +1126,66 @@ function App() {
           </div>
         </div>
 
-        {/* Dashboard Filter Bar */}
-        <div className="w-full max-w-4xl flex items-center justify-center mb-8 sm:mb-10">
-          <FilterType
-            key={filterResetKey}
-            types={types}
-            generations={generations}
-            regions={regions}
-            onSearchAndFilter={handleSearchAndFilter}
-            isLoading={isLoading}
-          />
+        {/* Primary Top Navigation Switcher */}
+        <div className="w-full max-w-xl flex items-center justify-center p-1.5 bg-theme-surface border border-theme rounded-2xl shadow-sm mb-6 sm:mb-8 select-none">
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => {
+              setActiveAppMode("pokedex");
+              setSelectedPokemon(null);
+              randomizeHeroPokemon();
+            }}
+            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+              activeAppMode === "pokedex"
+                ? "bg-rose-600 text-white font-extrabold shadow-sm"
+                : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
+            }`}
+          >
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h6m6 0h6" />
+              <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity={0.2} />
+            </svg>
+            <span>National Dex</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setActiveAppMode("items")}
+            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+              activeAppMode === "items"
+                ? "bg-amber-500 text-slate-950 font-extrabold shadow-sm"
+                : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
+            }`}
+          >
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+              <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+              <path d="M8 14h8" />
+            </svg>
+            <span>Trainer's Bag</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setActiveAppMode("battle-lab")}
+            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+              activeAppMode === "battle-lab"
+                ? "bg-indigo-600 text-white font-extrabold shadow-sm"
+                : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
+            }`}
+          >
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+              <path d="m13 19 6 2 2-6-2-2-6 6Z" />
+              <path d="M9.5 17.5 21 6V3h-3L6.5 14.5" />
+              <path d="m11 19-6 2-2-6 2-2 6 6Z" />
+            </svg>
+            <span>Battle Lab</span>
+          </motion.button>
         </div>
 
         {/* Scanner Component Modal */}
@@ -945,6 +1200,36 @@ function App() {
           />
         )}
 
+        {/* Mode 1: Trainer's Bag (Items Database) */}
+        {activeAppMode === "items" && (
+          <ItemsDex
+            onSelectPokemon={(name) => {
+              setActiveAppMode("pokedex");
+              handleSelectPokemonByName(name);
+            }}
+          />
+        )}
+
+        {/* Mode 2: Battle Lab (Competitive Corner) */}
+        {activeAppMode === "battle-lab" && (
+          <BattleLab pokemonList={memoizedPokemonList} />
+        )}
+
+        {/* Mode 3: National Dex (Core Pokédex) */}
+        {activeAppMode === "pokedex" && (
+          <>
+            {/* Dashboard Filter Bar */}
+            <div className="w-full max-w-4xl flex items-center justify-center mb-8 sm:mb-10">
+              <FilterType
+                key={filterResetKey}
+                types={types}
+                generations={generations}
+                regions={regions}
+                onSearchAndFilter={handleSearchAndFilter}
+                isLoading={isLoading}
+              />
+            </div>
+
         {/* Custom Poké Ball loading animation */}
         {(isLoading || isScanning) && (
           <PokeBallLoader
@@ -954,12 +1239,14 @@ function App() {
 
         {/* Selected Pokémon detailed view */}
         {selectedPokemon && !showScanner && (
-          <div className="w-full max-w-4xl mb-8">
+          <div className="w-full max-w-6xl xl:max-w-7xl mb-8 px-2 sm:px-4">
             <PokemonCard
               pokemon={selectedPokemon}
               layout="horizontal"
               pokemonToRegionMap={pokemonToRegionMapRef.current}
               description={selectedPokemonDescription}
+              speciesData={selectedSpeciesData}
+              onSelectPokemon={handleSelectPokemonByName}
             />
           </div>
         )}
@@ -967,7 +1254,7 @@ function App() {
         {/* Staggered result cards grid */}
         {filteredPokemon.length > 0 && !showScanner && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 w-full max-w-screen-xl">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 mt-4 w-full max-w-screen-xl">
               {paginatedPokemon.map((pokemon, idx) => (
                 <motion.div
                   key={pokemon.id}
@@ -999,7 +1286,7 @@ function App() {
                 ref={loadMoreRef}
                 className="flex flex-col items-center justify-center mt-10 mb-8 py-4 select-none"
               >
-                <div className="flex items-center gap-3 text-xs font-display font-semibold text-theme-secondary bg-theme-surface border border-theme px-5 py-2.5 rounded-full shadow-md">
+                <div className="flex items-center gap-3 text-xs font-display font-semibold text-theme-secondary bg-theme-surface border border-theme px-4 py-2 rounded-lg shadow-sm">
                   <svg className="animate-spin h-4 w-4 text-theme-accent" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -1009,7 +1296,7 @@ function App() {
               </div>
             ) : (
               <div className="flex items-center justify-center mt-10 mb-8 select-none">
-                <span className="text-xs font-display text-theme-secondary bg-theme-surface border border-theme px-4 py-2 rounded-full">
+                <span className="text-xs font-display text-theme-secondary bg-theme-surface border border-theme px-4 py-2 rounded-lg">
                   All <span className="font-extrabold text-theme-primary">{filteredPokemon.length}</span> Pokémon loaded
                 </span>
               </div>
@@ -1027,94 +1314,145 @@ function App() {
               ref={heroRef}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 80, damping: 15 }}
+              transition={{ type: "spring", stiffness: 90, damping: 16 }}
               className="flex flex-col items-center w-full max-w-5xl mt-2 sm:mt-4 select-none"
             >
-              {/* Hero Main Block (Open canvas layout - no enclosing card border) */}
-              <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 sm:gap-10 py-4 sm:py-10 relative">
+              {/* Hero Main Block */}
+              <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 sm:gap-12 py-4 sm:py-10 relative">
                 <div className="flex-grow flex flex-col items-start text-left max-w-xl">
-                  {/* 12px Red/Gold Eyebrow Label */}
-                  <span className="text-[11px] sm:text-[12px] font-display font-bold text-theme-gold bg-theme-gold-bg border border-theme-gold/40 rounded-full uppercase tracking-widest mb-3 px-3 py-1">
-                    OFFICIAL POKÉDEX ARCHIVE
-                  </span>
-
-                  {/* Bold Headline */}
-                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-display font-extrabold text-theme-primary leading-tight tracking-[-0.02em] mb-3 sm:mb-4">
-                    Discover, Search & <span className="text-theme-accent">Analyze Pokémon</span>
+                  {/* High-Impact Headline */}
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-theme-primary leading-[1.15] tracking-tight mb-4">
+                    The Complete <span className="text-theme-accent">Pokédex</span> & Battle Database
                   </h2>
 
                   {/* Supporting text */}
-                  <p className="text-sm sm:text-base md:text-lg font-display text-theme-secondary tracking-normal mb-6 sm:mb-8 leading-relaxed">
-                    Explore comprehensive battle statistics, regional form origins, type matchups, and use the real-time AI Dex Lens to identify any species instantly.
+                  <p className="text-sm sm:text-base md:text-lg font-display text-theme-secondary tracking-normal mb-6 sm:mb-7 leading-relaxed">
+                    Explore 1,025 species with full learnsets, pre-evolution egg move inheritance, multi-game lore archives, and an instant AI Dex Lens for live identification.
                   </p>
 
-                  {/* CTAs */}
+                  {/* Action CTA */}
                   <div className="flex flex-wrap gap-3 sm:gap-4 w-full">
                     <button
-                      onClick={() => setShowScanner(true)}
-                      className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 bg-theme-accent text-white font-display font-bold text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-[0_6px_20px_rgba(161,26,41,0.3)] hover:opacity-90 transition-transform active:scale-[0.97] focus:outline-none flex items-center justify-center gap-2 border border-theme-accent cursor-pointer min-h-[44px]"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15.5a2.25 2.25 0 0 0 2.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.053 47.745 47.745 0 0 0-3.91-.228 2.192 2.192 0 0 0-1.736 1.053l-.822 1.316z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5z" />
-                      </svg>
-                      Launch Scanner
-                    </button>
-                    <button
                       onClick={handleBrowseDex}
-                      className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 bg-theme-surface border-2 border-theme text-theme-primary font-display font-bold text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-md hover:bg-theme-surface-hover transition-transform active:scale-[0.97] focus:outline-none flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
+                      className="px-6 sm:px-8 py-3.5 bg-theme-accent text-white font-display font-bold text-xs sm:text-sm rounded-lg shadow-[0_4px_16px_rgba(225,29,72,0.35)] hover:opacity-95 transition-transform active:scale-[0.97] focus:outline-none flex items-center justify-center gap-2 border border-theme-accent cursor-pointer min-h-[44px]"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
                       </svg>
-                      Browse Pokédex
+                      Browse National Dex
                     </button>
                   </div>
                 </div>
 
-                {/* Hero Sprite - Unboxed Bleeding Artwork with Warm Gold Drop Shadow Glow in Light Mode */}
-                <div className="relative flex items-center justify-center flex-shrink-0 motion-safe:animate-float my-4 lg:my-0">
-                  <img
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"
-                    alt="Pikachu"
-                    className="w-44 h-44 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain filter drop-shadow-[0_20px_35px_rgba(212,163,58,0.45)] dark:drop-shadow-[0_20px_40px_rgba(248,113,113,0.4)]"
-                  />
+                {/* Random Showdown Battle Sprite Showcase Stage */}
+                <div className="relative flex flex-col items-center justify-center flex-shrink-0 my-4 lg:my-0 group select-none min-w-[240px] sm:min-w-[280px]">
+                  {/* Soft Radiant Ambient Glow */}
+                  <div className="absolute w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-theme-accent/15 filter blur-3xl pointer-events-none -z-10" />
+
+                  {/* Floating Animated Showdown Sprite Stage */}
+                  <div className="relative motion-safe:animate-float z-10 flex flex-col items-center">
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={() => handleSelectPokemonByName(heroPokemon.id)}
+                      className="relative group/sprite cursor-pointer p-2 rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent transition-all"
+                      title={`View ${heroPokemon.displayName || "Pokémon"} in Pokédex`}
+                      aria-label={`View ${heroPokemon.displayName || "Pokémon"} in Pokédex`}
+                    >
+                      <img
+                        key={`${heroPokemon.id}-${heroPokemon.isShiny}`}
+                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/${heroPokemon.isShiny ? "shiny/" : ""}${heroPokemon.id}.gif`}
+                        alt={heroPokemon.displayName || "Featured Pokémon"}
+                        className="w-48 h-48 sm:w-60 sm:h-60 md:w-68 md:h-68 object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.35)]"
+                        style={{ imageRendering: "pixelated" }}
+                        onError={(e) => {
+                          // Fallback to HOME artwork if animated showdown gif isn't available
+                          e.target.onerror = null;
+                          e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${heroPokemon.isShiny ? "shiny/" : ""}${heroPokemon.id}.png`;
+                        }}
+                      />
+                      {heroPokemon.isShiny && (
+                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-mono-tech font-bold text-amber-400 tracking-wider flex items-center gap-1 shadow-xs pointer-events-none">
+                          <svg className="w-2.5 h-2.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                          SHINY
+                        </span>
+                      )}
+                    </motion.button>
+
+                    {/* Quick Re-Roll Controller */}
+                    <div className="mt-1 flex items-center justify-center">
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.15, rotate: 90 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          randomizeHeroPokemon();
+                        }}
+                        className="p-2 bg-theme-surface/80 hover:bg-theme-surface border border-theme hover:border-theme-accent text-theme-secondary hover:text-theme-primary rounded-full cursor-pointer shadow-xs transition-colors backdrop-blur-xs"
+                        title="Roll another random Pokémon"
+                        aria-label="Roll another random Pokémon"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                          <path d="M16 21h5v-5" />
+                        </svg>
+                      </motion.button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* 3-Column Stat Strip with 1px Dividers */}
+              {/* 4-Column Telemetry Stat Strip */}
               <div className="w-full mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-theme">
-                <div className="grid grid-cols-3 divide-x divide-theme w-full text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 divide-y sm:divide-y-0 sm:divide-x divide-theme w-full text-center">
                   <div className="flex flex-col items-center px-2 sm:px-4">
-                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-extrabold text-theme-primary tracking-tight">
-                      {pokemonList.length > 0 ? pokemonList.length.toLocaleString() : "1,000+"}
+                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-theme-primary tracking-tight font-mono-tech">
+                      {pokemonList.length > 0 ? pokemonList.length.toLocaleString() : "1,025"}
                     </span>
-                    <span className="text-[10px] sm:text-xs font-display text-theme-secondary uppercase tracking-wider mt-1 text-center">
-                      Species tracked
+                    <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary uppercase tracking-wider mt-1 text-center">
+                      Canon Species
                     </span>
                   </div>
                   <div className="flex flex-col items-center px-2 sm:px-4">
-                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-extrabold text-theme-primary tracking-tight">
+                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-theme-primary tracking-tight font-mono-tech">
                       {regions.length > 0 ? regions.length : 10}
                     </span>
-                    <span className="text-[10px] sm:text-xs font-display text-theme-secondary uppercase tracking-wider mt-1 text-center">
-                      Regions covered
+                    <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary uppercase tracking-wider mt-1 text-center">
+                      Canon Regions
                     </span>
                   </div>
-                  <div className="flex flex-col items-center px-2 sm:px-4">
-                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-extrabold text-theme-gold tracking-tight flex items-center justify-center gap-1.5 sm:gap-2">
-                      <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                      Live
+                  <div className="flex flex-col items-center px-2 sm:px-4 pt-4 sm:pt-0">
+                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-emerald-400 tracking-tight font-mono-tech">
+                      {caughtCount}
+                      <span className="text-xs sm:text-sm text-theme-secondary font-normal font-display ml-1">/ 1,025</span>
                     </span>
-                    <span className="text-[10px] sm:text-xs font-display text-theme-secondary uppercase tracking-wider mt-1 text-center">
-                      Dex scanner
+                    <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary uppercase tracking-wider mt-1 text-center">
+                      Living Dex Caught
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center px-2 sm:px-4 pt-4 sm:pt-0">
+                    <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-rose-500 tracking-tight flex items-center justify-center gap-1.5 sm:gap-2 font-mono-tech">
+                      <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                      LIVE
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary uppercase tracking-wider mt-1 text-center">
+                      AI Optical Lens
                     </span>
                   </div>
                 </div>
               </div>
             </motion.div>
           )}
-      </div>
+        </>
+      )}
+    </div>
 
       {/* Floating Compare drawer bar */}
       {comparedPokemon.length > 0 && (
@@ -1124,7 +1462,7 @@ function App() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", stiffness: 100, damping: 15 }}
-            className="pointer-events-auto bg-theme-surface/95 backdrop-blur-md border-2 border-theme rounded-2xl sm:rounded-3xl shadow-2xl p-2.5 sm:p-4 flex flex-col gap-2 w-full max-w-lg select-none"
+            className="pointer-events-auto bg-theme-surface/95 backdrop-blur-md border border-theme rounded-xl shadow-2xl p-2.5 sm:p-4 flex flex-col gap-2 w-full max-w-lg select-none"
           >
             <div className="flex items-center justify-between gap-2 sm:gap-4">
               <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-0.5">
@@ -1213,13 +1551,13 @@ function App() {
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 120, damping: 18 }}
-            className="bg-theme-surface border-2 border-theme rounded-2xl sm:rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 md:p-8 shadow-2xl relative"
+            className="bg-theme-surface border border-theme rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 md:p-8 shadow-2xl relative"
           >
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCompareModal(false)}
-              className="absolute top-4 right-4 bg-theme-surface-hover text-theme-primary font-bold p-2 rounded-full border border-theme hover:border-theme-accent flex items-center justify-center focus:outline-none cursor-pointer min-w-[36px] min-h-[36px]"
+              className="absolute top-4 right-4 bg-theme-surface-hover text-theme-primary font-bold p-2 rounded-lg border border-theme hover:border-theme-accent flex items-center justify-center focus:outline-none cursor-pointer min-w-[36px] min-h-[36px]"
               title="Close Comparison Panel"
               aria-label="Close Comparison Panel"
             >
@@ -1269,12 +1607,7 @@ function App() {
                     {/* Dynamic Brand Accurate Flat Type Badges (no glossy look) */}
                     <div className="flex gap-1.5 mb-5 justify-center flex-wrap">
                       {p.types.map((t) => (
-                        <span
-                          key={t.type.name}
-                          className={`px-3 py-0.5 rounded-full text-[10px] font-display font-bold border capitalize ${typeColors[t.type.name]}`}
-                        >
-                          {t.type.name}
-                        </span>
+                        <TypeBadge key={t.type.name} type={t.type.name} size="sm" />
                       ))}
                     </div>
 
