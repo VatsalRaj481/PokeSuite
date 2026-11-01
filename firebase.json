@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "pokedex-32631",
     "public": "build",
     "ignore": [
       "firebase.json",
