@@ -1,7 +1,6 @@
 /**
  * Utility mapping for Local Official Pokémon SVG Type Badges (150x36)
- * Traced genuine vector SVGs stored locally in /assets/types/{typeName}.svg
- * Original source PNGs archived in /assets/types/png/{typeName}.png
+ * Genuine clean vector SVGs stored locally in /assets/types/{typeName}.svg
  */
 
 export const TYPE_NAMES = [
@@ -81,14 +80,10 @@ export const getTypeSvgUrl = (typeName) => {
 };
 
 /**
- * Returns the local URL for the downloaded reference PNG type badge.
+ * Backward compatibility alias for type badges (returns the crisp vector SVG URL).
  */
 export const getTypePngUrl = (typeName) => {
-  if (!typeName) return null;
-  const cleanName = typeName.toLowerCase().trim();
-  if (!TYPE_IDS[cleanName] || cleanName === "stellar") return null;
-  const publicUrl = process.env.PUBLIC_URL || "";
-  return `${publicUrl}/assets/types/png/${cleanName}.png`;
+  return getTypeSvgUrl(typeName);
 };
 
 export const getChampionsTypeBadgeUrl = (typeName) => {
