@@ -1356,7 +1356,7 @@ function App() {
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.94 }}
                       onClick={() => handleSelectPokemonByName(heroPokemon.id)}
-                      className="relative group/sprite cursor-pointer p-2 rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-accent transition-all"
+                      className="relative group/sprite cursor-pointer p-2 rounded-3xl outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-none ring-0 select-none transition-all"
                       title={`View ${heroPokemon.displayName || "Pokémon"} in Pokédex`}
                       aria-label={`View ${heroPokemon.displayName || "Pokémon"} in Pokédex`}
                     >
@@ -1364,7 +1364,8 @@ function App() {
                         key={`${heroPokemon.id}-${heroPokemon.isShiny}`}
                         src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/${heroPokemon.isShiny ? "shiny/" : ""}${heroPokemon.id}.gif`}
                         alt={heroPokemon.displayName || "Featured Pokémon"}
-                        className="w-48 h-48 sm:w-60 sm:h-60 md:w-68 md:h-68 object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.35)]"
+                        draggable={false}
+                        className="w-48 h-48 sm:w-60 sm:h-60 md:w-68 md:h-68 object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.35)] select-none pointer-events-none"
                         style={{ imageRendering: "pixelated" }}
                         onError={(e) => {
                           // Fallback to HOME artwork if animated showdown gif isn't available
