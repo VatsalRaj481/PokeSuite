@@ -1095,10 +1095,12 @@ function PokemonCard({
 
   // Available HOME Sprites & Gender Differences
   const hasFemaleHomeSprite = Boolean(pokemon?.sprites?.other?.home?.front_female);
+  const hasShinyVariant = selectedCustomSprite ? Boolean(selectedCustomSprite.shiny) : true;
+  const effectiveIsShiny = isShiny && hasShinyVariant;
 
   const currentDisplayImage = useMemo(() => {
     if (selectedCustomSprite) {
-      if (isShiny && selectedCustomSprite.shiny) {
+      if (effectiveIsShiny && selectedCustomSprite.shiny) {
         return selectedCustomSprite.shiny;
       }
       return selectedCustomSprite.regular || selectedCustomSprite.src;
@@ -1108,7 +1110,7 @@ function PokemonCard({
     const sprites = pokemon?.sprites;
 
     if (selectedGender === "female" && hasFemaleHomeSprite) {
-      if (isShiny) {
+      if (effectiveIsShiny) {
         return (
           home?.front_shiny_female ||
           home?.front_shiny ||
@@ -1125,11 +1127,11 @@ function PokemonCard({
     }
 
     // Default / Male
-    if (isShiny) {
+    if (effectiveIsShiny) {
       return home?.front_shiny || sprites?.front_shiny;
     }
     return home?.front_default || sprites?.front_default;
-  }, [pokemon, selectedGender, isShiny, hasFemaleHomeSprite, selectedCustomSprite]);
+  }, [pokemon, selectedGender, effectiveIsShiny, hasFemaleHomeSprite, selectedCustomSprite]);
 
   // Categorize Moves by Learning Method (with fallback to base form for special forms)
   const categorizedMoves = useMemo(() => {
@@ -1982,7 +1984,7 @@ function PokemonCard({
             <div
               className="absolute w-56 h-56 sm:w-64 sm:h-64 rounded-full filter blur-3xl pointer-events-none -z-10 transition-colors duration-500"
               style={{
-                backgroundColor: isShiny
+                backgroundColor: effectiveIsShiny
                   ? "rgba(245, 158, 11, 0.28)"
                   : mainType === "fire"
                   ? "rgba(239, 68, 68, 0.22)"
@@ -2003,18 +2005,18 @@ function PokemonCard({
             />
 
             {/* Shiny Sparkle Burst */}
-            {isShiny && (
+            {effectiveIsShiny && (
               <ShinySparkles triggerKey={shinySparkleKey} />
             )}
 
             {/* Smooth Spring Transition between Normal and Shiny / Genders */}
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.img
-                key={`${currentDisplayImage}-${isShiny ? "shiny" : "regular"}-${selectedGender}`}
+                key={`${currentDisplayImage}-${effectiveIsShiny ? "shiny" : "regular"}-${selectedGender}`}
                 initial={{
                   opacity: 0,
-                  scale: isShiny ? 0.93 : 1.05,
-                  filter: isShiny ? "brightness(1.25) saturate(1.15)" : "brightness(0.9)",
+                  scale: effectiveIsShiny ? 0.93 : 1.05,
+                  filter: effectiveIsShiny ? "brightness(1.25) saturate(1.15)" : "brightness(0.9)",
                 }}
                 animate={{
                   opacity: 1,
@@ -2023,8 +2025,8 @@ function PokemonCard({
                 }}
                 exit={{
                   opacity: 0,
-                  scale: isShiny ? 1.05 : 0.93,
-                  filter: isShiny ? "brightness(0.9)" : "brightness(1.2)",
+                  scale: effectiveIsShiny ? 1.05 : 0.93,
+                  filter: effectiveIsShiny ? "brightness(0.9)" : "brightness(1.2)",
                 }}
                 transition={{
                   duration: 0.35,
@@ -2049,7 +2051,7 @@ function PokemonCard({
                 type="button"
                 onClick={() => setIsShiny(false)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 cursor-pointer ${
-                  !isShiny
+                  !effectiveIsShiny
                     ? "bg-theme-bg text-theme-primary border border-theme shadow-xs"
                     : "text-theme-secondary hover:text-theme-primary"
                 }`}
@@ -2058,15 +2060,24 @@ function PokemonCard({
               </button>
               <button
                 type="button"
+                disabled={!hasShinyVariant}
                 onClick={() => {
+                  if (!hasShinyVariant) return;
                   setIsShiny(true);
                   setShinySparkleKey((prev) => prev + 1);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                  isShiny
-                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-xs"
-                    : "text-theme-secondary hover:text-theme-primary"
+                className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                  !hasShinyVariant
+                    ? "opacity-35 cursor-not-allowed text-theme-secondary select-none"
+                    : effectiveIsShiny
+                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-xs cursor-pointer"
+                    : "text-theme-secondary hover:text-theme-primary cursor-pointer"
                 }`}
+                title={
+                  !hasShinyVariant
+                    ? `Shiny artwork not available for ${selectedCustomSprite?.label || selectedCustomSprite?.era}`
+                    : "Toggle Shiny color variation"
+                }
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
@@ -2119,7 +2130,9 @@ function PokemonCard({
                 }`}
                 title="View historical sprites across Pokémon generations (1996 - Present)"
               >
-                <span>⌛</span>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+                </svg>
                 <span>Time Capsule</span>
                 {selectedCustomSprite && (
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
@@ -2155,7 +2168,10 @@ function PokemonCard({
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono-tech font-bold text-theme-secondary uppercase tracking-wider flex items-center gap-1.5">
-                    <span>⌛ Generational Sprite Archive</span>
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+                    </svg>
+                    <span>Generational Sprite Archive</span>
                   </span>
                   <span className="text-[10px] font-display text-theme-secondary">
                     Click any sprite to preview
@@ -2171,7 +2187,12 @@ function PokemonCard({
                       <button
                         key={item.era}
                         type="button"
-                        onClick={() => setSelectedCustomSprite(item)}
+                        onClick={() => {
+                          setSelectedCustomSprite(item);
+                          if (!item.shiny && isShiny) {
+                            setIsShiny(false);
+                          }
+                        }}
                         className={`flex flex-col items-center p-2 rounded-xl border flex-shrink-0 transition-all cursor-pointer select-none min-w-[76px] ${
                           isSelected
                             ? "bg-purple-500/15 border-purple-500/60 ring-2 ring-purple-500/40"
