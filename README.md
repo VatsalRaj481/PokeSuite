@@ -1,92 +1,142 @@
 # Pokedex
 
-A React-based Pokedex web app with search, type filtering, generation filtering, and an AI-powered camera scanner. The frontend is hosted on Firebase Hosting, while the image scan backend runs on Render with the Gemini API key kept server-side.
+A modern, responsive Pokédex web application featuring comprehensive species data, a Generational Sprite Archive, interactive Battle Lab, Trainer's Bag item encyclopedia, and an AI-powered camera scanner. The frontend is hosted on Firebase Hosting with automated CI/CD via GitHub Actions, while the image scanning proxy runs on Render with the Gemini API key protected server-side.
 
 ## Features
 
-- Search Pokemon by name
-- Filter Pokemon by type
-- Filter Pokemon by generation and region
-- View Pokemon details and descriptions
-- Scan a Pokemon image using the device camera
-- Use a protected backend so the Gemini API key is not exposed in the browser
-- Apply scan cooldowns to reduce repeated requests and quota issues
+- **National Dex**: Search and browse across 1,025+ species with real-time name, ID, type, and generational filters.
+- **Generational Sprite Archive**: Explore historical sprites across generations (Gen 1 through Gen 9, 3D HOME artwork, animated Gen 5, Showdown battle gifs, and Dream World vector art) with shiny variant toggles where supported.
+- **Audio Archive**: Playback for official modern Pokémon cries and classic 8-bit retro sound clips.
+- **Type Matchups & Defenses**: Detailed damage multipliers for weaknesses, resistances, and immunities rendered with crisp, scalable vector badges.
+- **Move Learnsets**: Filterable moves categorized into Level-Up, TM/HM Machines, Egg Moves, and Tutor Moves with physical, special, and status damage classes.
+- **Battle Lab**: Interactive team sheet builder with EV/IV stat calculators, role assignments, dynamic type coverage analysis, and Pokémon Showdown import/export format support.
+- **Trainer's Bag**: Item database covering Poké Balls, held battle items, evolutionary stones, berries, vitamins, and key adventure items.
+- **AI Camera Scanner**: Live camera scanning powered by Google Gemini 2.5 Flash through a rate-limited backend proxy.
+- **Appearance & Themes**: Integrated Light and Dark mode toggle with persistent state.
+- **Automated CI/CD**: Automatic production deployments to Firebase Hosting on push to `main` via GitHub Actions.
 
 ## Tech Stack
 
-- React
-- Create React App
-- Tailwind CSS
-- Axios
-- React Toastify
-- PokeAPI
-- Express
-- Render
-- Firebase Hosting
-- Gemini API
+- **Frontend**: React 19, Create React App, Tailwind CSS, Framer Motion, Lucide React, Canvas Confetti, React Toastify
+- **Data & Assets**: PokeAPI, Showdown Sprite Archives, Pokémon HOME Artwork
+- **Backend Proxy**: Node.js, Express, node-fetch
+- **Cloud & Hosting**: Firebase Hosting, Render
+- **AI**: Google Gemini API (Gemini 2.5 Flash)
 
 ## Architecture
 
-- Frontend: React app deployed on Firebase Hosting
-- Backend: Express server in `backend/` deployed on Render
-- Pokemon data: PokeAPI
-- Image recognition: Gemini API through the backend only
+- **Frontend**: Single Page Application deployed to Firebase Hosting.
+- **Backend**: Express server in `backend/` deployed to Render to protect API credentials and enforce global rate limits.
+- **Data Layer**: Direct REST calls to PokeAPI for species data, evolution chains, and moves.
+- **Image Scanner**: Client captures image payload, proxies to `/scan` on backend, which validates and queries Gemini 2.5 Flash.
+
+## Project Structure
+
+```text
+pokedex/
+├── .github/
+│   └── workflows/
+│       ├── firebase-hosting-merge.yml        # CI/CD deployment on push to main
+│       └── firebase-hosting-pull-request.yml  # Preview deployment for PRs
+├── backend/
+│   ├── server.js                             # Express proxy for Gemini scanner
+│   ├── package.json                          # Backend dependencies
+│   └── package-lock.json
+├── public/
+│   ├── assets/
+│   │   └── types/                            # Crisp vector SVGs for all 18 types
+│   ├── Pokeball.png                          # Favicon and branding asset
+│   └── index.html                            # Root HTML template
+├── src/
+│   ├── components/
+│   │   ├── BattleLab.jsx                     # Competitive team builder & Showdown tools
+│   │   ├── FilterType.jsx                    # Type and generation filtering controls
+│   │   ├── Footer.jsx                        # App footer
+│   │   ├── ItemsDex.jsx                      # Trainer's Bag item encyclopedia
+│   │   ├── PokemonCard.jsx                   # Detailed modal card (stats, sprites, moves)
+│   │   ├── PokemonScanner.jsx                # AI camera scanner interface
+│   │   └── TypeBadge.jsx                     # Scalable vector type badge component
+│   ├── utils/
+│   │   ├── moveMeta.js                       # Move damage class and power metadata
+│   │   └── typeIcons.js                      # Type metadata, colors, and asset mappings
+│   ├── App.js                                # Primary application layout and state
+│   ├── index.css                             # Tailwind and global typography styles
+│   └── index.js                              # React DOM mount point
+├── .env                                      # Local environment configuration
+├── .firebaserc                               # Firebase project configuration
+├── firebase.json                             # Firebase Hosting routing & rewrite rules
+├── package.json                              # Frontend dependencies and scripts
+└── tailwind.config.js                        # Tailwind CSS configuration
+```
 
 ## Environment Variables
 
-Frontend `.env` in the project root:
+### Frontend (`.env` in repository root)
 
 ```env
 REACT_APP_SCAN_API_URL=https://your-render-service.onrender.com/scan
 ```
 
-Backend environment variable on Render:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-Do not store the Gemini API key in the frontend.
-
-## Run Frontend Locally
-
-Install frontend dependencies:
-
-```bash
-npm install
-```
-
-Start the React app:
-
-```bash
-npm start
-```
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-If you want the frontend to call the local backend while developing, set the root `.env` file to:
+For local backend testing:
 
 ```env
 REACT_APP_SCAN_API_URL=http://localhost:5000/scan
 ```
 
-## Run Backend Locally
+### Backend (Render Environment)
 
-Install backend dependencies:
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+*Note: Never include the Gemini API key in frontend configuration or repository files.*
+
+## Getting Started Locally
+
+### 1. Prerequisites
+
+- Node.js (v18 or higher recommended)
+- npm
+
+### 2. Frontend Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm start
+```
+
+The application will open at `http://localhost:3000`.
+
+To create an optimized production build:
+
+```bash
+npm run build
+```
+
+### 3. Backend Setup (Optional for Local Scanner)
+
+In a separate terminal:
 
 ```bash
 cd backend
 npm install
 ```
 
-Set the backend environment variable:
+Set your Gemini API key:
 
-```env
-GEMINI_API_KEY=your_gemini_api_key
+```bash
+# On Linux/macOS
+export GEMINI_API_KEY="your_api_key_here"
+
+# On Windows PowerShell
+$env:GEMINI_API_KEY="your_api_key_here"
 ```
 
 Start the backend:
@@ -95,111 +145,51 @@ Start the backend:
 npm start
 ```
 
-The backend runs on:
+The backend server runs at `http://localhost:5000`.
 
-```text
-http://localhost:5000
-```
-
-Health check:
+Verify health endpoint:
 
 ```text
 http://localhost:5000/health
 ```
 
-## Run Full App Locally
+## Deployment
 
-Run the backend in one terminal:
+### Automated Deployment (GitHub Actions)
 
-```bash
-cd backend
-npm install
-npm start
-```
+Deployments are automated through `.github/workflows/firebase-hosting-merge.yml`. Pushing changes to the `main` branch automatically:
 
-Run the frontend in a second terminal from the project root:
+1. Checks out the repository.
+2. Installs frontend dependencies.
+3. Builds the production bundle (`npm run build`).
+4. Deploys to Firebase Hosting using repository secret `FIREBASE_SERVICE_ACCOUNT_POKEDEX_32631`.
 
-```bash
-npm install
-npm start
-```
+### Manual Deployment
 
-For local development, make sure the root `.env` contains:
-
-```env
-REACT_APP_SCAN_API_URL=http://localhost:5000/scan
-```
-
-The app should then be available at:
-
-```text
-Frontend: http://localhost:3000
-Backend: http://localhost:5000
-Health: http://localhost:5000/health
-```
-
-## Deploy Backend To Render
-
-Create a new Render Web Service with these settings:
-
-- Root Directory: `backend`
-- Environment: `Node`
-- Build Command: `npm install`
-- Start Command: `npm start`
-
-Add this environment variable in Render:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-After deployment, copy your Render backend URL and use it in the frontend `.env` as `REACT_APP_SCAN_API_URL`.
-
-## Deploy Frontend To Firebase Hosting
-
-Install the Firebase CLI if needed:
+If deploying manually via Firebase CLI:
 
 ```bash
 npm install -g firebase-tools
-```
-
-Log in:
-
-```bash
 firebase login
-```
-
-Build and deploy:
-
-```bash
 npm run build
-firebase deploy
+firebase deploy --only hosting
 ```
+
+### Backend Deployment (Render)
+
+1. Create a new Web Service on Render pointing to the `backend/` directory.
+2. Set Build Command to `npm install` and Start Command to `npm start`.
+3. Add `GEMINI_API_KEY` to Render Environment Variables.
+4. Copy the service URL and update `REACT_APP_SCAN_API_URL` in the frontend.
 
 ## Rate Limiting
 
-- The backend allows only one scan request every 8 seconds globally
-- If the limit is hit, the backend returns HTTP `429`
-- The frontend also applies a cooldown to reduce duplicate scans
+- The backend proxy enforces a global cooldown of 8 seconds between scan requests to respect Gemini API quotas.
+- The frontend disables the scan button and displays a countdown timer during cooldown periods.
+- Excess requests receive an HTTP `429` with retry time remaining.
 
-## Project Structure
+## Data & Asset Sources
 
-```text
-src/
-  components/
-  App.js
-  index.js
-  index.css
-backend/
-  server.js
-  package.json
-public/
-build/
-firebase.json
-.firebaserc
-```
-
-## Data Sources
-
-- Pokemon data: [PokeAPI](https://pokeapi.co/)
-- Image recognition: Gemini API
+- Species data, moves, items, and abilities: [PokeAPI](https://pokeapi.co/)
+- Animated battle sprites: Pokémon Showdown
+- AI identification: Google Gemini 2.5 Flash
