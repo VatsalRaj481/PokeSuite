@@ -2670,27 +2670,23 @@ function PokemonCard({
           </div>
 
           <div className="w-full py-2 sm:py-4 flex items-center justify-center overflow-x-auto">
-            {evolutionTree ? (
-              evolutionTree.evolvesTo &&
-              evolutionTree.evolvesTo.length === 0 &&
-              !evolutionTree.trigger ? (
-                <div className="p-4 bg-theme-surface border border-theme rounded-xl text-xs font-sans text-theme-secondary italic text-center">
-                  This species has no recorded evolution chain.
-                </div>
-              ) : (
-                <div className="inline-flex items-center justify-center min-w-max mx-auto py-2 px-2 sm:px-4">
-                  <EvolutionBranch
-                    node={evolutionTree}
-                    currentPokemonId={pokemon.id}
-                    onSelectPokemon={onSelectPokemon}
-                  />
-                </div>
-              )
+            {loadingEvolution ? (
+              <div className="p-4 text-xs font-sans text-theme-secondary italic text-center animate-pulse">
+                Loading evolution chain...
+              </div>
             ) : (
-              <div className="p-4 text-xs font-sans text-theme-secondary italic text-center">
-                {loadingEvolution
-                  ? "Loading evolution chain..."
-                  : "No evolution chain recorded for this species."}
+              <div className="inline-flex items-center justify-center min-w-max mx-auto py-2 px-2 sm:px-4">
+                <EvolutionBranch
+                  node={
+                    evolutionTree || {
+                      id: pokemon.id,
+                      name: pokemon.name,
+                      evolvesTo: [],
+                    }
+                  }
+                  currentPokemonId={pokemon.id}
+                  onSelectPokemon={onSelectPokemon}
+                />
               </div>
             )}
           </div>
