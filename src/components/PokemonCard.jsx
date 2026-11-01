@@ -2045,46 +2045,40 @@ function PokemonCard({
 
           {/* Sprite Controls: Regular / Shiny & Gender Switcher */}
           <div className="flex flex-wrap items-center justify-center gap-2 self-center">
-            {/* Shiny Switcher */}
-            <div className="inline-flex items-center bg-theme-surface p-1 rounded-xl border border-theme shadow-xs">
-              <button
-                type="button"
-                onClick={() => setIsShiny(false)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 cursor-pointer ${
-                  !effectiveIsShiny
-                    ? "bg-theme-bg text-theme-primary border border-theme shadow-xs"
-                    : "text-theme-secondary hover:text-theme-primary"
-                }`}
-              >
-                Regular
-              </button>
-              <button
-                type="button"
-                disabled={!hasShinyVariant}
-                onClick={() => {
-                  if (!hasShinyVariant) return;
-                  setIsShiny(true);
-                  setShinySparkleKey((prev) => prev + 1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                  !hasShinyVariant
-                    ? "opacity-35 cursor-not-allowed text-theme-secondary select-none"
-                    : effectiveIsShiny
-                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-xs cursor-pointer"
-                    : "text-theme-secondary hover:text-theme-primary cursor-pointer"
-                }`}
-                title={
-                  !hasShinyVariant
-                    ? `Shiny artwork not available for ${selectedCustomSprite?.label || selectedCustomSprite?.era}`
-                    : "Toggle Shiny color variation"
-                }
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
-                </svg>
-                <span>Shiny</span>
-              </button>
-            </div>
+            {/* Shiny Switcher (Only if the active sprite has a shiny variant) */}
+            {hasShinyVariant && (
+              <div className="inline-flex items-center bg-theme-surface p-1 rounded-xl border border-theme shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setIsShiny(false)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 cursor-pointer ${
+                    !effectiveIsShiny
+                      ? "bg-theme-bg text-theme-primary border border-theme shadow-xs"
+                      : "text-theme-secondary hover:text-theme-primary"
+                  }`}
+                >
+                  Regular
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsShiny(true);
+                    setShinySparkleKey((prev) => prev + 1);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                    effectiveIsShiny
+                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-xs"
+                      : "text-theme-secondary hover:text-theme-primary"
+                  }`}
+                  title="Toggle Shiny color variation"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
+                  </svg>
+                  <span>Shiny</span>
+                </button>
+              </div>
+            )}
 
             {/* Gender Switcher (Only if female HOME sprite is available) */}
             {hasFemaleHomeSprite && (
