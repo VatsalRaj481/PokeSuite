@@ -257,17 +257,38 @@ export default function BattleLab({ pokemonList = [] }) {
     });
   };
 
-  // Update a specific EV
+  // Update a specific EV (strictly capped at 252 individual and 508 total)
   const handleUpdateEV = (statKey, rawVal) => {
-    const val = Math.max(0, Math.min(252, Number(rawVal) || 0));
     setTeam((prev) => {
       const copy = [...prev];
       if (!copy[activeSlot]) return prev;
       const currentEVs = { ...copy[activeSlot].evs };
+      const otherEVsTotal = Object.entries(currentEVs)
+        .filter(([k]) => k !== statKey)
+        .reduce((sum, [, v]) => sum + (Number(v) || 0), 0);
+      const remainingBudget = Math.max(0, 508 - otherEVsTotal);
+      const requested = Number(rawVal) || 0;
+      const val = Math.max(0, Math.min(252, remainingBudget, requested));
       currentEVs[statKey] = val;
       copy[activeSlot] = {
         ...copy[activeSlot],
         evs: currentEVs,
+      };
+      return copy;
+    });
+  };
+
+  // Update a specific IV (0 to 31)
+  const handleUpdateIV = (statKey, rawVal) => {
+    const val = Math.max(0, Math.min(31, Number(rawVal) || 0));
+    setTeam((prev) => {
+      const copy = [...prev];
+      if (!copy[activeSlot]) return prev;
+      const currentIVs = { ...(copy[activeSlot].ivs || {}) };
+      currentIVs[statKey] = val;
+      copy[activeSlot] = {
+        ...copy[activeSlot],
+        ivs: currentIVs,
       };
       return copy;
     });
@@ -660,9 +681,12 @@ export default function BattleLab({ pokemonList = [] }) {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setShowPickerModal(true)}
-                  className="px-3 py-1.5 bg-theme-input hover:bg-theme-surface-hover hover:border-indigo-500 border border-theme text-theme-primary rounded-xl font-display text-xs font-semibold cursor-pointer transition-all self-start sm:self-auto"
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm border border-indigo-400/30 rounded-xl font-display text-xs font-bold cursor-pointer transition-all self-start sm:self-auto flex items-center gap-1.5"
                 >
-                  Change Species
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+                    <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+                  </svg>
+                  <span>Change Pokémon</span>
                 </motion.button>
               </div>
 
@@ -688,21 +712,21 @@ export default function BattleLab({ pokemonList = [] }) {
 
                 {/* Nature */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
                       Nature ({currentMember.nature})
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowNatureModal(true)}
-                      className="px-2 py-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 font-mono-tech text-[10px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
-                      title="Open 5×5 Nature Stat Matrix"
+                      className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 border border-indigo-400/40 font-display text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95"
+                      title="Open Interactive Nature Chart"
                     >
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
                         <rect x="3" y="3" width="18" height="18" rx="2" />
                         <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
                       </svg>
-                      <span>5×5 Matrix</span>
+                      <span>Nature Chart</span>
                     </button>
                   </div>
                   <select
@@ -832,16 +856,25 @@ export default function BattleLab({ pokemonList = [] }) {
                 </div>
 
                 <div className="text-right">
-                  <div className="text-xs font-mono-tech font-bold">
-                    <span className={currentTotalEVs > 508 ? "text-rose-500 font-extrabold" : "text-indigo-400 font-extrabold"}>
+                  <div className="text-xs font-mono-tech font-bold flex items-center gap-1.5 justify-end">
+                    <span className={currentTotalEVs >= 508 ? "text-amber-400 font-extrabold" : "text-indigo-400 font-extrabold"}>
                       {currentTotalEVs}
                     </span>
                     <span className="text-theme-secondary"> / 508 EVs</span>
+                    {currentTotalEVs >= 508 ? (
+                      <span className="text-[10px] text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold uppercase">
+                        Max
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-1.5 py-0.5 rounded font-bold">
+                        {508 - currentTotalEVs} left
+                      </span>
+                    )}
                   </div>
-                  <div className="w-28 h-1.5 bg-theme-input rounded-full overflow-hidden mt-1">
+                  <div className="w-32 h-1.5 bg-theme-input rounded-full overflow-hidden mt-1 ml-auto">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        currentTotalEVs > 508 ? "bg-rose-500" : "bg-indigo-500"
+                        currentTotalEVs >= 508 ? "bg-amber-400" : "bg-indigo-500"
                       }`}
                       style={{ width: `${Math.min((currentTotalEVs / 508) * 100, 100)}%` }}
                     />
@@ -860,9 +893,15 @@ export default function BattleLab({ pokemonList = [] }) {
                   { key: "speed", label: "Spe", color: "bg-pink-500" },
                 ].map((stat) => {
                   const base = currentMember.baseStats[stat.key] || 50;
-                  const iv = currentMember.ivs[stat.key] ?? 31;
-                  const ev = currentMember.evs[stat.key] ?? 0;
+                  const iv = currentMember.ivs?.[stat.key] ?? 31;
+                  const ev = currentMember.evs?.[stat.key] ?? 0;
                   const finalStat = computeRealStat(stat.key, base, iv, ev, battleLevel, currentMember.nature);
+
+                  const otherEVsTotal = Object.entries(currentMember.evs || {})
+                    .filter(([k]) => k !== stat.key)
+                    .reduce((sum, [, v]) => sum + (Number(v) || 0), 0);
+                  const maxAllowed = Math.min(252, Math.max(0, 508 - otherEVsTotal));
+                  const sliderMax = Math.max(ev, maxAllowed);
 
                   return (
                     <div key={stat.key} className="flex flex-col gap-1">
@@ -878,7 +917,7 @@ export default function BattleLab({ pokemonList = [] }) {
                           <input
                             type="range"
                             min="0"
-                            max="252"
+                            max={sliderMax}
                             step="4"
                             value={ev}
                             onChange={(e) => handleUpdateEV(stat.key, e.target.value)}
@@ -886,17 +925,30 @@ export default function BattleLab({ pokemonList = [] }) {
                           />
                         </div>
 
-                        {/* Direct EV Numeric Input */}
+                        {/* EV Numeric Input & IV Toggle */}
                         <div className="flex items-center gap-1.5">
                           <input
                             type="number"
                             min="0"
-                            max="252"
+                            max={sliderMax}
                             step="4"
                             value={ev}
                             onChange={(e) => handleUpdateEV(stat.key, e.target.value)}
                             className="w-14 py-1 px-1.5 bg-theme-input border border-theme rounded-lg text-center text-xs font-mono-tech text-theme-primary font-bold focus:outline-none focus:border-indigo-500"
+                            title={`EV (Max remaining allowed: ${sliderMax})`}
                           />
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateIV(stat.key, iv === 31 ? 0 : 31)}
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono-tech font-bold border transition-colors cursor-pointer ${
+                              iv === 31
+                                ? "bg-theme-input text-theme-secondary hover:text-indigo-400 border-theme"
+                                : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                            }`}
+                            title={`IV value: ${iv}. Click to toggle between 31 and 0`}
+                          >
+                            {iv} IV
+                          </button>
                           <span className="w-12 text-right font-mono-tech font-extrabold text-sm text-indigo-400">
                             {finalStat}
                           </span>
@@ -1016,7 +1068,7 @@ export default function BattleLab({ pokemonList = [] }) {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-display font-bold text-theme-primary">
-                  Select Species for Slot {activeSlot + 1}
+                  Select Pokémon for Slot {activeSlot + 1}
                 </h3>
                 <button
                   onClick={() => setShowPickerModal(false)}

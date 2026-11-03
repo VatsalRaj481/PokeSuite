@@ -888,9 +888,6 @@ export default function ItemsDex({ onSelectPokemon }) {
             {ITEM_POCKETS.find((p) => p.id === selectedPocket)?.label || "All Items"}
           </span>
         </span>
-        <span className="hidden sm:inline font-mono-tech text-[11px]">
-          Silph Co. & PokeAPI Inventory Registry
-        </span>
       </div>
 
       {/* Items Cards Grid */}

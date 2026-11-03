@@ -65,7 +65,7 @@ export default function NatureChartModal({ isOpen, onClose, onSelectNature, sele
                   </span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-display font-black text-theme-primary mt-1">
-                  Pokémon Nature 5×5 Stat Matrix
+                  Pokémon Nature Stat Chart
                 </h2>
                 <p className="text-xs text-theme-secondary font-display mt-0.5">
                   Rows boost the stat by +10%; columns hinder the stat by -10%. The diagonal contains the 5 Neutral natures.
