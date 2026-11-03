@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
+import { ICONIC_POKEMON_POOL } from "../../utils/calcData.js";
 
 // Helper to determine generation from ID
 const getGenFromId = (id) => {
@@ -38,7 +39,9 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
   const [isWon, setIsWon] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [copiedShare, setCopiedShare] = useState(false);
+  const inputRef = useRef(null);
 
   // Stats in localStorage
   const [stats, setStats] = useState(() => {
@@ -74,9 +77,14 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, []);
 
+  // Active pool with iconic fallback
+  const activePool = useMemo(() => {
+    return pokemonList && pokemonList.length > 0 ? pokemonList : ICONIC_POKEMON_POOL;
+  }, [pokemonList]);
+
   // Pick target Pokémon
   const initializeGame = React.useCallback(() => {
-    if (!pokemonList || pokemonList.length === 0) return;
+    if (!activePool || activePool.length === 0) return;
     setGuesses([]);
     setIsWon(false);
     setIsGameOver(false);
@@ -84,13 +92,13 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
 
     if (isDaily) {
       const rng = seedRandom(todaySeed);
-      const idx = Math.floor(rng() * Math.min(pokemonList.length, 1025));
-      setTargetPokemon(pokemonList[idx]);
+      const idx = Math.floor(rng() * Math.min(activePool.length, 1025));
+      setTargetPokemon(activePool[idx]);
     } else {
-      const idx = Math.floor(Math.random() * Math.min(pokemonList.length, 1025));
-      setTargetPokemon(pokemonList[idx]);
+      const idx = Math.floor(Math.random() * Math.min(activePool.length, 1025));
+      setTargetPokemon(activePool[idx]);
     }
-  }, [pokemonList, isDaily, todaySeed]);
+  }, [activePool, isDaily, todaySeed]);
 
   useEffect(() => {
     initializeGame();
@@ -98,13 +106,18 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
 
   // Autocomplete suggestions
   const suggestions = useMemo(() => {
-    if (!searchQuery.trim() || !pokemonList) return [];
+    if (!searchQuery.trim() || !activePool) return [];
     const q = searchQuery.toLowerCase().trim();
     const alreadyGuessed = new Set(guesses.map((g) => g.name.toLowerCase()));
-    return pokemonList
+    return activePool
       .filter((p) => p.name.toLowerCase().includes(q) && !alreadyGuessed.has(p.name.toLowerCase()))
       .slice(0, 6);
-  }, [searchQuery, pokemonList, guesses]);
+  }, [searchQuery, activePool, guesses]);
+
+  // Reset keyboard highlight whenever suggestions update
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [suggestions]);
 
   // Compare a guess against the target
   const evaluateGuess = (guess) => {
@@ -173,6 +186,12 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
     setGuesses(newGuesses);
     setSearchQuery("");
     setShowDropdown(false);
+    setHighlightedIndex(-1);
+
+    // Keep keyboard focus inside the input for rapid-fire guessing
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
 
     // Check if won
     if (selectedP.id === targetPokemon.id) {
@@ -201,6 +220,43 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
       try {
         localStorage.setItem("pokedex_dexdle_stats_v1", JSON.stringify(newStats));
       } catch (e) {}
+    }
+  };
+
+  // Keyboard navigation for autocomplete list (ArrowDown, ArrowUp, Enter, Esc)
+  const handleInputKeyDown = (e) => {
+    if (!showDropdown || suggestions.length === 0) {
+      if (e.key === "Enter" && searchQuery.trim()) {
+        e.preventDefault();
+        const q = searchQuery.toLowerCase().trim();
+        const exact = activePool.find(
+          (p) => p.name.toLowerCase() === q || (p.displayName && p.displayName.toLowerCase() === q)
+        );
+        if (exact) {
+          handleMakeGuess(exact);
+        } else if (suggestions.length > 0) {
+          handleMakeGuess(suggestions[0]);
+        }
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
+        handleMakeGuess(suggestions[highlightedIndex]);
+      } else if (suggestions.length > 0) {
+        handleMakeGuess(suggestions[0]);
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+      setHighlightedIndex(-1);
     }
   };
 
@@ -284,43 +340,69 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
       {/* Search Input Box */}
       {!isGameOver && (
         <div className="w-full relative">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder={`Guess ${guesses.length + 1} of 6: Type Pokémon name...`}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowDropdown(true);
-              }}
-              onFocus={() => setShowDropdown(true)}
-              className="flex-1 px-4 py-3 bg-theme-surface border border-theme rounded-2xl text-sm font-display text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent shadow-sm"
-            />
+          <div className="flex flex-col gap-1.5">
+            <div className="flex gap-2 relative">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder={`Guess ${guesses.length + 1} of 6: Type Pokémon name...`}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                onKeyDown={handleInputKeyDown}
+                className="flex-1 px-4 py-3 bg-theme-surface border border-theme rounded-2xl text-sm font-display text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent shadow-sm"
+              />
+              {/* Keyboard Cue Tag */}
+              <div className="hidden sm:flex items-center gap-1 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[10px] font-mono-tech text-theme-secondary/70">
+                <kbd className="px-1.5 py-0.5 rounded bg-theme-bg border border-theme text-[9px]">↓/↑</kbd>
+                <span>Navigate</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-theme-bg border border-theme text-[9px] ml-1">Enter ↵</kbd>
+                <span>Select</span>
+              </div>
+            </div>
           </div>
 
           {/* Autocomplete Dropdown */}
           {showDropdown && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-theme-surface border border-theme rounded-2xl shadow-xl z-30 overflow-hidden">
-              {suggestions.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  onClick={() => handleMakeGuess(p)}
-                  className="w-full px-4 py-2.5 hover:bg-theme-surface-hover flex items-center justify-between text-left text-xs font-display text-theme-primary border-b border-theme/50 last:border-b-0 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`}
-                      alt={p.name}
-                      className="w-8 h-8 object-contain"
-                    />
-                    <span className="font-bold capitalize">{p.displayName || p.name}</span>
-                  </div>
-                  <span className="text-[10px] font-mono-tech text-theme-secondary">
-                    Gen {getGenFromId(p.id)}
-                  </span>
-                </button>
-              ))}
+              {suggestions.map((p, idx) => {
+                const isSelected = idx === highlightedIndex;
+                return (
+                  <button
+                    key={p.name}
+                    type="button"
+                    onClick={() => handleMakeGuess(p)}
+                    onMouseEnter={() => setHighlightedIndex(idx)}
+                    className={`w-full px-4 py-2.5 flex items-center justify-between text-left text-xs font-display border-b border-theme/50 last:border-b-0 cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-theme-accent/20 text-theme-accent font-bold"
+                        : "hover:bg-theme-surface-hover text-theme-primary"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`}
+                        alt={p.name}
+                        className="w-8 h-8 object-contain"
+                      />
+                      <span className="capitalize">{p.displayName || p.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono-tech text-theme-secondary">
+                        Gen {getGenFromId(p.id)}
+                      </span>
+                      {isSelected && (
+                        <span className="text-[9px] font-mono-tech uppercase px-1.5 py-0.2 rounded bg-theme-accent text-white font-bold">
+                          Enter ↵
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -385,7 +467,12 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
       )}
 
       {/* Guesses Feedback Table */}
-      <div className="w-full overflow-x-auto">
+      {guesses.length > 0 && (
+        <div className="sm:hidden text-[10px] font-mono-tech text-theme-secondary/70 text-center pb-1 select-none">
+          ← Swipe table for Height, Weight &amp; BST →
+        </div>
+      )}
+      <div className="w-full overflow-x-auto scrollbar-none pb-2">
         {/* Table Header */}
         <div className="min-w-[620px] grid grid-cols-7 gap-2 pb-2 text-center text-[10px] font-mono-tech uppercase text-theme-secondary font-bold tracking-wider">
           <div>Pokémon</div>
@@ -465,6 +552,34 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
               ))}
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Arrow Clues & Color Indicator Legend */}
+      <div className="w-full bg-theme-surface border border-theme/70 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs text-xs font-display">
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-400 font-mono-tech font-bold uppercase text-[9px] border border-indigo-500/30">
+            Clue Legend
+          </span>
+          <span className="text-theme-primary font-bold">What the arrow and color cues mean:</span>
+        </div>
+        <div className="flex items-center gap-4 flex-wrap text-xs text-theme-secondary">
+          <div className="flex items-center gap-1.5">
+            <span className="px-1.5 py-0.5 rounded bg-sky-600/80 text-white font-mono-tech font-bold text-[10px]">↑ Higher</span>
+            <span>Mystery Pokémon has a <strong>higher</strong> value</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="px-1.5 py-0.5 rounded bg-sky-600/80 text-white font-mono-tech font-bold text-[10px]">↓ Lower</span>
+            <span>Mystery Pokémon has a <strong>lower</strong> value</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+            <span className="text-emerald-400 font-semibold">Match (within 15%)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
+            <span className="text-amber-400 font-semibold">Type Swap</span>
+          </div>
         </div>
       </div>
     </div>

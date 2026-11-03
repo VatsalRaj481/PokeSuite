@@ -14,6 +14,7 @@ export default function TypeBadge({ type, size = "md", className = "" }) {
 
   // Height configurations that preserve the 150x36 (~25:6) badge ratio
   const sizeClasses = {
+    xs: "h-4 max-w-[65px]",
     sm: "h-5 max-w-[85px]",
     md: "h-6 sm:h-6.5 max-w-[110px]",
     lg: "h-7 sm:h-8 max-w-[130px]",

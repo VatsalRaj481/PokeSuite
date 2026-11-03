@@ -13,6 +13,7 @@ import ItemsDex from "./components/ItemsDex";
 import BattleLab from "./components/BattleLab";
 import DamageCalculator from "./components/DamageCalculator";
 import MinigamesHub from "./components/minigames/MinigamesHub";
+import { getPokemonArchetype } from "./utils/loreData.js";
 
 const formatPokemonName = (rawName) => {
   if (!rawName) return "";
@@ -427,6 +428,17 @@ function App() {
     }
   }, [hasFetchedAllPokemon, pokemonList]);
 
+  // Pre-load full dataset in background when entering arcade, battle-lab, or damage-calc
+  useEffect(() => {
+    if (
+      (activeAppMode === "arcade" || activeAppMode === "battle-lab" || activeAppMode === "damage-calc") &&
+      pokemonList.length === 0 &&
+      !hasFetchedAllPokemon
+    ) {
+      fetchAllPokemonData();
+    }
+  }, [activeAppMode, pokemonList.length, hasFetchedAllPokemon, fetchAllPokemonData]);
+
   const toSentenceCase = (text) => {
     if (!text) {
       return "";
@@ -472,7 +484,7 @@ function App() {
   }, []);
 
   const handleSearchAndFilter = useCallback(
-    async (nameQuery, typeQuery, selectedRegion, selectedGenerationId, selectedCategory, selectedCollection) => {
+    async (nameQuery, typeQuery, selectedRegion, selectedGenerationId, selectedCategory, selectedCollection, selectedArchetype) => {
       setIsLoading(true);
       setFilteredPokemon([]);
       setSelectedPokemon(null);
@@ -483,7 +495,7 @@ function App() {
       const queryLower = nameQuery ? nameQuery.trim().toLowerCase() : "";
 
       // Fast direct lookup for exact name or ID query
-      if (queryLower && !typeQuery && !selectedRegion && !selectedGenerationId && !selectedCategory && !selectedCollection) {
+      if (queryLower && !typeQuery && !selectedRegion && !selectedGenerationId && !selectedCategory && !selectedCollection && !selectedArchetype) {
         try {
           const directRes = await axios.get(`https://pokeapi.co/api/v2/pokemon/${queryLower}`);
           if (directRes.data) {
@@ -650,6 +662,12 @@ function App() {
           }
         }
 
+        let matchesArchetype = true;
+        if (selectedArchetype) {
+          const arch = getPokemonArchetype(pokemon);
+          matchesArchetype = Boolean(arch && arch.key === selectedArchetype);
+        }
+
         let matchesCollection = true;
         if (selectedCollection) {
           const status = trainerCollection[pokemon.id];
@@ -664,7 +682,7 @@ function App() {
           }
         }
 
-        return matchesName && matchesType && matchesGeneration && matchesRegion && matchesCategory && matchesCollection;
+        return matchesName && matchesType && matchesGeneration && matchesRegion && matchesCategory && matchesCollection && matchesArchetype;
       });
 
       // Sort exact matches, default forms, and canon ID first
@@ -837,7 +855,7 @@ function App() {
   }, []);
 
   return (
-    <div className={`min-h-screen flex flex-col items-center transition-all duration-350 relative overflow-hidden ${getBackgroundStyle()}`}>
+    <div className={`min-h-screen flex flex-col items-center transition-all duration-350 relative overflow-x-hidden w-full max-w-full ${getBackgroundStyle()}`}>
       
       {/* Restored Authentic Dual Poké Ball Background Watermark */}
       <div className="fixed inset-0 pointer-events-none z-0 select-none overflow-hidden">
@@ -899,14 +917,14 @@ function App() {
               </button>
 
               {/* Mode Switcher in Sticky Header */}
-              <div className="flex items-center gap-1 bg-theme-input p-1 rounded-xl border border-theme flex-shrink-0">
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-theme-input p-0.5 sm:p-1 rounded-xl border border-theme flex-shrink min-w-0 overflow-x-auto scrollbar-none">
                 <button
                   onClick={() => {
                     setActiveAppMode("pokedex");
                     setSelectedPokemon(null);
                     randomizeHeroPokemon();
                   }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
                     activeAppMode === "pokedex"
                       ? "bg-rose-600 text-white font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
@@ -922,7 +940,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setActiveAppMode("items")}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
                     activeAppMode === "items"
                       ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
@@ -938,7 +956,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setActiveAppMode("battle-lab")}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
                     activeAppMode === "battle-lab"
                       ? "bg-indigo-600 text-white font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
@@ -955,7 +973,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setActiveAppMode("damage-calc")}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
                     activeAppMode === "damage-calc"
                       ? "bg-rose-500 text-white font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
@@ -972,7 +990,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setActiveAppMode("arcade")}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
                     activeAppMode === "arcade"
                       ? "bg-purple-600 text-white font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
@@ -1106,54 +1124,54 @@ function App() {
           </div>
 
           {/* Action Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleRandomPokemon}
-              className="px-3 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center gap-1.5 min-h-[38px] hover:border-theme-accent"
+              className="px-2.5 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px] hover:border-theme-accent"
               title="Load Random Pokémon"
               aria-label="Random Pokémon"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-theme-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-theme-accent flex-shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
               </svg>
-              <span>Random</span>
+              <span className="hidden sm:inline">Random</span>
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowScanner(true)}
-              className="px-3 sm:px-4 py-2 bg-theme-accent text-white font-display font-semibold text-xs rounded-lg shadow-sm hover:opacity-90 cursor-pointer flex items-center gap-1.5 min-h-[38px]"
+              className="px-2.5 sm:px-4 py-2 bg-theme-accent text-white font-display font-semibold text-xs rounded-lg shadow-sm hover:opacity-90 cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px]"
               title="Launch Dex Scanner"
               aria-label="Scan Pokemon"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
               </svg>
-              <span>Scanner</span>
+              <span className="hidden sm:inline">Scanner</span>
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleTheme}
-              className="px-3 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center gap-1.5 min-h-[38px] hover:border-theme-accent"
+              className="px-2.5 sm:px-4 py-2 bg-theme-surface border border-theme text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px] hover:border-theme-accent"
               title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
               aria-label="Toggle Theme"
             >
               {theme === "dark" ? (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-amber-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-amber-400 flex-shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25m-13.5 0H3m15.364 6.364l-1.591-1.591M6.758 6.758L5.167 5.167m12.728 0l-1.591 1.591M6.758 17.242l-1.591 1.591M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
                   </svg>
                   <span className="hidden sm:inline">Light Mode</span>
                 </>
               ) : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-500 flex-shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                   </svg>
                   <span className="hidden sm:inline">Dark Mode</span>
@@ -1164,7 +1182,7 @@ function App() {
         </div>
 
         {/* Primary Top Navigation Switcher */}
-        <div className="w-full max-w-xl flex items-center justify-center p-1.5 bg-theme-surface border border-theme rounded-2xl shadow-sm mb-6 sm:mb-8 select-none">
+        <div className="w-full max-w-xl flex items-center justify-between p-1 sm:p-1.5 bg-theme-surface border border-theme rounded-2xl shadow-sm mb-6 sm:mb-8 select-none overflow-x-auto scrollbar-none gap-1 sm:gap-1.5">
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
@@ -1173,7 +1191,7 @@ function App() {
               setSelectedPokemon(null);
               randomizeHeroPokemon();
             }}
-            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
               activeAppMode === "pokedex"
                 ? "bg-rose-600 text-white font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
@@ -1184,14 +1202,15 @@ function App() {
               <path d="M3 12h6m6 0h6" />
               <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity={0.2} />
             </svg>
-            <span>National Dex</span>
+            <span className="sm:hidden">Dex</span>
+            <span className="hidden sm:inline">National Dex</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveAppMode("items")}
-            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
               activeAppMode === "items"
                 ? "bg-amber-500 text-slate-950 font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
@@ -1202,14 +1221,15 @@ function App() {
               <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
               <path d="M8 14h8" />
             </svg>
-            <span>Trainer's Bag</span>
+            <span className="sm:hidden">Bag</span>
+            <span className="hidden sm:inline">Trainer's Bag</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveAppMode("battle-lab")}
-            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
               activeAppMode === "battle-lab"
                 ? "bg-indigo-600 text-white font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
@@ -1221,14 +1241,15 @@ function App() {
               <path d="M9.5 17.5 21 6V3h-3L6.5 14.5" />
               <path d="m11 19-6 2-2-6 2-2 6 6Z" />
             </svg>
-            <span>Battle Lab</span>
+            <span className="sm:hidden">Lab</span>
+            <span className="hidden sm:inline">Battle Lab</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveAppMode("damage-calc")}
-            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
               activeAppMode === "damage-calc"
                 ? "bg-rose-500 text-white font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
@@ -1240,14 +1261,15 @@ function App() {
               <line x1="16" y1="14" x2="16" y2="18" />
               <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01" />
             </svg>
-            <span>Damage Calc</span>
+            <span className="sm:hidden">Calc</span>
+            <span className="hidden sm:inline">Damage Calc</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveAppMode("arcade")}
-            className={`flex-1 py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
               activeAppMode === "arcade"
                 ? "bg-purple-600 text-white font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
@@ -1260,7 +1282,8 @@ function App() {
               <line x1="18" y1="11" x2="18.01" y2="11" />
               <rect x="2" y="6" width="20" height="12" rx="2" />
             </svg>
-            <span>PokéArcade</span>
+            <span className="sm:hidden">Arcade</span>
+            <span className="hidden sm:inline">PokéArcade</span>
           </motion.button>
         </div>
 
@@ -1413,7 +1436,7 @@ function App() {
               <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 sm:gap-12 py-4 sm:py-10 relative">
                 <div className="flex-grow flex flex-col items-start text-left max-w-xl">
                   {/* High-Impact Headline */}
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-theme-primary leading-[1.15] tracking-tight mb-4">
+                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-display font-black text-theme-primary leading-[1.15] tracking-tight mb-4">
                     The Complete <span className="text-theme-accent">Pokédex</span> & Battle Database
                   </h2>
 
@@ -1606,11 +1629,12 @@ function App() {
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   onClick={() => setShowCompareModal(true)}
-                  className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-bold font-display rounded-xl shadow-md whitespace-nowrap cursor-pointer min-h-[36px]"
+                  className="px-2.5 sm:px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-bold font-display rounded-xl shadow-md whitespace-nowrap cursor-pointer min-h-[36px]"
                   disabled={comparedPokemon.length < 2}
                   title={comparedPokemon.length < 2 ? "Add at least 2 Pokemon to compare" : "Open comparison charts"}
                 >
-                  Compare ({comparedPokemon.length}/3)
+                  <span className="sm:hidden">Compare ({comparedPokemon.length})</span>
+                  <span className="hidden sm:inline">Compare ({comparedPokemon.length}/3)</span>
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.03 }}

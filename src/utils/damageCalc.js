@@ -124,6 +124,10 @@ export function calculateDamage({
   let moveType = (move.type || "normal").toLowerCase();
   let basePower = move.power;
 
+  if (move.name?.toLowerCase() === "facade" && attacker.status && attacker.status !== "healthy") {
+    basePower *= 2;
+  }
+
   if (move.name?.toLowerCase() === "tera blast" && attacker.isTera && attacker.teraType) {
     moveType = attacker.teraType.toLowerCase();
     // Tera Blast becomes physical if Attack > Sp. Attack
@@ -138,6 +142,7 @@ export function calculateDamage({
   let typeMult = getTypeMultiplier(moveType, defTypes);
 
   // Ability immunities
+  const atkAbility = (attacker.ability || "").toLowerCase();
   const defAbility = (defender.ability || "").toLowerCase();
   if (
     (moveType === "fire" && (defAbility === "flash fire" || defAbility === "well-baked body")) ||
@@ -163,6 +168,11 @@ export function calculateDamage({
     };
   }
 
+  // Tinted Lens: doubles damage of not very effective moves (below 1x effectiveness)
+  if (atkAbility === "tinted lens" && typeMult < 1) {
+    typeMult *= 2.0;
+  }
+
   // Calculate Base Stats
   const rawAttackerStat = isPhysical
     ? (attacker.stats?.attack || calculateStat("attack", attacker.baseStats?.attack, attacker.ivs?.attack, attacker.evs?.attack, level, attacker.nature))
@@ -179,7 +189,6 @@ export function calculateDamage({
   let defStage = (isPhysical ? defender.stages?.defense : defender.stages?.["special-defense"]) || 0;
 
   // Unaware checks
-  const atkAbility = (attacker.ability || "").toLowerCase();
   if (defAbility === "unaware") atkStage = 0;
   if (atkAbility === "unaware") defStage = 0;
 
@@ -198,12 +207,20 @@ export function calculateDamage({
   if (isPhysical && atkAbility === "guts" && attacker.status && attacker.status !== "healthy") {
     finalAtk *= 1.5;
   }
-  if (atkAbility === "protosynthesis" || atkAbility === "quark drive") {
-    // Standard booster energy stat boost
+  const atkItem = (attacker.item || "").toLowerCase();
+  const defItem = (defender.item || "").toLowerCase();
+
+  if (
+    (atkAbility === "protosynthesis" && (field.weather === "sun" || atkItem === "booster energy")) ||
+    (atkAbility === "quark drive" && (field.terrain === "electric" || atkItem === "booster energy"))
+  ) {
     finalAtk *= 1.3;
   }
-  if (atkAbility === "sword of ruin" && !isPhysical) {
-    // Ruin abilities
+  if (atkAbility === "sword of ruin" && isPhysical) {
+    finalDef *= 0.75;
+  }
+  if (atkAbility === "beads of ruin" && !isPhysical) {
+    finalDef *= 0.75;
   }
   if (defAbility === "tablets of ruin" && isPhysical) {
     finalAtk *= 0.75;
@@ -221,9 +238,6 @@ export function calculateDamage({
   }
 
   // Item modifiers on Stat
-  const atkItem = (attacker.item || "").toLowerCase();
-  const defItem = (defender.item || "").toLowerCase();
-
   if (isPhysical && atkItem === "choice band") finalAtk *= 1.5;
   if (!isPhysical && atkItem === "choice specs") finalAtk *= 1.5;
   if (!isPhysical && defItem === "assault vest") finalDef *= 1.5;
@@ -262,9 +276,14 @@ export function calculateDamage({
     else if (moveType === "fire") baseDamage = Math.floor(baseDamage * 0.5);
   }
 
-  // Critical hit multiplier (Gen 6+ is 1.5x)
+  // Critical hit multiplier (Gen 6+ is 1.5x, Sniper boosts to 2.25x)
   if (isCrit) {
-    baseDamage = Math.floor(baseDamage * 1.5);
+    baseDamage = Math.floor(baseDamage * (atkAbility === "sniper" ? 2.25 : 1.5));
+  }
+
+  // Water Bubble attacker bonus
+  if (atkAbility === "water bubble" && moveType === "water") {
+    baseDamage = Math.floor(baseDamage * 2.0);
   }
 
   // Terrain modifiers

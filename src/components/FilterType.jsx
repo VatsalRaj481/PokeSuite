@@ -25,6 +25,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
   const [selectedGeneration, setSelectedGeneration] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("");
+  const [selectedArchetype, setSelectedArchetype] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverCoords, setPopoverCoords] = useState(null);
 
@@ -70,8 +71,20 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
     { value: "special", label: "Special Form" },
   ];
 
+  const archetypeOptions = [
+    { value: "", label: "All Archetypes" },
+    { value: "starter", label: "Starter Pokémon" },
+    { value: "legendary", label: "Legendary Pokémon" },
+    { value: "mythical", label: "Mythical Pokémon" },
+    { value: "paradox", label: "Paradox Pokémon" },
+    { value: "ultrabeast", label: "Ultra Beasts" },
+    { value: "pseudolegendary", label: "Pseudo-Legendary" },
+    { value: "fossil", label: "Fossil Pokémon" },
+    { value: "baby", label: "Baby Pokémon" },
+  ];
+
   // Count of active filters for the badge
-  const activeFilterCount = [selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection].filter(Boolean).length;
+  const activeFilterCount = [selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection, selectedArchetype].filter(Boolean).length;
 
   // Recalculate position on resize or scroll when open
   useEffect(() => {
@@ -147,7 +160,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
   // Handles form submission to trigger search/filter
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearchAndFilter(nameQuery, selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection);
+    onSearchAndFilter(nameQuery, selectedType, selectedRegion, selectedGeneration, selectedCategory, selectedCollection, selectedArchetype);
     setIsPopoverOpen(false);
   };
 
@@ -157,6 +170,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
     setSelectedGeneration("");
     setSelectedCategory("");
     setSelectedCollection("");
+    setSelectedArchetype("");
   };
 
   const selectClasses =
@@ -342,6 +356,31 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                       </select>
                     </div>
 
+                    {/* Archetype / Classification Select */}
+                    <div>
+                      <label htmlFor="filter-archetype" className={labelClasses}>
+                        Archetype / Classification
+                      </label>
+                      <select
+                        id="filter-archetype"
+                        value={selectedArchetype}
+                        onChange={(e) => setSelectedArchetype(e.target.value)}
+                        className={selectClasses}
+                        aria-label="Filter by archetype or classification"
+                        disabled={isLoading}
+                      >
+                        {archetypeOptions.map((opt) => (
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            className="bg-theme-input text-theme-primary"
+                          >
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     {/* Form Tag / Special Category Select */}
                     <div>
                       <label htmlFor="filter-category" className={labelClasses}>
@@ -431,7 +470,7 @@ function FilterType({ types, generations, regions, onSearchAndFilter, isLoading,
                         type="button"
                         onClick={handleClearAll}
                         disabled={activeFilterCount === 0}
-                        className="flex-1 py-2 text-xs sm:text-sm font-display font-semibold text-theme-accent hover:text-theme-primary bg-transparent border border-theme hover:border-theme-accent rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-accent"
+                        className="flex-1 py-2 text-xs sm:text-sm font-display font-semibold text-theme-accent hover:text-theme-primary bg-transparent border border-theme hover:border-theme-accent rounded-lg transition-all duration-200 disabled:opacity-40 disabled:border-theme/30 disabled:text-theme-secondary/40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-accent"
                         aria-label="Clear all filters"
                       >
                         Clear All

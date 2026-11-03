@@ -2,6 +2,20 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import TypeBadge from "./TypeBadge";
+import NatureChartModal from "./NatureChartModal";
+
+const formatStatShort = (stat) => {
+  if (!stat) return "";
+  const map = {
+    hp: "HP",
+    attack: "Atk",
+    defense: "Def",
+    "special-attack": "SpA",
+    "special-defense": "SpD",
+    speed: "Spe",
+  };
+  return map[stat] || stat;
+};
 
 // 25 Canonical Pokémon Natures
 export const NATURES = [
@@ -220,6 +234,7 @@ export default function BattleLab({ pokemonList = [] }) {
   const [pickerSearch, setPickerSearch] = useState("");
   const [showPasteModal, setShowPasteModal] = useState(false);
   const [pasteInputText, setPasteInputText] = useState("");
+  const [showNatureModal, setShowNatureModal] = useState(false);
 
   const currentMember = team[activeSlot] || null;
 
@@ -596,7 +611,7 @@ export default function BattleLab({ pokemonList = [] }) {
                     <div className="font-display font-extrabold text-xs text-theme-primary truncate">
                       {member.displayName}
                     </div>
-                    <div className="flex gap-1 justify-center mt-1">
+                    <div className="flex flex-wrap gap-1 justify-center items-center mt-1 w-full max-w-full">
                       {member.types.map((t) => (
                         <TypeBadge key={t} type={t} size="sm" />
                       ))}
@@ -620,9 +635,9 @@ export default function BattleLab({ pokemonList = [] }) {
           {/* Left Column: Pokémon Identity & Loadout (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <div className="bg-theme-surface border border-theme rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 bg-theme-input rounded-2xl p-2 flex items-center justify-center border border-theme shadow-inner">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-theme-input rounded-2xl p-2 flex items-center justify-center border border-theme shadow-inner flex-shrink-0">
                     <img
                       src={currentMember.sprite}
                       alt={currentMember.displayName}
@@ -630,10 +645,10 @@ export default function BattleLab({ pokemonList = [] }) {
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-display font-extrabold text-theme-primary">
+                    <h3 className="text-lg sm:text-xl font-display font-extrabold text-theme-primary">
                       {currentMember.displayName}
                     </h3>
-                    <div className="flex gap-1.5 mt-1">
+                    <div className="flex flex-wrap gap-1.5 mt-1">
                       {currentMember.types.map((t) => (
                         <TypeBadge key={t} type={t} size="sm" />
                       ))}
@@ -645,7 +660,7 @@ export default function BattleLab({ pokemonList = [] }) {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setShowPickerModal(true)}
-                  className="px-3 py-1.5 bg-theme-input hover:bg-theme-surface-hover hover:border-indigo-500 border border-theme text-theme-primary rounded-xl font-display text-xs font-semibold cursor-pointer transition-all"
+                  className="px-3 py-1.5 bg-theme-input hover:bg-theme-surface-hover hover:border-indigo-500 border border-theme text-theme-primary rounded-xl font-display text-xs font-semibold cursor-pointer transition-all self-start sm:self-auto"
                 >
                   Change Species
                 </motion.button>
@@ -673,9 +688,23 @@ export default function BattleLab({ pokemonList = [] }) {
 
                 {/* Nature */}
                 <div>
-                  <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold block mb-1">
-                    Nature ({currentMember.nature})
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                      Nature ({currentMember.nature})
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowNatureModal(true)}
+                      className="px-2 py-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 font-mono-tech text-[10px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Open 5×5 Nature Stat Matrix"
+                    >
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+                      </svg>
+                      <span>5×5 Matrix</span>
+                    </button>
+                  </div>
                   <select
                     value={currentMember.nature}
                     onChange={(e) => handleUpdateCurrent("nature", e.target.value)}
@@ -683,7 +712,7 @@ export default function BattleLab({ pokemonList = [] }) {
                   >
                     {NATURES.map((nat) => {
                       let tag = "Neutral";
-                      if (nat.plus) tag = `+${nat.plus.slice(0, 3)} / -${nat.minus.slice(0, 3)}`;
+                      if (nat.plus) tag = `+${formatStatShort(nat.plus)} / -${formatStatShort(nat.minus)}`;
                       return (
                         <option key={nat.name} value={nat.name}>
                           {nat.name} ({tag})
@@ -880,7 +909,7 @@ export default function BattleLab({ pokemonList = [] }) {
             </div>
 
             {/* In-Game Stat Formula Note */}
-            <div className="mt-6 pt-4 border-t border-theme/70 text-[10px] font-mono-tech text-theme-secondary flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-theme/70 text-[10px] font-mono-tech text-theme-secondary flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
               <span>Formula: Math.floor(((2*Base + IV + EV/4) * Lv)/100 + 5) * Nature</span>
               <span className="text-indigo-400 font-semibold">100% Cartridge Formula</span>
             </div>
@@ -1086,6 +1115,13 @@ export default function BattleLab({ pokemonList = [] }) {
             </motion.div>
           </div>
         )}
+        {/* Nature 5x5 Matrix Modal */}
+        <NatureChartModal
+          isOpen={showNatureModal}
+          onClose={() => setShowNatureModal(false)}
+          onSelectNature={(nat) => handleUpdateCurrent("nature", nat)}
+          selectedNature={currentMember?.nature}
+        />
       </AnimatePresence>
     </div>
   );

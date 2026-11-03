@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import TypeBadge from "./TypeBadge";
+import NatureChartModal from "./NatureChartModal";
 import { calculateDamage } from "../utils/damageCalc.js";
 import {
   NATURES,
@@ -101,6 +102,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
   const [defenderSearch, setDefenderSearch] = useState("");
   const [isSearchingAttacker, setIsSearchingAttacker] = useState(false);
   const [isSearchingDefender, setIsSearchingDefender] = useState(false);
+  const [showNatureModal, setShowNatureModal] = useState(false);
+  const [natureModalTarget, setNatureModalTarget] = useState("attacker");
 
   // Quick helper to map pokemon object
   const mapPokemonToFighter = (p) => {
@@ -215,9 +218,9 @@ export default function DamageCalculator({ pokemonList = [] }) {
       >
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           {/* Attacker vs Defender mini preview */}
-          <div className="flex items-center gap-3 sm:gap-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center relative">
+          <div className="flex items-center justify-center gap-2 sm:gap-6 w-full lg:w-auto">
+            <div className="flex flex-col items-center text-center min-w-0 max-w-[110px] sm:max-w-none">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative">
                 <img
                   src={getSpriteUrl(attackerPokemon.id)}
                   alt={attackerPokemon.displayName}
@@ -227,27 +230,27 @@ export default function DamageCalculator({ pokemonList = [] }) {
                   }}
                 />
               </div>
-              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize">
+              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
                 {attackerPokemon.displayName}
               </span>
-              <div className="flex gap-1 mt-0.5">
+              <div className="flex flex-wrap justify-center gap-1 mt-0.5 max-w-[100px] sm:max-w-none">
                 {attackerPokemon.types.map((t) => (
                   <TypeBadge key={t} type={t} size="sm" />
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-col items-center">
-              <span className="text-xl sm:text-2xl font-black font-display text-theme-accent animate-pulse">
+            <div className="flex flex-col items-center px-1">
+              <span className="text-lg sm:text-2xl font-black font-display text-theme-accent animate-pulse">
                 VS
               </span>
-              <span className="text-[10px] font-mono-tech text-theme-secondary uppercase mt-0.5">
+              <span className="text-[10px] font-mono-tech text-theme-secondary uppercase mt-0.5 text-center truncate max-w-[80px] sm:max-w-[120px]">
                 {selectedMove.name}
               </span>
             </div>
 
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center relative">
+            <div className="flex flex-col items-center text-center min-w-0 max-w-[110px] sm:max-w-none">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative">
                 <img
                   src={getSpriteUrl(defenderPokemon.id)}
                   alt={defenderPokemon.displayName}
@@ -257,10 +260,10 @@ export default function DamageCalculator({ pokemonList = [] }) {
                   }}
                 />
               </div>
-              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize">
+              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
                 {defenderPokemon.displayName}
               </span>
-              <div className="flex gap-1 mt-0.5">
+              <div className="flex flex-wrap justify-center gap-1 mt-0.5 max-w-[100px] sm:max-w-none">
                 {defenderPokemon.types.map((t) => (
                   <TypeBadge key={t} type={t} size="sm" />
                 ))}
@@ -371,7 +374,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
           )}
 
           {/* Level, Nature & Ability */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
               <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
                 Level
@@ -386,9 +389,22 @@ export default function DamageCalculator({ pokemonList = [] }) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Nature
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Nature
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNatureModalTarget("attacker");
+                    setShowNatureModal(true);
+                  }}
+                  className="text-[9px] font-mono-tech text-indigo-400 hover:text-indigo-300 font-bold uppercase cursor-pointer"
+                  title="Open 5×5 Nature Stat Matrix"
+                >
+                  5×5 Chart
+                </button>
+              </div>
               <select
                 value={attackerNature}
                 onChange={(e) => setAttackerNature(e.target.value)}
@@ -420,7 +436,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
           </div>
 
           {/* Item & Status */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
                 Held Item
@@ -555,7 +571,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
               </label>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <select
                 value={selectedMove.name}
                 onChange={(e) => {
@@ -742,7 +758,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
           )}
 
           {/* Level, Nature & Ability */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
               <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
                 Level
@@ -757,9 +773,22 @@ export default function DamageCalculator({ pokemonList = [] }) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Nature
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Nature
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNatureModalTarget("defender");
+                    setShowNatureModal(true);
+                  }}
+                  className="text-[9px] font-mono-tech text-indigo-400 hover:text-indigo-300 font-bold uppercase cursor-pointer"
+                  title="Open 5×5 Nature Stat Matrix"
+                >
+                  5×5 Chart
+                </button>
+              </div>
               <select
                 value={defenderNature}
                 onChange={(e) => setDefenderNature(e.target.value)}
@@ -791,7 +820,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
           </div>
 
           {/* Item & Status */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
                 Held Item
@@ -926,6 +955,20 @@ export default function DamageCalculator({ pokemonList = [] }) {
           </div>
         </div>
       </div>
+
+      {/* Nature 5x5 Matrix Modal */}
+      <NatureChartModal
+        isOpen={showNatureModal}
+        onClose={() => setShowNatureModal(false)}
+        onSelectNature={(nat) => {
+          if (natureModalTarget === "attacker") {
+            setAttackerNature(nat);
+          } else {
+            setDefenderNature(nat);
+          }
+        }}
+        selectedNature={natureModalTarget === "attacker" ? attackerNature : defenderNature}
+      />
     </div>
   );
 }

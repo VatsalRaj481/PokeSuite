@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
+import { ICONIC_POKEMON_POOL } from "../../utils/calcData.js";
 
 export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -23,10 +24,10 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const audioRef = useRef(null);
 
-  // Filter pool by generation
+  // Filter pool by generation with immediate iconic pool fallback
   const candidatePool = React.useMemo(() => {
-    if (!pokemonList || pokemonList.length === 0) return [];
-    if (selectedGen === "all") return pokemonList;
+    const basePool = pokemonList && pokemonList.length > 0 ? pokemonList : ICONIC_POKEMON_POOL;
+    if (selectedGen === "all") return basePool;
     const gen = parseInt(selectedGen, 10);
     const genBounds = {
       1: [1, 151],
@@ -40,8 +41,8 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
       9: [899, 1025],
     };
     const bounds = genBounds[gen];
-    if (!bounds) return pokemonList;
-    return pokemonList.filter((p) => p.id >= bounds[0] && p.id <= bounds[1]);
+    if (!bounds) return basePool;
+    return basePool.filter((p) => p.id >= bounds[0] && p.id <= bounds[1]);
   }, [pokemonList, selectedGen]);
 
   // Load a new mystery Pokémon
@@ -315,13 +316,13 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
       {/* Guess Input Interface */}
       {!isRevealed ? (
         gameMode === "choice" ? (
-          <div className="w-full grid grid-cols-2 gap-3">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
             {options.map((opt) => (
               <button
                 key={opt.name}
                 type="button"
                 onClick={() => handleGuess(opt.name)}
-                className="py-3 px-4 bg-theme-surface hover:bg-theme-surface-hover border border-theme rounded-2xl font-display font-extrabold text-sm sm:text-base text-theme-primary capitalize shadow-sm transition-all transform active:scale-95 cursor-pointer text-center"
+                className="py-3 px-4 bg-theme-surface hover:bg-theme-surface-hover border border-theme rounded-2xl font-display font-extrabold text-sm sm:text-base text-theme-primary capitalize shadow-sm transition-all transform active:scale-95 cursor-pointer text-center min-h-[44px]"
               >
                 {opt.displayName || opt.name.replace(/-/g, " ")}
               </button>
@@ -333,19 +334,19 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
               e.preventDefault();
               handleGuess(userGuess);
             }}
-            className="w-full flex gap-2"
+            className="w-full flex flex-col sm:flex-row gap-2"
           >
             <input
               type="text"
               placeholder="Enter Pokémon name (e.g. Pikachu, Lucario)..."
               value={userGuess}
               onChange={(e) => setUserGuess(e.target.value)}
-              className="flex-1 px-4 py-3 bg-theme-surface border border-theme rounded-2xl text-sm font-display text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent"
+              className="flex-1 px-4 py-3 bg-theme-surface border border-theme rounded-2xl text-sm font-display text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-accent min-h-[44px]"
               autoFocus
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-theme-accent text-white font-display font-extrabold text-sm rounded-2xl hover:bg-theme-accent/90 shadow-md cursor-pointer"
+              className="px-6 py-3 bg-theme-accent text-white font-display font-extrabold text-sm rounded-2xl hover:bg-theme-accent/90 shadow-md cursor-pointer min-h-[44px]"
             >
               Guess
             </button>

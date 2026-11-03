@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { KNOWN_MOVE_META } from "../utils/moveMeta";
 import TypeBadge from "./TypeBadge";
 import { TYPE_NAMES } from "../utils/typeIcons";
+import {
+  getPokemonArchetype,
+  isPokemonSignatureMove,
+  isPokemonSignatureAbility,
+  getPokemonSignatureMoves,
+  getPokemonSignatureAbilities,
+} from "../utils/loreData.js";
 
 // Defines brand-accurate flat type colors with subtle 1px border for definition
 const typeColors = {
@@ -1860,11 +1867,22 @@ function PokemonCard({
           <h2 className="text-sm sm:text-lg font-display font-extrabold text-theme-primary text-center tracking-tight leading-snug truncate w-full">
             {formatPokemonName(pokemon.name)}
           </h2>
-          {formBadge && (
-            <span className="mt-1 px-1.5 py-0.5 rounded-md bg-theme-gold-bg text-theme-gold text-[8px] font-display font-bold uppercase">
-              {formBadge}
-            </span>
-          )}
+          <div className="flex items-center gap-1 mt-1 flex-wrap justify-center">
+            {formBadge && (
+              <span className="px-1.5 py-0.5 rounded-md bg-theme-gold-bg text-theme-gold text-[8px] font-display font-bold uppercase">
+                {formBadge}
+              </span>
+            )}
+            {(() => {
+              const archetype = getPokemonArchetype(pokemon);
+              if (!archetype) return null;
+              return (
+                <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-mono-tech font-bold uppercase border ${archetype.color}`}>
+                  {archetype.label}
+                </span>
+              );
+            })()}
+          </div>
         </div>
 
         {/* Champions Type Badges */}
@@ -1913,7 +1931,7 @@ function PokemonCard({
 
   // Full Details Layout (horizontal layout / main selected card)
   return (
-    <div className="pokedex-chassis bg-theme-surface border border-theme rounded-2xl p-5 sm:p-7 md:p-8 flex flex-col gap-6 sm:gap-8 shadow-xl relative animate-card-in overflow-hidden w-full">
+    <div className="pokedex-chassis bg-theme-surface border border-theme rounded-2xl p-3.5 sm:p-7 md:p-8 flex flex-col gap-6 sm:gap-8 shadow-xl relative animate-card-in overflow-hidden w-full">
       {/* Card Top Header */}
       <div className="flex items-center justify-between border-b border-theme pb-4 w-full flex-wrap gap-3">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
@@ -2092,11 +2110,49 @@ function PokemonCard({
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-2.5">
+            <div className="flex flex-wrap items-center gap-2 mt-2.5">
               {pokemon.types.map((t) => (
                 <TypeBadge key={t.type.name} type={t.type.name} size="md" />
               ))}
+              {(() => {
+                const archetype = getPokemonArchetype(pokemon);
+                if (!archetype) return null;
+                return (
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-mono-tech font-bold uppercase border shadow-2xs ${archetype.color}`}>
+                    {archetype.label}
+                  </span>
+                );
+              })()}
             </div>
+
+            {/* Signature Moves & Signature Abilities Badges */}
+            {(() => {
+              const sigMoves = getPokemonSignatureMoves(pokemon.name);
+              const sigAbilities = getPokemonSignatureAbilities(pokemon.name);
+              if (sigMoves.length === 0 && sigAbilities.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {sigMoves.map((m) => (
+                    <span
+                      key={m}
+                      className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-mono-tech font-bold uppercase tracking-wide"
+                      title={`${formatPokemonName(pokemon.name)}'s exclusive signature attack`}
+                    >
+                      Signature Move: {m}
+                    </span>
+                  ))}
+                  {sigAbilities.map((a) => (
+                    <span
+                      key={a}
+                      className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-mono-tech font-bold uppercase tracking-wide"
+                      title={`${formatPokemonName(pokemon.name)}'s exclusive signature ability`}
+                    >
+                      Signature Ability: {a}
+                    </span>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Sprite Showcase Stage */}
@@ -2737,6 +2793,11 @@ function PokemonCard({
                             HIDDEN ABILITY
                           </span>
                         )}
+                        {isPokemonSignatureAbility(abName, pokemon.name) && (
+                          <span className="px-2.5 py-0.5 rounded-md text-[8px] font-display font-bold bg-purple-500/20 text-purple-400 border border-purple-500/40 shadow-sm">
+                            SIGNATURE ABILITY
+                          </span>
+                        )}
                       </div>
 
                       <motion.svg
@@ -2877,7 +2938,7 @@ function PokemonCard({
               </div>
 
               {/* Top toolbar: Search + Type Dropdown */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 {/* Search moves input */}
                 <div className="relative flex-1 sm:flex-initial">
                   <input
@@ -2935,7 +2996,7 @@ function PokemonCard({
 
             {/* Sub-bar: Category Pills (Physical, Special, Status) & Active Filters Reset */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-theme/50">
-              <div className="flex items-center gap-1 bg-theme-surface/70 p-1 rounded-xl border border-theme overflow-x-auto max-w-full">
+              <div className="flex items-center gap-1 bg-theme-surface/70 p-1 rounded-xl border border-theme overflow-x-auto max-w-full scrollbar-none">
                 <span className="text-[10px] font-sans font-bold text-theme-secondary uppercase tracking-wider px-1.5 hidden sm:inline">
                   Category:
                 </span>
@@ -3004,7 +3065,7 @@ function PokemonCard({
           </div>
 
           {/* Learn Method Sub-Tabs */}
-          <div className="flex flex-wrap gap-2 mb-3 border-b border-theme pb-3">
+          <div className="flex flex-nowrap sm:flex-wrap items-center gap-2 mb-3 border-b border-theme pb-3 overflow-x-auto scrollbar-none">
             {[
               { key: "level-up", label: "Level-Up Moves", count: categorizedMoves["level-up"].length },
               { key: "machine", label: "TM / Machine", count: categorizedMoves.machine.length },
@@ -3040,12 +3101,12 @@ function PokemonCard({
           {currentMoveList.length > 0 ? (
             <div className="border border-theme rounded-xl overflow-hidden bg-theme-surface/35 shadow-xs">
               {/* Table Column Header: Mobile (< sm) */}
-              <div className="flex sm:hidden items-center justify-between px-3 py-2 bg-theme-surface border-b border-theme text-[10px] font-mono-tech uppercase tracking-wider text-theme-secondary font-bold select-none">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-12 text-left">Level</span>
-                  <span>Move / Category</span>
+              <div className="flex sm:hidden items-center justify-between px-2.5 py-1.5 bg-theme-surface border-b border-theme text-[9px] font-mono-tech uppercase tracking-wider text-theme-secondary font-bold select-none">
+                <div className="flex items-center gap-2">
+                  <span className="w-10 text-left">Level</span>
+                  <span>Move</span>
                 </div>
-                <div className="flex items-center gap-2 pr-5">
+                <div className="flex items-center gap-2 pr-4">
                   <span>Type</span>
                 </div>
               </div>
@@ -3078,13 +3139,13 @@ function PokemonCard({
                       <button
                         type="button"
                         onClick={() => handleMoveClick(m.name, m.url)}
-                        className="w-full px-3 sm:px-4 py-2.5 text-left transition-colors cursor-pointer group"
+                        className="w-full px-2.5 sm:px-4 py-2 text-left transition-colors cursor-pointer group"
                       >
                         {/* Mobile Row (< sm): Flex with guaranteed fixed-width slots (no overlapping) */}
-                        <div className="flex sm:hidden items-center gap-2.5 w-full">
-                          {/* Col 1: Level / Method Badge - Dedicated w-12 flex-shrink-0 */}
-                          <div className="w-12 flex-shrink-0 flex items-center justify-start">
-                            <span className="w-full py-0.5 px-1 rounded text-[10px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center truncate">
+                        <div className="flex sm:hidden items-center gap-2 w-full">
+                          {/* Col 1: Level / Method Badge */}
+                          <div className="w-10 flex-shrink-0 flex items-center justify-start">
+                            <span className="w-full py-0.5 px-0.5 rounded text-[9px] font-mono-tech font-bold bg-theme-input/80 border border-theme/60 text-theme-secondary text-center truncate">
                               {isSearching || activeMoveTab === "all"
                                 ? (m.level ? `Lv.${m.level}` : (m.method?.slice(0, 4).toUpperCase() || "MOVE"))
                                 : activeMoveTab === "level-up"
@@ -3098,14 +3159,21 @@ function PokemonCard({
                           </div>
 
                           {/* Col 2: Move Name & Category Subtitle - flex-1 min-w-0 */}
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <span className="text-xs font-sans font-bold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate">
-                              {m.name.replace(/-/g, " ")}
-                            </span>
-                            <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden">
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span className="text-xs font-sans font-bold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate block">
+                                {m.name.replace(/-/g, " ")}
+                              </span>
+                              {isPokemonSignatureMove(m.name, pokemon.name) && (
+                                <span className="px-1 py-0.2 rounded text-[7.5px] font-mono-tech font-bold uppercase bg-purple-500/20 text-purple-400 border border-purple-500/40 flex-shrink-0">
+                                  Sig
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5 min-w-0">
                               {meta?.damageClass && (
                                 <span
-                                  className={`px-1.5 py-0.2 rounded text-[8.5px] font-mono-tech font-bold uppercase tracking-tight border ${
+                                  className={`px-1 py-0.2 rounded text-[8px] font-mono-tech font-bold uppercase tracking-tight border flex-shrink-0 ${
                                     meta.damageClass === "physical"
                                       ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
                                       : meta.damageClass === "special"
@@ -3117,7 +3185,7 @@ function PokemonCard({
                                 </span>
                               )}
                               {m.fromPreEvo && !isSearching && activeMoveTab !== "all" && (
-                                <span className="text-[8.5px] font-mono-tech text-theme-secondary/80 truncate">
+                                <span className="text-[8px] font-mono-tech text-theme-secondary/80 truncate">
                                   via {formatPokemonName(m.fromPreEvo)}
                                 </span>
                               )}
@@ -3127,7 +3195,7 @@ function PokemonCard({
                           {/* Col 3: Type Badge - flex-shrink-0 */}
                           <div className="flex-shrink-0">
                             {meta?.type ? (
-                              <TypeBadge type={meta.type} size="sm" />
+                              <TypeBadge type={meta.type} size="xs" />
                             ) : (
                               <span className="text-[10px] font-mono-tech text-theme-secondary/60">
                                 —
@@ -3176,6 +3244,11 @@ function PokemonCard({
                             <span className="text-xs sm:text-sm font-sans font-semibold capitalize text-theme-primary group-hover:text-theme-accent transition-colors truncate">
                               {m.name.replace(/-/g, " ")}
                             </span>
+                            {isPokemonSignatureMove(m.name, pokemon.name) && (
+                              <span className="px-1.5 py-0.5 rounded text-[8.5px] font-mono-tech font-bold uppercase bg-purple-500/20 text-purple-400 border border-purple-500/40 flex-shrink-0">
+                                Signature
+                              </span>
+                            )}
                             {m.fromPreEvo && !isSearching && activeMoveTab !== "all" && (
                               <span className="px-1.5 py-0.5 rounded text-[9px] font-mono-tech text-theme-secondary/80 bg-theme-input/60 border border-theme/40 hidden md:inline flex-shrink-0">
                                 via {formatPokemonName(m.fromPreEvo)}
