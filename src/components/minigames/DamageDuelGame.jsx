@@ -160,26 +160,24 @@ export default function DamageDuelGame({ onSelectPokemon }) {
             <button
               type="button"
               onClick={() => handleSwitchGameMode("infinite")}
-              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
                 gameMode === "infinite"
                   ? "bg-theme-accent text-white shadow-sm"
                   : "text-theme-secondary hover:text-theme-primary"
               }`}
             >
-              <span>♾️</span>
-              <span>Infinite</span>
+              Infinite
             </button>
             <button
               type="button"
               onClick={() => handleSwitchGameMode("curated")}
-              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
                 gameMode === "curated"
                   ? "bg-theme-accent text-white shadow-sm"
                   : "text-theme-secondary hover:text-theme-primary"
               }`}
             >
-              <span>📜</span>
-              <span>Classics ({BATTLE_QUIZ_SCENARIOS.length})</span>
+              Classics ({BATTLE_QUIZ_SCENARIOS.length})
             </button>
           </div>
 
