@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
 import { calculateDamage } from "../../utils/damageCalc.js";
-import { BATTLE_QUIZ_SCENARIOS } from "../../utils/calcData.js";
+import { BATTLE_QUIZ_SCENARIOS, generateProceduralScenario } from "../../utils/calcData.js";
 
 const RANKS = [
   { minStreak: 0, title: "Bug Catcher" },
@@ -14,7 +14,10 @@ const RANKS = [
 ];
 
 export default function DamageDuelGame({ onSelectPokemon }) {
+  const [gameMode, setGameMode] = useState("infinite"); // 'infinite' | 'curated'
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
+  const [proceduralScenario, setProceduralScenario] = useState(() => generateProceduralScenario(calculateDamage));
+  const [roundNumber, setRoundNumber] = useState(1);
   const [quizMode, setQuizMode] = useState("ko"); // 'ko' | 'bracket'
   const [userAnswer, setUserAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -27,7 +30,9 @@ export default function DamageDuelGame({ onSelectPokemon }) {
     }
   });
 
-  const scenario = BATTLE_QUIZ_SCENARIOS[currentScenarioIndex % BATTLE_QUIZ_SCENARIOS.length];
+  const scenario = gameMode === "infinite"
+    ? proceduralScenario
+    : BATTLE_QUIZ_SCENARIOS[currentScenarioIndex % BATTLE_QUIZ_SCENARIOS.length];
 
   // Calculate actual damage numbers
   const calcResult = useMemo(() => {
@@ -110,7 +115,22 @@ export default function DamageDuelGame({ onSelectPokemon }) {
   const nextQuestion = () => {
     setIsAnswered(false);
     setUserAnswer(null);
-    setCurrentScenarioIndex((prev) => prev + 1);
+    if (gameMode === "infinite") {
+      setProceduralScenario(generateProceduralScenario(calculateDamage));
+      setRoundNumber((prev) => prev + 1);
+    } else {
+      setCurrentScenarioIndex((prev) => prev + 1);
+    }
+  };
+
+  const handleSwitchGameMode = (newMode) => {
+    if (newMode === gameMode) return;
+    setGameMode(newMode);
+    setIsAnswered(false);
+    setUserAnswer(null);
+    if (newMode === "infinite" && !proceduralScenario) {
+      setProceduralScenario(generateProceduralScenario(calculateDamage));
+    }
   };
 
   const currentRank = [...RANKS].reverse().find((r) => streak >= r.minStreak) || RANKS[0];
@@ -120,9 +140,9 @@ export default function DamageDuelGame({ onSelectPokemon }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6">
-      {/* Top HUD: Streak, Rank, Mode Switcher */}
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 bg-theme-surface border border-theme rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center gap-3">
+      {/* Top HUD: Streak, Rank, Mode Switchers */}
+      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-3 bg-theme-surface border border-theme rounded-2xl p-4 shadow-sm">
+        <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
           <div className="px-3 py-1.5 bg-theme-accent/15 border border-theme-accent rounded-xl text-theme-accent font-display font-extrabold text-xs flex items-center gap-1.5">
             <span>{currentRank.title}</span>
             <span className="ml-1 px-1.5 py-0.2 rounded bg-theme-accent text-white text-[10px]">
@@ -134,31 +154,64 @@ export default function DamageDuelGame({ onSelectPokemon }) {
           </div>
         </div>
 
-        <div className="flex border border-theme rounded-xl overflow-hidden p-0.5 bg-theme-bg">
-          <button
-            type="button"
-            onClick={() => {
-              setQuizMode("ko");
-              setIsAnswered(false);
-            }}
-            className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
-              quizMode === "ko" ? "bg-theme-accent text-white" : "text-theme-secondary hover:text-theme-primary"
-            }`}
-          >
-            Does It KO?
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setQuizMode("bracket");
-              setIsAnswered(false);
-            }}
-            className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
-              quizMode === "bracket" ? "bg-theme-accent text-white" : "text-theme-secondary hover:text-theme-primary"
-            }`}
-          >
-            Damage % Bracket
-          </button>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {/* Game Mode: Infinite vs Curated */}
+          <div className="flex border border-theme rounded-xl overflow-hidden p-0.5 bg-theme-bg">
+            <button
+              type="button"
+              onClick={() => handleSwitchGameMode("infinite")}
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                gameMode === "infinite"
+                  ? "bg-theme-accent text-white shadow-sm"
+                  : "text-theme-secondary hover:text-theme-primary"
+              }`}
+            >
+              <span>♾️</span>
+              <span>Infinite</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchGameMode("curated")}
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                gameMode === "curated"
+                  ? "bg-theme-accent text-white shadow-sm"
+                  : "text-theme-secondary hover:text-theme-primary"
+              }`}
+            >
+              <span>📜</span>
+              <span>Classics ({BATTLE_QUIZ_SCENARIOS.length})</span>
+            </button>
+          </div>
+
+          {/* Quiz Type: Does It KO? vs Damage % Bracket */}
+          <div className="flex border border-theme rounded-xl overflow-hidden p-0.5 bg-theme-bg">
+            <button
+              type="button"
+              onClick={() => {
+                setQuizMode("ko");
+                setIsAnswered(false);
+                setUserAnswer(null);
+              }}
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
+                quizMode === "ko" ? "bg-theme-accent text-white" : "text-theme-secondary hover:text-theme-primary"
+              }`}
+            >
+              Does It KO?
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setQuizMode("bracket");
+                setIsAnswered(false);
+                setUserAnswer(null);
+              }}
+              className={`px-3 py-1 text-xs font-display font-bold rounded-lg transition-colors cursor-pointer ${
+                quizMode === "bracket" ? "bg-theme-accent text-white" : "text-theme-secondary hover:text-theme-primary"
+              }`}
+            >
+              Damage % Bracket
+            </button>
+          </div>
         </div>
       </div>
 
@@ -166,9 +219,18 @@ export default function DamageDuelGame({ onSelectPokemon }) {
       <div className="w-full bg-theme-surface border border-theme rounded-3xl p-5 sm:p-7 shadow-md flex flex-col gap-6">
         {/* Title & Scenario Header */}
         <div className="text-center border-b border-theme pb-4">
-          <span className="text-[10px] font-mono-tech uppercase text-theme-accent font-bold tracking-widest block mb-1">
-            Scenario #{currentScenarioIndex + 1}
-          </span>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="text-[10px] font-mono-tech uppercase text-theme-accent font-bold tracking-widest">
+              {gameMode === "infinite"
+                ? `Round #${roundNumber} (Infinite Mode)`
+                : `Scenario #${(currentScenarioIndex % BATTLE_QUIZ_SCENARIOS.length) + 1} of ${BATTLE_QUIZ_SCENARIOS.length} (Curated)`}
+            </span>
+            {gameMode === "infinite" && (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-mono-tech text-emerald-400 font-bold">
+                Live Procedural
+              </span>
+            )}
+          </div>
           <h2 className="text-xl sm:text-2xl font-display font-extrabold text-theme-primary">
             {scenario.title}
           </h2>

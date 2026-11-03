@@ -359,6 +359,577 @@ export const BATTLE_QUIZ_SCENARIOS = [
 ];
 
 /**
+ * Competitive Gen 9 Metagame Threats Pool for Infinite Procedural Scenario Generation
+ */
+export const COMPETITIVE_THREATS = [
+  {
+    name: "Flutter Mane",
+    id: 987,
+    types: ["ghost", "fairy"],
+    nature: "Timid",
+    ability: "Protosynthesis",
+    items: ["Choice Specs", "Booster Energy", "Life Orb", "Focus Sash"],
+    teraTypes: ["fairy", "ghost"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 55, attack: 55, defense: 55, "special-attack": 135, "special-defense": 135, speed: 135 },
+    moves: [
+      { name: "Moonblast", type: "fairy", power: 95, category: "special", isContact: false },
+      { name: "Shadow Ball", type: "ghost", power: 80, category: "special", isContact: false },
+      { name: "Power Gem", type: "rock", power: 80, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Chi-Yu",
+    id: 1004,
+    types: ["dark", "fire"],
+    nature: "Modest",
+    ability: "Beads of Ruin",
+    items: ["Choice Specs", "Life Orb", "Choice Scarf"],
+    teraTypes: ["fire", "dark"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 55, attack: 80, defense: 80, "special-attack": 135, "special-defense": 120, speed: 100 },
+    moves: [
+      { name: "Overheat", type: "fire", power: 130, category: "special", isContact: false },
+      { name: "Flamethrower", type: "fire", power: 90, category: "special", isContact: false },
+      { name: "Dark Pulse", type: "dark", power: 80, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Urshifu",
+    id: 892,
+    types: ["fighting", "water"],
+    nature: "Adamant",
+    ability: "Unseen Fist",
+    items: ["Choice Band", "Life Orb", "Focus Sash"],
+    teraTypes: ["water", "fighting"],
+    evs: { hp: 4, attack: 252, defense: 0, "special-attack": 0, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 100, attack: 130, defense: 100, "special-attack": 63, "special-defense": 60, speed: 97 },
+    moves: [
+      { name: "Surging Strikes", type: "water", power: 75, category: "physical", isContact: true },
+      { name: "Close Combat", type: "fighting", power: 120, category: "physical", isContact: true },
+      { name: "Aqua Jet", type: "water", power: 40, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Chien-Pao",
+    id: 1002,
+    types: ["dark", "ice"],
+    nature: "Jolly",
+    ability: "Sword of Ruin",
+    items: ["Focus Sash", "Life Orb", "Choice Band"],
+    teraTypes: ["ice", "dark", "ghost"],
+    evs: { hp: 4, attack: 252, defense: 0, "special-attack": 0, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 80, attack: 120, defense: 80, "special-attack": 90, "special-defense": 65, speed: 135 },
+    moves: [
+      { name: "Icicle Crash", type: "ice", power: 85, category: "physical", isContact: true },
+      { name: "Sacred Sword", type: "fighting", power: 90, category: "physical", isContact: true },
+      { name: "Sucker Punch", type: "dark", power: 70, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Great Tusk",
+    id: 984,
+    types: ["ground", "fighting"],
+    nature: "Adamant",
+    ability: "Protosynthesis",
+    items: ["Booster Energy", "Choice Band", "Leftovers"],
+    teraTypes: ["ground", "fighting", "ice"],
+    evs: { hp: 4, attack: 252, defense: 0, "special-attack": 0, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 115, attack: 131, defense: 131, "special-attack": 53, "special-defense": 53, speed: 87 },
+    moves: [
+      { name: "Headlong Rush", type: "ground", power: 120, category: "physical", isContact: true },
+      { name: "Close Combat", type: "fighting", power: 120, category: "physical", isContact: true },
+      { name: "Knock Off", type: "dark", power: 65, category: "physical", isContact: true },
+      { name: "Earthquake", type: "ground", power: 100, category: "physical", isContact: false },
+    ],
+  },
+  {
+    name: "Kingambit",
+    id: 983,
+    types: ["dark", "steel"],
+    nature: "Adamant",
+    ability: "Supreme Overlord",
+    items: ["Leftovers", "Life Orb", "Assault Vest"],
+    teraTypes: ["dark", "flying", "fairy"],
+    evs: { hp: 252, attack: 252, defense: 4, "special-attack": 0, "special-defense": 0, speed: 0 },
+    baseStats: { hp: 100, attack: 135, defense: 120, "special-attack": 60, "special-defense": 85, speed: 50 },
+    moves: [
+      { name: "Kowtow Cleave", type: "dark", power: 85, category: "physical", isContact: true },
+      { name: "Iron Head", type: "steel", power: 80, category: "physical", isContact: true },
+      { name: "Sucker Punch", type: "dark", power: 70, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Garchomp",
+    id: 445,
+    types: ["dragon", "ground"],
+    nature: "Jolly",
+    ability: "Rough Skin",
+    items: ["Life Orb", "Choice Band", "Leftovers"],
+    teraTypes: ["ground", "dragon", "fire"],
+    evs: { hp: 4, attack: 252, defense: 0, "special-attack": 0, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 108, attack: 130, defense: 95, "special-attack": 80, "special-defense": 85, speed: 102 },
+    moves: [
+      { name: "Earthquake", type: "ground", power: 100, category: "physical", isContact: false },
+      { name: "Outrage", type: "dragon", power: 120, category: "physical", isContact: true },
+      { name: "Dragon Claw", type: "dragon", power: 80, category: "physical", isContact: true },
+      { name: "Fire Fang", type: "fire", power: 65, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Miraidon",
+    id: 1008,
+    types: ["electric", "dragon"],
+    nature: "Modest",
+    ability: "Hadron Engine",
+    items: ["Choice Specs", "Life Orb", "Choice Scarf"],
+    teraTypes: ["electric", "dragon", "fairy"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 100, attack: 85, defense: 100, "special-attack": 135, "special-defense": 115, speed: 135 },
+    moves: [
+      { name: "Electro Drift", type: "electric", power: 100, category: "special", isContact: false },
+      { name: "Draco Meteor", type: "dragon", power: 130, category: "special", isContact: false },
+      { name: "Volt Switch", type: "electric", power: 70, category: "special", isContact: false },
+      { name: "Dazzling Gleam", type: "fairy", power: 80, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Koraidon",
+    id: 1007,
+    types: ["fighting", "dragon"],
+    nature: "Adamant",
+    ability: "Orichalcum Pulse",
+    items: ["Choice Band", "Life Orb", "Clear Amulet"],
+    teraTypes: ["fighting", "fire", "dragon"],
+    evs: { hp: 4, attack: 252, defense: 0, "special-attack": 0, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 100, attack: 135, defense: 115, "special-attack": 85, "special-defense": 100, speed: 135 },
+    moves: [
+      { name: "Collision Course", type: "fighting", power: 100, category: "physical", isContact: true },
+      { name: "Flare Blitz", type: "fire", power: 120, category: "physical", isContact: true },
+      { name: "Outrage", type: "dragon", power: 120, category: "physical", isContact: true },
+      { name: "Low Kick", type: "fighting", power: 100, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Kyogre",
+    id: 382,
+    types: ["water"],
+    nature: "Modest",
+    ability: "Drizzle",
+    items: ["Choice Specs", "Leftovers", "Life Orb"],
+    teraTypes: ["water", "grass"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 100, attack: 100, defense: 90, "special-attack": 150, "special-defense": 140, speed: 90 },
+    moves: [
+      { name: "Water Spout", type: "water", power: 150, category: "special", isContact: false },
+      { name: "Origin Pulse", type: "water", power: 110, category: "special", isContact: false },
+      { name: "Ice Beam", type: "ice", power: 90, category: "special", isContact: false },
+      { name: "Thunder", type: "electric", power: 110, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Gholdengo",
+    id: 1000,
+    types: ["steel", "ghost"],
+    nature: "Modest",
+    ability: "Good as Gold",
+    items: ["Choice Specs", "Life Orb", "Air Balloon"],
+    teraTypes: ["steel", "ghost", "fighting"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 87, attack: 60, defense: 95, "special-attack": 133, "special-defense": 91, speed: 84 },
+    moves: [
+      { name: "Make It Rain", type: "steel", power: 120, category: "special", isContact: false },
+      { name: "Shadow Ball", type: "ghost", power: 80, category: "special", isContact: false },
+      { name: "Thunderbolt", type: "electric", power: 90, category: "special", isContact: false },
+      { name: "Focus Blast", type: "fighting", power: 120, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Iron Bundle",
+    id: 991,
+    types: ["ice", "water"],
+    nature: "Timid",
+    ability: "Quark Drive",
+    items: ["Booster Energy", "Choice Specs", "Focus Sash"],
+    teraTypes: ["ice", "water"],
+    evs: { hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 },
+    baseStats: { hp: 56, attack: 80, defense: 114, "special-attack": 124, "special-defense": 60, speed: 136 },
+    moves: [
+      { name: "Freeze-Dry", type: "ice", power: 70, category: "special", isContact: false },
+      { name: "Hydro Pump", type: "water", power: 110, category: "special", isContact: false },
+      { name: "Ice Beam", type: "ice", power: 90, category: "special", isContact: false },
+    ],
+  },
+  {
+    name: "Rillaboom",
+    id: 812,
+    types: ["grass"],
+    nature: "Adamant",
+    ability: "Grassy Surge",
+    items: ["Choice Band", "Assault Vest", "Life Orb"],
+    teraTypes: ["grass", "fire"],
+    evs: { hp: 252, attack: 252, defense: 0, "special-attack": 0, "special-defense": 4, speed: 0 },
+    baseStats: { hp: 100, attack: 125, defense: 90, "special-attack": 60, "special-defense": 70, speed: 85 },
+    moves: [
+      { name: "Wood Hammer", type: "grass", power: 120, category: "physical", isContact: true },
+      { name: "Grassy Glide", type: "grass", power: 60, category: "physical", isContact: true },
+      { name: "High Horsepower", type: "ground", power: 95, category: "physical", isContact: true },
+    ],
+  },
+  {
+    name: "Incineroar",
+    id: 727,
+    types: ["fire", "dark"],
+    nature: "Adamant",
+    ability: "Intimidate",
+    items: ["Sitrus Berry", "Assault Vest", "Safety Goggles"],
+    teraTypes: ["grass", "ghost", "water"],
+    evs: { hp: 252, attack: 156, defense: 0, "special-attack": 0, "special-defense": 100, speed: 0 },
+    baseStats: { hp: 95, attack: 115, defense: 90, "special-attack": 80, "special-defense": 90, speed: 60 },
+    moves: [
+      { name: "Flare Blitz", type: "fire", power: 120, category: "physical", isContact: true },
+      { name: "Knock Off", type: "dark", power: 65, category: "physical", isContact: true },
+      { name: "Close Combat", type: "fighting", power: 120, category: "physical", isContact: true },
+    ],
+  },
+];
+
+/**
+ * Competitive Gen 9 Metagame Defensive Walls Pool
+ */
+export const COMPETITIVE_WALLS = [
+  {
+    name: "Corviknight",
+    id: 823,
+    types: ["flying", "steel"],
+    nature: "Impish",
+    ability: "Mirror Armor",
+    items: ["Leftovers", "Rocky Helmet"],
+    teraTypes: ["flying", "dragon", "water"],
+    baseStats: { hp: 98, attack: 87, defense: 105, "special-attack": 53, "special-defense": 85, speed: 67 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+      { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 },
+    ],
+  },
+  {
+    name: "Ting-Lu",
+    id: 1003,
+    types: ["dark", "ground"],
+    nature: "Careful",
+    ability: "Vessel of Ruin",
+    items: ["Leftovers", "Assault Vest"],
+    teraTypes: ["poison", "steel", "water"],
+    baseStats: { hp: 155, attack: 110, defense: 125, "special-attack": 55, "special-defense": 80, speed: 45 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 },
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Dondozo",
+    id: 977,
+    types: ["water"],
+    nature: "Careful",
+    ability: "Unaware",
+    items: ["Leftovers", "Sitrus Berry"],
+    teraTypes: ["grass", "dragon", "steel"],
+    baseStats: { hp: 150, attack: 100, defense: 115, "special-attack": 65, "special-defense": 65, speed: 35 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 },
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Ferrothorn",
+    id: 598,
+    types: ["grass", "steel"],
+    nature: "Careful",
+    ability: "Iron Barbs",
+    items: ["Leftovers", "Rocky Helmet"],
+    teraTypes: ["water", "fire"],
+    baseStats: { hp: 74, attack: 94, defense: 131, "special-attack": 54, "special-defense": 116, speed: 20 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 88, "special-attack": 0, "special-defense": 168, speed: 0 },
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Garganacl",
+    id: 981,
+    types: ["rock"],
+    nature: "Careful",
+    ability: "Purifying Salt",
+    items: ["Leftovers", "Covert Cloak"],
+    teraTypes: ["water", "ghost", "fairy"],
+    baseStats: { hp: 100, attack: 100, defense: 130, "special-attack": 45, "special-defense": 90, speed: 35 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 156, "special-attack": 0, "special-defense": 100, speed: 0 },
+    ],
+  },
+  {
+    name: "Clodsire",
+    id: 980,
+    types: ["poison", "ground"],
+    nature: "Careful",
+    ability: "Unaware",
+    items: ["Leftovers", "Black Sludge"],
+    teraTypes: ["dark", "steel", "water"],
+    baseStats: { hp: 130, attack: 75, defense: 60, "special-attack": 45, "special-defense": 100, speed: 20 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 },
+    ],
+  },
+  {
+    name: "Toxapex",
+    id: 748,
+    types: ["poison", "water"],
+    nature: "Bold",
+    ability: "Regenerator",
+    items: ["Black Sludge", "Leftovers", "Rocky Helmet"],
+    teraTypes: ["grass", "steel", "fairy"],
+    baseStats: { hp: 50, attack: 63, defense: 152, "special-attack": 53, "special-defense": 142, speed: 35 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+      { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 },
+    ],
+  },
+  {
+    name: "Blissey",
+    id: 242,
+    types: ["normal"],
+    nature: "Bold",
+    ability: "Natural Cure",
+    items: ["Heavy-Duty Boots", "Leftovers"],
+    teraTypes: ["ghost", "steel", "fairy"],
+    baseStats: { hp: 255, attack: 10, defense: 10, "special-attack": 75, "special-defense": 135, speed: 55 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Dragonite",
+    id: 149,
+    types: ["dragon", "flying"],
+    nature: "Adamant",
+    ability: "Multiscale",
+    items: ["Heavy-Duty Boots", "Lum Berry"],
+    teraTypes: ["normal", "steel", "flying"],
+    baseStats: { hp: 91, attack: 134, defense: 95, "special-attack": 100, "special-defense": 100, speed: 80 },
+    evsOptions: [
+      { hp: 252, attack: 4, defense: 252, "special-attack": 0, "special-defense": 0, speed: 0 },
+    ],
+  },
+  {
+    name: "Skeledirge",
+    id: 911,
+    types: ["fire", "ghost"],
+    nature: "Bold",
+    ability: "Unaware",
+    items: ["Heavy-Duty Boots", "Leftovers"],
+    teraTypes: ["fairy", "water", "normal"],
+    baseStats: { hp: 104, attack: 75, defense: 100, "special-attack": 110, "special-defense": 75, speed: 66 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Landorus-Therian",
+    id: 645,
+    types: ["ground", "flying"],
+    nature: "Impish",
+    ability: "Intimidate",
+    items: ["Leftovers", "Rocky Helmet"],
+    teraTypes: ["water", "steel", "flying"],
+    baseStats: { hp: 89, attack: 145, defense: 90, "special-attack": 105, "special-defense": 80, speed: 91 },
+    evsOptions: [
+      { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 },
+    ],
+  },
+  {
+    name: "Gliscor",
+    id: 472,
+    types: ["ground", "flying"],
+    nature: "Impish",
+    ability: "Poison Heal",
+    items: ["Toxic Orb"],
+    teraTypes: ["water", "normal", "steel"],
+    baseStats: { hp: 75, attack: 95, defense: 125, "special-attack": 45, "special-defense": 75, speed: 95 },
+    evsOptions: [
+      { hp: 244, attack: 0, defense: 244, "special-attack": 0, "special-defense": 0, speed: 20 },
+    ],
+  },
+];
+
+/**
+ * Procedurally generates an infinite, authentic Gen 9 competitive scenario
+ * Computes deep mechanics (Tera, Weather, Terrain, Items, Immunities, EVs) dynamically.
+ *
+ * @param {Function} [calculateDamageFn] Optional calculateDamage reference to dynamically build analysis
+ * @returns {Object} Scenario object matching BATTLE_QUIZ_SCENARIOS schema
+ */
+export function generateProceduralScenario(calculateDamageFn) {
+  // 1. Pick Attacker
+  const attackerTemplate = COMPETITIVE_THREATS[Math.floor(Math.random() * COMPETITIVE_THREATS.length)];
+
+  // 2. Pick Defender (different species)
+  let defenderTemplate;
+  do {
+    defenderTemplate = COMPETITIVE_WALLS[Math.floor(Math.random() * COMPETITIVE_WALLS.length)];
+  } while (defenderTemplate.name === attackerTemplate.name);
+
+  // 3. Pick Move
+  const move = attackerTemplate.moves[Math.floor(Math.random() * attackerTemplate.moves.length)];
+
+  // 4. Attacker setup
+  const attackerItem = attackerTemplate.items[Math.floor(Math.random() * attackerTemplate.items.length)];
+  const isAttackerTera = Math.random() < 0.25;
+  const attackerTera = attackerTemplate.teraTypes[Math.floor(Math.random() * attackerTemplate.teraTypes.length)];
+
+  // Attacker status respecting immunities (Fire can't be burned!)
+  let attackerStatus = "healthy";
+  if (
+    Math.random() < 0.15 &&
+    move.category === "physical" &&
+    !attackerTemplate.types.includes("fire") &&
+    (!isAttackerTera || attackerTera !== "fire")
+  ) {
+    attackerStatus = "burn";
+  }
+
+  // 5. Defender setup
+  const defenderItem = defenderTemplate.items[Math.floor(Math.random() * defenderTemplate.items.length)];
+  const isDefenderTera = Math.random() < 0.20;
+  const defenderTera = defenderTemplate.teraTypes[Math.floor(Math.random() * defenderTemplate.teraTypes.length)];
+  const defenderEvs = defenderTemplate.evsOptions[Math.floor(Math.random() * defenderTemplate.evsOptions.length)];
+
+  // 6. Field Environment
+  let weather = "none";
+  let terrain = "none";
+
+  if (attackerTemplate.ability === "Drizzle") weather = "rain";
+  else if (attackerTemplate.ability === "Orichalcum Pulse") weather = "sun";
+  else if (attackerTemplate.ability === "Hadron Engine") terrain = "electric";
+  else if (attackerTemplate.ability === "Grassy Surge") terrain = "grassy";
+  else {
+    const fieldRoll = Math.random();
+    if (fieldRoll < 0.15 && move.type === "water") weather = "rain";
+    else if (fieldRoll < 0.30 && move.type === "fire") weather = "sun";
+    else if (fieldRoll < 0.40 && move.type === "electric") terrain = "electric";
+    else if (fieldRoll < 0.50 && move.type === "grass") terrain = "grassy";
+    else if (fieldRoll < 0.58 && move.type === "psychic") terrain = "psychic";
+    else if (fieldRoll < 0.65 && (move.type === "ice" || defenderTemplate.types.includes("ice"))) weather = "snow";
+    else if (fieldRoll < 0.72 && (defenderTemplate.types.includes("rock") || defenderTemplate.types.includes("ground"))) weather = "sand";
+  }
+
+  const attacker = {
+    name: attackerTemplate.name,
+    id: attackerTemplate.id,
+    types: attackerTemplate.types,
+    level: 50,
+    nature: attackerTemplate.nature,
+    ability: attackerTemplate.ability,
+    item: attackerItem,
+    status: attackerStatus,
+    isTera: isAttackerTera,
+    teraType: attackerTera,
+    evs: attackerTemplate.evs,
+    baseStats: attackerTemplate.baseStats,
+  };
+
+  const defender = {
+    name: defenderTemplate.name,
+    id: defenderTemplate.id,
+    types: defenderTemplate.types,
+    level: 50,
+    nature: defenderTemplate.nature,
+    ability: defenderTemplate.ability,
+    item: defenderItem,
+    status: "healthy",
+    isTera: isDefenderTera,
+    teraType: defenderTera,
+    evs: defenderEvs,
+    baseStats: defenderTemplate.baseStats,
+  };
+
+  const field = { weather, terrain, isDoubles: false };
+
+  // Calculate damage analysis if function provided
+  let explanation = `${attacker.name} strikes ${defender.name} with ${move.name} (${move.power} BP ${move.category}). `;
+  if (typeof calculateDamageFn === "function") {
+    const calc = calculateDamageFn({ attacker, defender, move, field, isCrit: false });
+    if (calc.effectiveness > 1) {
+      explanation += `Hits super effectively (${calc.effectiveness}x)! `;
+    } else if (calc.effectiveness === 0) {
+      explanation += `Has zero effect due to type/ability immunity! `;
+    } else if (calc.effectiveness < 1) {
+      explanation += `Hits resisted (${calc.effectiveness}x). `;
+    }
+
+    if (attacker.item && attacker.item !== "None") {
+      if (attacker.item === "Choice Specs") explanation += "Choice Specs amplifies SpA by 1.5x. ";
+      else if (attacker.item === "Choice Band") explanation += "Choice Band amplifies Atk by 1.5x. ";
+      else if (attacker.item === "Life Orb") explanation += "Life Orb boosts power by 1.3x. ";
+      else if (attacker.item === "Booster Energy") explanation += `${attacker.ability} activated by Booster Energy (+30%). `;
+    }
+
+    if (attacker.status === "burn") {
+      explanation += "Burn cuts physical damage output in half (50%)! ";
+    }
+
+    if (attacker.isTera) {
+      explanation += `Attacker Terastallized into ${attacker.teraType.toUpperCase()}! `;
+    }
+
+    if (defender.isTera) {
+      explanation += `Defender Terastallized into defensive ${defender.teraType.toUpperCase()}! `;
+    }
+
+    if (weather !== "none") {
+      if (weather === "sun" && move.type === "fire") explanation += "Sun boosts Fire by 1.5x. ";
+      else if (weather === "rain" && move.type === "water") explanation += "Rain boosts Water by 1.5x. ";
+      else if (weather === "rain" && move.type === "fire") explanation += "Rain weakens Fire by 50%. ";
+      else if (weather === "sun" && move.type === "water") explanation += "Sun weakens Water by 50%. ";
+    }
+
+    if (terrain !== "none") {
+      if (terrain === "electric" && move.type === "electric") explanation += "Electric Terrain amplifies Electric by 1.3x. ";
+      else if (terrain === "grassy" && move.type === "grass") explanation += "Grassy Terrain amplifies Grass by 1.3x. ";
+    }
+
+    if (defender.item === "Assault Vest") {
+      explanation += "Defender's Assault Vest raises SpD by 50%. ";
+    }
+
+    if (defender.ability === "Multiscale") {
+      explanation += "Multiscale halves damage at full HP! ";
+    } else if (defender.ability === "Unaware") {
+      explanation += "Unaware ignores stat stages! ";
+    } else if (defender.ability === "Vessel of Ruin") {
+      explanation += "Vessel of Ruin dampens SpA by 25%! ";
+    } else if (attacker.ability === "Beads of Ruin") {
+      explanation += "Beads of Ruin drops target SpD by 25%! ";
+    } else if (attacker.ability === "Sword of Ruin") {
+      explanation += "Sword of Ruin drops target Def by 25%! ";
+    }
+
+    explanation += `Outcome: ${calc.minDamage} - ${calc.maxDamage} HP (${calc.minPercent}% - ${calc.maxPercent}%) -> ${calc.koVerdict}.`;
+  }
+
+  const title = `${attacker.name} vs ${defender.name}`;
+
+  return {
+    id: `proc-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    title,
+    attacker,
+    defender,
+    move,
+    field,
+    explanation,
+  };
+}
+
+/**
  * Curated iconic Pokémon pool across Gen 1-9 for instant minigame play
  * Provides immediate offline/instant loading before the full 1,025 list finishes streaming.
  */
