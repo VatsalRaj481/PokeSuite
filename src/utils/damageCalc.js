@@ -4,7 +4,7 @@
  * stat stage modifiers, items, abilities, weather, terrain, and Tera mechanics.
  */
 
-import { NATURES } from "./calcData.js";
+import { NATURES, getMaxMovePower, GENERIC_MAX_MOVES } from "./calcData.js";
 
 // Type chart defense lookup (from BattleLab / canon)
 export const TYPE_CHART = {
@@ -114,6 +114,8 @@ export function calculateDamage({
 
   const level = attacker.level || 50;
   const isPhysical = move.category === "physical";
+  const isAttackerDynamax = Boolean(attacker.isDynamax || attacker.isGmax);
+  const isDefenderDynamax = Boolean(defender.isDynamax || defender.isGmax);
 
   // Defender effective types (if Tera is active, defender is purely that single type)
   const defTypes = defender.isTera && defender.teraType
@@ -123,6 +125,36 @@ export function calculateDamage({
   // Move typing (e.g. Tera Blast changes type if Terastallized)
   let moveType = (move.type || "normal").toLowerCase();
   let basePower = move.power;
+
+  // Dynamax / G-Max move transformation
+  let effectiveMoveName = move.name || "Move";
+  if (isAttackerDynamax) {
+    if (move.isGmax) {
+      effectiveMoveName = move.name;
+      basePower = move.power || 150;
+    } else {
+      effectiveMoveName = GENERIC_MAX_MOVES[moveType] || `Max ${moveType.toUpperCase()}`;
+      basePower = getMaxMovePower(basePower, moveType);
+    }
+  }
+
+  // Weight-based moves fail against Dynamax Pokémon (Gen 8 rule)
+  const weightBasedMoves = ["low kick", "grass knot", "heavy slam", "heat crash"];
+  if (isDefenderDynamax && weightBasedMoves.includes((move.name || "").toLowerCase())) {
+    const rawHp = defender.stats?.hp || calculateStat("hp", defender.baseStats?.hp, defender.ivs?.hp, defender.evs?.hp, defender.level || level, defender.nature);
+    return {
+      damageRolls: new Array(16).fill(0),
+      minDamage: 0,
+      maxDamage: 0,
+      minPercent: 0,
+      maxPercent: 0,
+      hpMax: rawHp * 2,
+      koVerdict: "Failed: Weight-based moves have no effect on Dynamax Pokémon",
+      description: "0% (Dynamax immunity to weight moves)",
+      effectiveness: 0,
+      effectiveMoveName,
+    };
+  }
 
   if (move.name?.toLowerCase() === "facade" && attacker.status && attacker.status !== "healthy") {
     basePower *= 2;
@@ -154,25 +186,6 @@ export function calculateDamage({
     typeMult = 0;
   }
 
-  if (typeMult === 0) {
-    return {
-      damageRolls: new Array(16).fill(0),
-      minDamage: 0,
-      maxDamage: 0,
-      minPercent: 0,
-      maxPercent: 0,
-      hpMax: defender?.stats?.hp || 100,
-      koVerdict: `Does not affect ${defender.name || "the target"} (Immune)`,
-      description: "0% (Immune)",
-      effectiveness: 0,
-    };
-  }
-
-  // Tinted Lens: doubles damage of not very effective moves (below 1x effectiveness)
-  if (atkAbility === "tinted lens" && typeMult < 1) {
-    typeMult *= 2.0;
-  }
-
   // Calculate Base Stats
   const rawAttackerStat = isPhysical
     ? (attacker.stats?.attack || calculateStat("attack", attacker.baseStats?.attack, attacker.ivs?.attack, attacker.evs?.attack, level, attacker.nature))
@@ -182,7 +195,28 @@ export function calculateDamage({
     ? (defender.stats?.defense || calculateStat("defense", defender.baseStats?.defense, defender.ivs?.defense, defender.evs?.defense, defender.level || level, defender.nature))
     : (defender.stats?.["special-defense"] || calculateStat("special-defense", defender.baseStats?.["special-defense"], defender.ivs?.["special-defense"], defender.evs?.["special-defense"], defender.level || level, defender.nature));
 
-  const defenderMaxHp = defender.stats?.hp || calculateStat("hp", defender.baseStats?.hp, defender.ivs?.hp, defender.evs?.hp, defender.level || level, defender.nature);
+  let defenderMaxHp = defender.stats?.hp || calculateStat("hp", defender.baseStats?.hp, defender.ivs?.hp, defender.evs?.hp, defender.level || level, defender.nature);
+  if (isDefenderDynamax) {
+    defenderMaxHp *= 2;
+  }
+
+  if (typeMult === 0) {
+    return {
+      damageRolls: new Array(16).fill(0),
+      minDamage: 0,
+      maxDamage: 0,
+      minPercent: 0,
+      maxPercent: 0,
+      hpMax: defenderMaxHp,
+      koVerdict: `Does not affect ${defender.name || "the target"} (Immune)`,
+      description: "0% (Immune)",
+      effectiveness: 0,
+      effectiveMoveName,
+    };
+  }
+
+  // Max Moves do not make contact
+  const isContact = isAttackerDynamax ? false : Boolean(move.isContact);
 
   // Apply Stat Stages (Crit ignores defender positive boosts & attacker negative drops)
   let atkStage = (isPhysical ? attacker.stages?.attack : attacker.stages?.["special-attack"]) || 0;
@@ -237,9 +271,9 @@ export function calculateDamage({
     // Fluffy halves contact
   }
 
-  // Item modifiers on Stat
-  if (isPhysical && atkItem === "choice band") finalAtk *= 1.5;
-  if (!isPhysical && atkItem === "choice specs") finalAtk *= 1.5;
+  // Item modifiers on Stat (Choice Band & Specs are suppressed during Dynamax)
+  if (isPhysical && atkItem === "choice band" && !isAttackerDynamax) finalAtk *= 1.5;
+  if (!isPhysical && atkItem === "choice specs" && !isAttackerDynamax) finalAtk *= 1.5;
   if (!isPhysical && defItem === "assault vest") finalDef *= 1.5;
   if (defItem === "eviolite") finalDef *= 1.5;
 
@@ -330,7 +364,7 @@ export function calculateDamage({
     }
   }
   if (defAbility === "fluffy") {
-    if (move.isContact) otherAbilityMult *= 0.5;
+    if (isContact) otherAbilityMult *= 0.5;
     if (moveType === "fire") otherAbilityMult *= 2.0;
   }
   if (defAbility === "thick fat" && (moveType === "fire" || moveType === "ice")) {
@@ -421,5 +455,8 @@ export function calculateDamage({
     description,
     effectiveness: typeMult,
     stab,
+    effectiveMoveName,
+    isAttackerDynamax,
+    isDefenderDynamax,
   };
 }

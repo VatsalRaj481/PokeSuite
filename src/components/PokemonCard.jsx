@@ -1490,6 +1490,70 @@ function PokemonCard({
     };
   }, [currentMoveList, layout]);
 
+  // Background prefetch details for signature moves & signature abilities
+  useEffect(() => {
+    if (!pokemon?.name) return;
+    const sigMoves = getPokemonSignatureMoves(pokemon.name);
+    const sigAbilities = getPokemonSignatureAbilities(pokemon.name);
+    if (sigMoves.length === 0 && sigAbilities.length === 0) return;
+
+    let isMounted = true;
+    (async () => {
+      for (const mName of sigMoves) {
+        if (!isMounted) break;
+        const slug = mName.toLowerCase().replace(/[\s']/g, "-");
+        if (moveDetails[slug] || moveDetailsCache[slug]) continue;
+        try {
+          const matched = pokemon.moves?.find((m) => m.move.name === slug);
+          const url = matched?.move?.url || `https://pokeapi.co/api/v2/move/${slug}`;
+          const res = await axios.get(url.replace(/^http:/, "https:"));
+          if (!isMounted) break;
+          const enEntry = res.data.effect_entries?.find((e) => e.language.name === "en");
+          const shortEffect = enEntry
+            ? enEntry.short_effect
+            : res.data.flavor_text_entries?.find((f) => f.language.name === "en")?.flavor_text || "Signature attack.";
+          const detailObj = {
+            power: res.data.power ?? "—",
+            accuracy: res.data.accuracy ? `${res.data.accuracy}%` : "—",
+            pp: res.data.pp ?? "—",
+            type: res.data.type?.name || "normal",
+            damageClass: res.data.damage_class?.name || "status",
+            effect: shortEffect.replace(/\$effect_chance%/, `${res.data.effect_chance}%`),
+          };
+          moveDetailsCache[slug] = detailObj;
+          setMoveDetails((prev) => ({ ...prev, [slug]: detailObj }));
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      for (const aName of sigAbilities) {
+        if (!isMounted) break;
+        const slug = aName.toLowerCase().replace(/[\s']/g, "-");
+        if (abilityDetails[slug] || abilityCache[slug]) continue;
+        try {
+          const matched = pokemon.abilities?.find((a) => a.ability.name === slug);
+          const url = matched?.ability?.url || `https://pokeapi.co/api/v2/ability/${slug}`;
+          const res = await axios.get(url.replace(/^http:/, "https:"));
+          if (!isMounted) break;
+          const enEntry = res.data.effect_entries?.find((e) => e.language.name === "en");
+          const effectText = enEntry
+            ? enEntry.short_effect
+            : res.data.flavor_text_entries?.find((f) => f.language.name === "en")?.flavor_text || "Signature ability.";
+          abilityCache[slug] = effectText;
+          setAbilityDetails((prev) => ({ ...prev, [slug]: effectText }));
+        } catch (e) {
+          // ignore
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pokemon?.name, pokemon?.moves, pokemon?.abilities]);
+
   // Alternate Forms / Varieties
   const varieties = useMemo(() => {
     if (!internalSpeciesData?.varieties || internalSpeciesData.varieties.length <= 1) {
@@ -2114,45 +2178,7 @@ function PokemonCard({
               {pokemon.types.map((t) => (
                 <TypeBadge key={t.type.name} type={t.type.name} size="md" />
               ))}
-              {(() => {
-                const archetype = getPokemonArchetype(pokemon);
-                if (!archetype) return null;
-                return (
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-mono-tech font-bold uppercase border shadow-2xs ${archetype.color}`}>
-                    {archetype.label}
-                  </span>
-                );
-              })()}
             </div>
-
-            {/* Signature Moves & Signature Abilities Badges */}
-            {(() => {
-              const sigMoves = getPokemonSignatureMoves(pokemon.name);
-              const sigAbilities = getPokemonSignatureAbilities(pokemon.name);
-              if (sigMoves.length === 0 && sigAbilities.length === 0) return null;
-              return (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {sigMoves.map((m) => (
-                    <span
-                      key={m}
-                      className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-mono-tech font-bold uppercase tracking-wide"
-                      title={`${formatPokemonName(pokemon.name)}'s exclusive signature attack`}
-                    >
-                      Signature Move: {m}
-                    </span>
-                  ))}
-                  {sigAbilities.map((a) => (
-                    <span
-                      key={a}
-                      className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-mono-tech font-bold uppercase tracking-wide"
-                      title={`${formatPokemonName(pokemon.name)}'s exclusive signature ability`}
-                    >
-                      Signature Ability: {a}
-                    </span>
-                  ))}
-                </div>
-              );
-            })()}
           </div>
 
           {/* Sprite Showcase Stage */}
@@ -2762,6 +2788,122 @@ function PokemonCard({
               </div>
             )}
           </div>
+
+          {/* Exclusive Signature Traits (Signature Moves & Abilities) */}
+          {(() => {
+            const sigMoves = getPokemonSignatureMoves(pokemon.name);
+            const sigAbilities = getPokemonSignatureAbilities(pokemon.name);
+            if (sigMoves.length === 0 && sigAbilities.length === 0) return null;
+
+            return (
+              <div className="bg-theme-bg border border-purple-500/40 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-sm">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-3 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-ping" />
+                    <h3 className="text-xs font-display font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+                      ★ Exclusive Signature Traits
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono-tech px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold uppercase">
+                    Canon Exclusive
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-3 relative z-10">
+                  {/* Signature Moves */}
+                  {sigMoves.map((mName) => {
+                    const slug = mName.toLowerCase().replace(/[\s']/g, "-");
+                    const details = moveDetails[slug] || moveDetailsCache[slug];
+                    const meta = details || KNOWN_MOVE_META[slug] || {};
+                    const moveType = meta.type || "normal";
+                    const damageClass = meta.damageClass || "status";
+
+                    return (
+                      <div
+                        key={mName}
+                        className="p-3 rounded-xl bg-theme-surface/90 border border-theme hover:border-purple-500/40 transition-colors"
+                      >
+                        <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono-tech font-bold text-purple-400">
+                              ⚔ SIGNATURE MOVE:
+                            </span>
+                            <span className="font-display font-bold text-theme-primary text-sm">
+                              {mName}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <TypeBadge type={moveType} size="sm" />
+                            <span
+                              className={`px-2 py-0.5 rounded text-[9px] font-mono-tech font-bold uppercase ${
+                                damageClass === "physical"
+                                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                  : damageClass === "special"
+                                  ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                                  : "bg-zinc-500/20 text-zinc-300 border border-zinc-500/30"
+                              }`}
+                            >
+                              {damageClass}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Power, Acc, PP stats */}
+                        <div className="flex items-center gap-4 text-[11px] font-mono-tech text-theme-secondary py-1 border-t border-theme/40 mb-1">
+                          <span>
+                            Power: <strong className="text-theme-primary">{details?.power ?? "—"}</strong>
+                          </span>
+                          <span>
+                            Accuracy: <strong className="text-theme-primary">{details?.accuracy ?? "—"}</strong>
+                          </span>
+                          <span>
+                            PP: <strong className="text-theme-primary">{details?.pp ?? "—"}</strong>
+                          </span>
+                        </div>
+
+                        {/* Move description */}
+                        <p className="text-xs font-display text-theme-secondary leading-relaxed">
+                          {details?.effect || "Signature attack exclusively mastered by this species."}
+                        </p>
+                      </div>
+                    );
+                  })}
+
+                  {/* Signature Abilities */}
+                  {sigAbilities.map((aName) => {
+                    const slug = aName.toLowerCase().replace(/[\s']/g, "-");
+                    const desc = abilityDetails[slug] || abilityCache[slug];
+
+                    return (
+                      <div
+                        key={aName}
+                        className="p-3 rounded-xl bg-theme-surface/90 border border-theme hover:border-purple-500/40 transition-colors"
+                      >
+                        <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono-tech font-bold text-purple-400">
+                              ✦ SIGNATURE ABILITY:
+                            </span>
+                            <span className="font-display font-bold text-theme-primary text-sm">
+                              {aName}
+                            </span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded text-[9px] font-mono-tech font-bold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                            Unique Trait
+                          </span>
+                        </div>
+
+                        <p className="text-xs font-display text-theme-secondary leading-relaxed pt-1 border-t border-theme/40">
+                          {desc || "Signature ability innate to this species."}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Abilities Accordion */}
           <div className="bg-theme-bg border border-theme rounded-2xl p-4 sm:p-5">

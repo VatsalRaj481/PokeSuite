@@ -1006,3 +1006,106 @@ export const ICONIC_POKEMON_POOL = [
   { id: 1000, name: "gholdengo", displayName: "Gholdengo", types: ["steel", "ghost"], height: 12, weight: 300, baseStats: { hp: 87, attack: 60, defense: 95, "special-attack": 133, "special-defense": 91, speed: 84 } },
   { id: 1007, name: "koraidon", displayName: "Koraidon", types: ["fighting", "dragon"], height: 25, weight: 3030, baseStats: { hp: 100, attack: 135, defense: 115, "special-attack": 85, "special-defense": 100, speed: 135 } },
 ];
+
+export const GENERIC_MAX_MOVES = {
+  normal: "Max Strike",
+  fire: "Max Flare",
+  water: "Max Geyser",
+  grass: "Max Overgrowth",
+  electric: "Max Lightning",
+  ice: "Max Hailstorm",
+  fighting: "Max Knuckle",
+  poison: "Max Ooze",
+  ground: "Max Quake",
+  flying: "Max Airstream",
+  psychic: "Max Mindstorm",
+  bug: "Max Flutterby",
+  rock: "Max Rockfall",
+  ghost: "Max Phantasm",
+  dragon: "Max Wyrmwind",
+  steel: "Max Steelspike",
+  dark: "Max Darkness",
+  fairy: "Max Starfall",
+};
+
+/**
+ * Calculates standard Max Move Base Power from base attack power and type in Gen 8
+ */
+export function getMaxMovePower(basePower, moveType) {
+  const bp = Number(basePower) || 0;
+  if (bp <= 0) return 0;
+  const type = (moveType || "normal").toLowerCase();
+
+  // Max Knuckle & Max Ooze (Fighting & Poison) have reduced BP because they boost Atk / SpA
+  if (type === "fighting" || type === "poison") {
+    if (bp <= 40) return 70;
+    if (bp <= 50) return 75;
+    if (bp <= 60) return 80;
+    if (bp <= 70) return 85;
+    if (bp <= 100) return 90;
+    if (bp <= 140) return 95;
+    return 100;
+  }
+
+  // All other standard Max Moves
+  if (bp <= 40) return 90;
+  if (bp <= 50) return 100;
+  if (bp <= 60) return 110;
+  if (bp <= 70) return 120;
+  if (bp <= 100) return 130;
+  if (bp <= 140) return 140;
+  return 150;
+}
+
+/**
+ * All 32 Canonical Gigantamax (G-Max) Pokémon species with their signature G-Max moves
+ */
+export const GMAX_POKEMON_MAP = {
+  "venusaur": { move: "G-Max Vine Lash", type: "grass", power: 160, effect: "Deals 1/6 max HP damage each turn for 4 turns to non-Grass foes" },
+  "charizard": { move: "G-Max Wildfire", type: "fire", power: 150, effect: "Deals 1/6 max HP damage each turn for 4 turns to non-Fire foes" },
+  "blastoise": { move: "G-Max Cannonade", type: "water", power: 150, effect: "Deals 1/6 max HP damage each turn for 4 turns to non-Water foes" },
+  "butterfree": { move: "G-Max Befuddle", type: "bug", power: 130, effect: "Inflicts poison, paralysis, or sleep on all foes" },
+  "pikachu": { move: "G-Max Volt Crash", type: "electric", power: 140, effect: "Paralyzes all foes" },
+  "meowth": { move: "G-Max Gold Rush", type: "normal", power: 130, effect: "Confuses all foes and scatters coins across the field" },
+  "machamp": { move: "G-Max Chi Strike", type: "fighting", power: 130, effect: "Boosts user and allies' critical hit ratio by 1 stage" },
+  "gengar": { move: "G-Max Terror", type: "ghost", power: 130, effect: "Traps all foes, preventing them from fleeing or switching" },
+  "kingler": { move: "G-Max Foam Burst", type: "water", power: 140, effect: "Harshly lowers all foes' Speed by 2 stages" },
+  "lapras": { move: "G-Max Resonance", type: "ice", power: 140, effect: "Sets up Aurora Veil for 5 turns, reducing damage taken" },
+  "eevee": { move: "G-Max Cuddle", type: "normal", power: 130, effect: "Infatuates all foes of the opposite gender" },
+  "snorlax": { move: "G-Max Replenish", type: "normal", power: 130, effect: "50% chance to restore user or allies' consumed Berries" },
+  "garbodor": { move: "G-Max Malodor", type: "poison", power: 130, effect: "Poisons all opposing Pokémon" },
+  "melmetal": { move: "G-Max Meltdown", type: "steel", power: 140, effect: "Torments all opposing Pokémon, preventing repeated moves" },
+  "rillaboom": { move: "G-Max Drum Solo", type: "grass", power: 160, effect: "Ignores target's ability (Mold Breaker effect)" },
+  "cinderace": { move: "G-Max Fireball", type: "fire", power: 160, effect: "Ignores target's ability (Mold Breaker effect)" },
+  "inteleon": { move: "G-Max Hydrosnipe", type: "water", power: 160, effect: "Ignores target's ability (Mold Breaker effect)" },
+  "corviknight": { move: "G-Max Wind Rage", type: "flying", power: 140, effect: "Clears entry hazards, terrains, screens, and reflectors" },
+  "orbeetle": { move: "G-Max Gravitas", type: "psychic", power: 130, effect: "Intensifies gravity for 5 turns" },
+  "drednaw": { move: "G-Max Stonesurge", type: "water", power: 140, effect: "Scatters sharp stealth rocks across the opponent's field" },
+  "coalossal": { move: "G-Max Volcalith", type: "rock", power: 130, effect: "Deals 1/6 max HP damage each turn for 4 turns to non-Rock foes" },
+  "flapple": { move: "G-Max Tartness", type: "grass", power: 130, effect: "Lowers all opposing Pokémon's evasiveness by 1 stage" },
+  "appletun": { move: "G-Max Sweetness", type: "grass", power: 130, effect: "Cures all status conditions of the user and allies" },
+  "sandaconda": { move: "G-Max Sandblast", type: "ground", power: 130, effect: "Traps opposing Pokémon in a sand tomb for 4-5 turns" },
+  "toxtricity": { move: "G-Max Stun Shock", type: "electric", power: 140, effect: "Poisons or paralyzes all opposing Pokémon" },
+  "centiskorch": { move: "G-Max Centiferno", type: "fire", power: 140, effect: "Traps opposing Pokémon in a blazing fire spin for 4-5 turns" },
+  "hatterene": { move: "G-Max Smite", type: "fairy", power: 130, effect: "Confuses all opposing Pokémon" },
+  "grimmsnarl": { move: "G-Max Snooze", type: "dark", power: 130, effect: "Causes opposing Pokémon to fall asleep on the next turn" },
+  "alcremie": { move: "G-Max Finale", type: "fairy", power: 130, effect: "Heals 1/6 max HP for the user and all allies" },
+  "copperajah": { move: "G-Max Steelsurge", type: "steel", power: 130, effect: "Scatters sharp steel spikes across the opponent's field" },
+  "duraludon": { move: "G-Max Depletion", type: "dragon", power: 140, effect: "Reduces 2 PP from the last move used by opposing Pokémon" },
+  "urshifu": { move: "G-Max One Blow", type: "dark", power: 130, effect: "Bypasses Protect, Detect, and Max Guard" },
+  "urshifu-single-strike": { move: "G-Max One Blow", type: "dark", power: 130, effect: "Bypasses Protect, Detect, and Max Guard" },
+  "urshifu-rapid-strike": { move: "G-Max Rapid Flow", type: "water", power: 130, effect: "Bypasses Protect, Detect, and Max Guard" },
+};
+
+/**
+ * Returns G-Max move metadata if Pokémon has a Gigantamax form
+ */
+export function getGmaxMoveForPokemon(pokemonName) {
+  if (!pokemonName) return null;
+  const key = pokemonName.toLowerCase().trim().replace(/\s+/g, "-");
+  if (key.includes("rapid")) return GMAX_POKEMON_MAP["urshifu-rapid-strike"];
+  if (GMAX_POKEMON_MAP[key]) return GMAX_POKEMON_MAP[key];
+  const baseKey = key.split("-")[0];
+  if (GMAX_POKEMON_MAP[baseKey]) return GMAX_POKEMON_MAP[baseKey];
+  return null;
+}

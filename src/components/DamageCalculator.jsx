@@ -8,22 +8,28 @@ import {
   COMPETITIVE_ITEMS,
   COMPETITIVE_ABILITIES,
   EV_PRESETS,
+  getGmaxMoveForPokemon,
+  GENERIC_MAX_MOVES,
 } from "../utils/calcData.js";
 
 const POPULAR_ATTACKERS = [
   { id: 987, name: "flutter-mane", displayName: "Flutter Mane", types: ["ghost", "fairy"], baseStats: { hp: 55, attack: 55, defense: 55, "special-attack": 135, "special-defense": 135, speed: 135 } },
-  { id: 1004, name: "chi-yu", displayName: "Chi-Yu", types: ["dark", "fire"], baseStats: { hp: 55, attack: 80, defense: 80, "special-attack": 135, "special-defense": 120, speed: 100 } },
+  { id: 6, name: "charizard", displayName: "Charizard", types: ["fire", "flying"], baseStats: { hp: 78, attack: 84, defense: 78, "special-attack": 109, "special-defense": 85, speed: 100 } },
   { id: 892, name: "urshifu", displayName: "Urshifu", types: ["fighting", "dark"], baseStats: { hp: 100, attack: 130, defense: 100, "special-attack": 63, "special-defense": 60, speed: 97 } },
+  { id: 815, name: "cinderace", displayName: "Cinderace", types: ["fire"], baseStats: { hp: 80, attack: 116, defense: 75, "special-attack": 65, "special-defense": 75, speed: 119 } },
+  { id: 94, name: "gengar", displayName: "Gengar", types: ["ghost", "poison"], baseStats: { hp: 60, attack: 65, defense: 60, "special-attack": 130, "special-defense": 75, speed: 110 } },
+  { id: 1004, name: "chi-yu", displayName: "Chi-Yu", types: ["dark", "fire"], baseStats: { hp: 55, attack: 80, defense: 80, "special-attack": 135, "special-defense": 120, speed: 100 } },
   { id: 149, name: "dragonite", displayName: "Dragonite", types: ["dragon", "flying"], baseStats: { hp: 91, attack: 134, defense: 95, "special-attack": 100, "special-defense": 100, speed: 80 } },
   { id: 382, name: "kyogre", displayName: "Kyogre", types: ["water"], baseStats: { hp: 100, attack: 100, defense: 90, "special-attack": 150, "special-defense": 140, speed: 90 } },
   { id: 1008, name: "miraidon", displayName: "Miraidon", types: ["electric", "dragon"], baseStats: { hp: 100, attack: 85, defense: 100, "special-attack": 135, "special-defense": 115, speed: 135 } },
   { id: 445, name: "garchomp", displayName: "Garchomp", types: ["dragon", "ground"], baseStats: { hp: 108, attack: 130, defense: 95, "special-attack": 80, "special-defense": 85, speed: 102 } },
-  { id: 6, name: "charizard", displayName: "Charizard", types: ["fire", "flying"], baseStats: { hp: 78, attack: 84, defense: 78, "special-attack": 109, "special-defense": 85, speed: 100 } },
 ];
 
 const POPULAR_DEFENDERS = [
   { id: 1003, name: "ting-lu", displayName: "Ting-Lu", types: ["dark", "ground"], baseStats: { hp: 155, attack: 110, defense: 125, "special-attack": 55, "special-defense": 80, speed: 45 } },
   { id: 823, name: "corviknight", displayName: "Corviknight", types: ["flying", "steel"], baseStats: { hp: 98, attack: 87, defense: 105, "special-attack": 53, "special-defense": 85, speed: 67 } },
+  { id: 131, name: "lapras", displayName: "Lapras", types: ["water", "ice"], baseStats: { hp: 130, attack: 85, defense: 80, "special-attack": 85, "special-defense": 95, speed: 60 } },
+  { id: 143, name: "snorlax", displayName: "Snorlax", types: ["normal"], baseStats: { hp: 160, attack: 110, defense: 65, "special-attack": 65, "special-defense": 110, speed: 30 } },
   { id: 977, name: "dondozo", displayName: "Dondozo", types: ["water"], baseStats: { hp: 150, attack: 100, defense: 115, "special-attack": 65, "special-defense": 65, speed: 35 } },
   { id: 727, name: "incineroar", displayName: "Incineroar", types: ["fire", "dark"], baseStats: { hp: 95, attack: 115, defense: 90, "special-attack": 80, "special-defense": 90, speed: 60 } },
   { id: 1000, name: "gholdengo", displayName: "Gholdengo", types: ["steel", "ghost"], baseStats: { hp: 87, attack: 60, defense: 95, "special-attack": 133, "special-defense": 91, speed: 84 } },
@@ -76,6 +82,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
   const [attackerStatus, setAttackerStatus] = useState("healthy");
   const [attackerIsTera, setAttackerIsTera] = useState(false);
   const [attackerTeraType, setAttackerTeraType] = useState("fairy");
+  const [attackerIsDynamax, setAttackerIsDynamax] = useState(false);
+  const [attackerUseGmaxMove, setAttackerUseGmaxMove] = useState(true);
   const [attackerStages, setAttackerStages] = useState({ attack: 0, "special-attack": 0, speed: 0 });
   const [attackerEvs, setAttackerEvs] = useState({ hp: 4, attack: 0, defense: 0, "special-attack": 252, "special-defense": 0, speed: 252 });
 
@@ -95,9 +103,20 @@ export default function DamageCalculator({ pokemonList = [] }) {
   const [defenderStatus, setDefenderStatus] = useState("healthy");
   const [defenderIsTera, setDefenderIsTera] = useState(false);
   const [defenderTeraType, setDefenderTeraType] = useState("poison");
+  const [defenderIsDynamax, setDefenderIsDynamax] = useState(false);
   const [defenderStages, setDefenderStages] = useState({ defense: 0, "special-defense": 0 });
   const [defenderEvs, setDefenderEvs] = useState({ hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 });
   const [defenderHpPercent, setDefenderHpPercent] = useState(100);
+
+  // Gigantamax (G-Max) form metadata
+  const attackerGmaxData = useMemo(
+    () => getGmaxMoveForPokemon(attackerPokemon?.name),
+    [attackerPokemon]
+  );
+  const defenderGmaxData = useMemo(
+    () => getGmaxMoveForPokemon(defenderPokemon?.name),
+    [defenderPokemon]
+  );
 
   // Field State
   const [field, setField] = useState({
@@ -189,7 +208,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
 
   // Run calculation
   const calcResult = useMemo(() => {
-    const activeMove = {
+    let activeMove = {
       name: selectedMove.name,
       type: customMoveType,
       power: Number(customMovePower),
@@ -197,6 +216,30 @@ export default function DamageCalculator({ pokemonList = [] }) {
       isContact: selectedMove.isContact || false,
       isSpread: selectedMove.isSpread || false,
     };
+
+    if (attackerIsDynamax) {
+      if (attackerGmaxData && attackerUseGmaxMove) {
+        activeMove = {
+          name: attackerGmaxData.move,
+          type: attackerGmaxData.type,
+          power: attackerGmaxData.power,
+          category: customMoveCategory,
+          isContact: false,
+          isGmax: true,
+          effect: attackerGmaxData.effect,
+        };
+      } else {
+        const moveTyping = (customMoveType || selectedMove.type || "normal").toLowerCase();
+        activeMove = {
+          name: GENERIC_MAX_MOVES[moveTyping] || `Max ${moveTyping.toUpperCase()}`,
+          type: moveTyping,
+          power: Number(customMovePower),
+          category: customMoveCategory,
+          isContact: false,
+          isGmax: false,
+        };
+      }
+    }
 
     return calculateDamage({
       attacker: {
@@ -210,6 +253,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
         status: attackerStatus,
         isTera: attackerIsTera,
         teraType: attackerTeraType,
+        isDynamax: attackerIsDynamax,
+        isGmax: attackerIsDynamax && Boolean(attackerGmaxData),
         stages: attackerStages,
         evs: attackerEvs,
       },
@@ -224,6 +269,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
         status: defenderStatus,
         isTera: defenderIsTera,
         teraType: defenderTeraType,
+        isDynamax: defenderIsDynamax,
+        isGmax: defenderIsDynamax && Boolean(defenderGmaxData),
         stages: defenderStages,
         evs: defenderEvs,
         currentHpPercent: defenderHpPercent,
@@ -234,9 +281,9 @@ export default function DamageCalculator({ pokemonList = [] }) {
     });
   }, [
     attackerPokemon, attackerLevel, attackerNature, attackerAbility, attackerItem, attackerStatus,
-    attackerIsTera, attackerTeraType, attackerStages, attackerEvs,
+    attackerIsTera, attackerTeraType, attackerIsDynamax, attackerUseGmaxMove, attackerGmaxData, attackerStages, attackerEvs,
     defenderPokemon, defenderLevel, defenderNature, defenderAbility, defenderItem, defenderStatus,
-    defenderIsTera, defenderTeraType, defenderStages, defenderEvs, defenderHpPercent,
+    defenderIsTera, defenderTeraType, defenderIsDynamax, defenderGmaxData, defenderStages, defenderEvs, defenderHpPercent,
     selectedMove, customMovePower, customMoveType, customMoveCategory, isCrit, field,
   ]);
 
@@ -262,15 +309,27 @@ export default function DamageCalculator({ pokemonList = [] }) {
           {/* Attacker vs Defender mini preview */}
           <div className="flex items-center justify-center gap-2 sm:gap-6 w-full lg:w-auto">
             <div className="flex flex-col items-center text-center min-w-0 max-w-[110px] sm:max-w-none">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative">
+              <div className={`w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative transition-transform duration-300 ${
+                attackerIsDynamax ? "scale-105" : ""
+              }`}>
+                {attackerIsDynamax && (
+                  <div className="absolute -inset-1 rounded-full bg-red-600/25 blur-sm animate-pulse" />
+                )}
                 <img
                   src={getSpriteUrl(attackerPokemon.id)}
                   alt={attackerPokemon.displayName}
-                  className="max-h-full max-w-full object-contain filter drop-shadow"
+                  className={`max-h-full max-w-full object-contain filter drop-shadow relative z-10 transition-all ${
+                    attackerIsDynamax ? "drop-shadow-[0_0_12px_rgba(239,68,68,0.85)]" : ""
+                  }`}
                   onError={(e) => {
                     e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${attackerPokemon.id}.png`;
                   }}
                 />
+                {attackerIsDynamax && (
+                  <span className="absolute -top-1 -right-1 z-20 px-1.5 py-0.5 rounded-full text-[9px] font-mono-tech font-black uppercase tracking-wider bg-red-600 text-white shadow-md border border-red-400">
+                    {attackerGmaxData ? "G-MAX" : "D-MAX"}
+                  </span>
+                )}
               </div>
               <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
                 {attackerPokemon.displayName}
@@ -286,21 +345,39 @@ export default function DamageCalculator({ pokemonList = [] }) {
               <span className="text-lg sm:text-2xl font-black font-display text-theme-accent animate-pulse">
                 VS
               </span>
-              <span className="text-[10px] font-mono-tech text-theme-secondary uppercase mt-0.5 text-center truncate max-w-[80px] sm:max-w-[120px]">
-                {selectedMove.name}
+              <span className={`text-[10px] font-mono-tech uppercase mt-0.5 text-center truncate max-w-[90px] sm:max-w-[140px] font-bold ${
+                calcResult.effectiveMoveName?.startsWith("G-Max")
+                  ? "text-red-400"
+                  : calcResult.effectiveMoveName?.startsWith("Max ")
+                  ? "text-amber-400"
+                  : "text-theme-secondary"
+              }`}>
+                {calcResult.effectiveMoveName || selectedMove.name}
               </span>
             </div>
 
             <div className="flex flex-col items-center text-center min-w-0 max-w-[110px] sm:max-w-none">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative">
+              <div className={`w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center relative transition-transform duration-300 ${
+                defenderIsDynamax ? "scale-105" : ""
+              }`}>
+                {defenderIsDynamax && (
+                  <div className="absolute -inset-1 rounded-full bg-red-600/25 blur-sm animate-pulse" />
+                )}
                 <img
                   src={getSpriteUrl(defenderPokemon.id)}
                   alt={defenderPokemon.displayName}
-                  className="max-h-full max-w-full object-contain filter drop-shadow"
+                  className={`max-h-full max-w-full object-contain filter drop-shadow relative z-10 transition-all ${
+                    defenderIsDynamax ? "drop-shadow-[0_0_12px_rgba(239,68,68,0.85)]" : ""
+                  }`}
                   onError={(e) => {
                     e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${defenderPokemon.id}.png`;
                   }}
                 />
+                {defenderIsDynamax && (
+                  <span className="absolute -top-1 -right-1 z-20 px-1.5 py-0.5 rounded-full text-[9px] font-mono-tech font-black uppercase tracking-wider bg-red-600 text-white shadow-md border border-red-400">
+                    {defenderGmaxData ? "G-MAX" : "D-MAX"}
+                  </span>
+                )}
               </div>
               <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
                 {defenderPokemon.displayName}
@@ -331,7 +408,10 @@ export default function DamageCalculator({ pokemonList = [] }) {
             {/* Defender HP Bar visualization */}
             <div className="w-full max-w-md mt-3 flex flex-col gap-1">
               <div className="flex justify-between text-[11px] font-mono-tech text-theme-secondary">
-                <span>Defender HP: {calcResult.hpMax} max</span>
+                <span>
+                  Defender HP: {calcResult.hpMax} max
+                  {defenderIsDynamax && <span className="ml-1 text-red-400 font-bold">(Dynamax 2×)</span>}
+                </span>
                 <span>
                   Remaining:{" "}
                   {Math.max(0, calcResult.hpMax - calcResult.maxDamage)} -{" "}
@@ -518,13 +598,16 @@ export default function DamageCalculator({ pokemonList = [] }) {
             </div>
           </div>
 
-          {/* Terastallize & Stat Boosts */}
+          {/* Terastallize */}
           <div className="flex items-center justify-between p-2.5 bg-theme-bg border border-theme rounded-xl">
             <label className="flex items-center gap-2 cursor-pointer text-xs font-display font-bold text-theme-primary">
               <input
                 type="checkbox"
                 checked={attackerIsTera}
-                onChange={(e) => setAttackerIsTera(e.target.checked)}
+                onChange={(e) => {
+                  setAttackerIsTera(e.target.checked);
+                  if (e.target.checked) setAttackerIsDynamax(false);
+                }}
                 className="rounded text-theme-accent cursor-pointer"
               />
               <span>Terastallize</span>
@@ -545,6 +628,82 @@ export default function DamageCalculator({ pokemonList = [] }) {
                   </option>
                 ))}
               </select>
+            )}
+          </div>
+
+          {/* Dynamax / Gigantamax Form */}
+          <div className="flex flex-col gap-2 p-2.5 bg-theme-bg border border-theme rounded-xl">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-display font-bold text-theme-primary">
+                <input
+                  type="checkbox"
+                  checked={attackerIsDynamax}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setAttackerIsDynamax(checked);
+                    if (checked) {
+                      setAttackerIsTera(false);
+                      if (attackerGmaxData) setAttackerUseGmaxMove(true);
+                    }
+                  }}
+                  className="rounded text-red-500 cursor-pointer accent-red-500"
+                />
+                <span>Dynamax / Gigantamax</span>
+              </label>
+              {attackerGmaxData ? (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono-tech font-extrabold uppercase bg-red-600/20 text-red-400 border border-red-500/40">
+                  G-MAX Available
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono-tech font-bold uppercase bg-theme-surface text-theme-secondary border border-theme">
+                  D-MAX Form
+                </span>
+              )}
+            </div>
+
+            {attackerIsDynamax && (
+              <div className="pt-2 border-t border-theme/60 flex flex-col gap-2 text-xs">
+                {attackerGmaxData ? (
+                  <div className="flex flex-col gap-1.5 bg-red-950/20 border border-red-500/30 rounded-lg p-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-display font-extrabold text-xs text-red-400 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                        Signature G-Max Move
+                      </span>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-mono-tech text-theme-primary font-bold">
+                        <input
+                          type="checkbox"
+                          checked={attackerUseGmaxMove}
+                          onChange={(e) => setAttackerUseGmaxMove(e.target.checked)}
+                          className="accent-red-500 rounded"
+                        />
+                        <span>Use {attackerGmaxData.move}</span>
+                      </label>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] font-mono-tech text-theme-secondary">
+                      <span>
+                        Base Power: <strong className="text-theme-primary font-bold">{attackerGmaxData.power} BP</strong> ({attackerGmaxData.type.toUpperCase()})
+                      </span>
+                      <span className="px-1.5 py-0.5 bg-red-500/10 text-red-300 rounded text-[9px] font-mono-tech">
+                        Non-contact
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-red-300/90 italic font-display leading-tight">
+                      Effect: {attackerGmaxData.effect}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1 text-[11px] font-mono-tech text-theme-secondary bg-theme-surface p-2 rounded-lg border border-theme">
+                    <div className="flex justify-between items-center">
+                      <span>Converts move to:</span>
+                      <strong className="text-amber-400 uppercase font-bold">{calcResult.effectiveMoveName}</strong>
+                    </div>
+                    <span className="text-[10px] text-theme-secondary/80">
+                      • Base power scales up to 130–150 BP • Choice items suppressed
+                    </span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -924,13 +1083,16 @@ export default function DamageCalculator({ pokemonList = [] }) {
             />
           </div>
 
-          {/* Terastallize & Stat Boosts */}
+          {/* Terastallize */}
           <div className="flex items-center justify-between p-2.5 bg-theme-bg border border-theme rounded-xl">
             <label className="flex items-center gap-2 cursor-pointer text-xs font-display font-bold text-theme-primary">
               <input
                 type="checkbox"
                 checked={defenderIsTera}
-                onChange={(e) => setDefenderIsTera(e.target.checked)}
+                onChange={(e) => {
+                  setDefenderIsTera(e.target.checked);
+                  if (e.target.checked) setDefenderIsDynamax(false);
+                }}
                 className="rounded text-theme-accent cursor-pointer"
               />
               <span>Terastallize</span>
@@ -952,6 +1114,28 @@ export default function DamageCalculator({ pokemonList = [] }) {
                 ))}
               </select>
             )}
+          </div>
+
+          {/* Dynamax / Gigantamax Form */}
+          <div className="flex items-center justify-between p-2.5 bg-theme-bg border border-theme rounded-xl">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-display font-bold text-theme-primary">
+              <input
+                type="checkbox"
+                checked={defenderIsDynamax}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setDefenderIsDynamax(checked);
+                  if (checked) setDefenderIsTera(false);
+                }}
+                className="rounded text-red-500 cursor-pointer accent-red-500"
+              />
+              <span>Dynamax Form</span>
+            </label>
+            <div className="flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono-tech font-extrabold uppercase bg-red-600/20 text-red-400 border border-red-500/40">
+                {defenderGmaxData ? "G-MAX HP ×2" : "D-MAX HP ×2"}
+              </span>
+            </div>
           </div>
 
           {/* Stat Boost Stages */}
