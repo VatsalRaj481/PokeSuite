@@ -338,10 +338,17 @@ export function calculateDamage({
   }
 
   // Burn modifier (halves physical move damage unless Guts or Facade)
+  // Note: Fire-type Pokémon are completely immune to burn unless Terastallized into a non-Fire type
   let burnMult = 1.0;
+  const atkEffectiveTypes = (attacker.isTera && attacker.teraType)
+    ? [attacker.teraType.toLowerCase()]
+    : (attacker.types || []).map((t) => (typeof t === "string" ? t : t?.type?.name || "").toLowerCase());
+  const isAttackerFireType = atkEffectiveTypes.includes("fire");
+
   if (
     isPhysical &&
     attacker.status === "burn" &&
+    !isAttackerFireType &&
     atkAbility !== "guts" &&
     move.name?.toLowerCase() !== "facade"
   ) {

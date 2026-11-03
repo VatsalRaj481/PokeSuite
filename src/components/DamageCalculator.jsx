@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import TypeBadge from "./TypeBadge";
 import NatureChartModal from "./NatureChartModal";
@@ -54,6 +54,18 @@ const COMMON_MOVES = [
   { name: "Tera Blast", type: "normal", power: 80, category: "special", isContact: false },
 ];
 
+export function getStatusImmunities(types = [], isTera = false, teraType = "") {
+  const effectiveTypes = (isTera && teraType)
+    ? [teraType.toLowerCase()]
+    : types.map((t) => (typeof t === "string" ? t : t?.type?.name || "").toLowerCase()).filter(Boolean);
+
+  return {
+    isBurnImmune: effectiveTypes.includes("fire"),
+    isElectricImmune: effectiveTypes.includes("electric"),
+    isPoisonImmune: effectiveTypes.includes("steel") || effectiveTypes.includes("poison"),
+  };
+}
+
 export default function DamageCalculator({ pokemonList = [] }) {
   // Attacker State
   const [attackerPokemon, setAttackerPokemon] = useState(POPULAR_ATTACKERS[0]);
@@ -96,6 +108,36 @@ export default function DamageCalculator({ pokemonList = [] }) {
     lightScreen: false,
     auroraVeil: false,
   });
+
+  // Status condition immunities based on typing and Terastallization
+  const attackerImmunities = useMemo(() => {
+    return getStatusImmunities(attackerPokemon?.types, attackerIsTera, attackerTeraType);
+  }, [attackerPokemon, attackerIsTera, attackerTeraType]);
+
+  const defenderImmunities = useMemo(() => {
+    return getStatusImmunities(defenderPokemon?.types, defenderIsTera, defenderTeraType);
+  }, [defenderPokemon, defenderIsTera, defenderTeraType]);
+
+  // Auto-clear impossible status conditions when typing changes
+  useEffect(() => {
+    if (attackerStatus === "burn" && attackerImmunities.isBurnImmune) {
+      setAttackerStatus("healthy");
+    } else if (attackerStatus === "poison" && attackerImmunities.isPoisonImmune) {
+      setAttackerStatus("healthy");
+    } else if (attackerStatus === "paralysis" && attackerImmunities.isElectricImmune) {
+      setAttackerStatus("healthy");
+    }
+  }, [attackerImmunities, attackerStatus]);
+
+  useEffect(() => {
+    if (defenderStatus === "burn" && defenderImmunities.isBurnImmune) {
+      setDefenderStatus("healthy");
+    } else if (defenderStatus === "poison" && defenderImmunities.isPoisonImmune) {
+      setDefenderStatus("healthy");
+    } else if (defenderStatus === "paralysis" && defenderImmunities.isElectricImmune) {
+      setDefenderStatus("healthy");
+    }
+  }, [defenderImmunities, defenderStatus]);
 
   // Search filter states
   const [attackerSearch, setAttackerSearch] = useState("");
@@ -463,9 +505,15 @@ export default function DamageCalculator({ pokemonList = [] }) {
                 className="w-full px-2 py-1.5 bg-theme-bg border border-theme rounded-lg text-xs font-display text-theme-primary cursor-pointer capitalize"
               >
                 <option value="healthy">Healthy</option>
-                <option value="burn">Burned (Atk halved)</option>
-                <option value="paralysis">Paralyzed</option>
-                <option value="poison">Poisoned</option>
+                <option value="burn" disabled={attackerImmunities.isBurnImmune}>
+                  {attackerImmunities.isBurnImmune ? "Burned (Immune: Fire-type)" : "Burned (Atk halved)"}
+                </option>
+                <option value="paralysis" disabled={attackerImmunities.isElectricImmune}>
+                  {attackerImmunities.isElectricImmune ? "Paralyzed (Immune: Electric)" : "Paralyzed"}
+                </option>
+                <option value="poison" disabled={attackerImmunities.isPoisonImmune}>
+                  {attackerImmunities.isPoisonImmune ? "Poisoned (Immune: Steel/Poison)" : "Poisoned"}
+                </option>
               </select>
             </div>
           </div>
@@ -847,9 +895,15 @@ export default function DamageCalculator({ pokemonList = [] }) {
                 className="w-full px-2 py-1.5 bg-theme-bg border border-theme rounded-lg text-xs font-display text-theme-primary cursor-pointer capitalize"
               >
                 <option value="healthy">Healthy</option>
-                <option value="burn">Burned</option>
-                <option value="paralysis">Paralyzed</option>
-                <option value="poison">Poisoned</option>
+                <option value="burn" disabled={defenderImmunities.isBurnImmune}>
+                  {defenderImmunities.isBurnImmune ? "Burned (Immune: Fire-type)" : "Burned"}
+                </option>
+                <option value="paralysis" disabled={defenderImmunities.isElectricImmune}>
+                  {defenderImmunities.isElectricImmune ? "Paralyzed (Immune: Electric)" : "Paralyzed"}
+                </option>
+                <option value="poison" disabled={defenderImmunities.isPoisonImmune}>
+                  {defenderImmunities.isPoisonImmune ? "Poisoned (Immune: Steel/Poison)" : "Poisoned"}
+                </option>
               </select>
             </div>
           </div>
