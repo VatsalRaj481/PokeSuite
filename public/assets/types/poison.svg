@@ -1,19 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <!-- Right Dark Capsule -->
-  <path fill="#37374d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
+  <path fill="#2e303d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
   
   <!-- Left Square Base -->
   <path fill="#9141cb" d="M 4 0 C 1.8 0 0 1.8 0 4 L 0 32 C 0 34.2 1.8 36 4 36 L 36 36 L 36 0 Z" />
   
-  <!-- Icon Symbol -->
-  <g fill="#ffffff">
-      <path d="M 11.5 7 Q 17.6 5.8 17 8.5 L 18 12.5 Q 17.3 15.8 12.5 15 Q 9.8 15.3 10 12 L 9.5 10 Q 9.3 7.8 11.5 7 Z" />
-      <path d="M 21.5 14 Q 25.3 13.3 26 15.5 Q 26.8 19.3 24.5 20 L 22 19.5 L 20 17 Q 19.3 14.8 21.5 14 Z" />
-      <path d="M 9.5 9 Q 9.3 13.3 12 14.5 L 9 12.5 L 9.5 9 Z" />
-      <path d="M 16.5 21 Q 21.3 20.3 22 23.5 L 19.5 22 Q 15.3 21.3 14.5 24 L 14 22 L 16.5 21 Z" />
-      <path d="M 16.5 22 L 19.5 22 L 22.5 25 L 28.5 26 L 30 27.5 L 26.5 29 L 20.5 28 L 17 25 L 12.5 28 L 7.5 28.5 L 6 26.5 L 9 24.5 L 14.5 24 L 16.5 22 Z" />
-    </g>
+  <!-- Official High-Precision Vector Icon -->
+  <g transform="translate(6, 6) scale(0.046875)" fill="#ffffff">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M427.821 393.449C479.524 352.108 512 292.376 512 225.95C512 101.161 397.385 0 256 0C114.615 0 0 101.161 0 225.95C0 289.978 30.1737 347.786 78.6553 388.901C75.7171 399.046 74.1052 410.081 74.1052 421.62C74.1052 471.535 104.267 512 141.474 512C165.65 512 186.852 494.915 198.737 469.254C210.622 494.915 231.824 512 256 512C278.038 512 297.604 497.804 309.895 475.857C322.186 497.804 341.752 512 363.789 512C400.996 512 431.158 471.535 431.158 421.62C431.158 411.784 429.986 402.314 427.821 393.449ZM404.211 230.431C404.211 293.785 336.346 345.144 252.632 345.144C168.917 345.144 101.053 293.785 101.053 230.431C101.053 167.077 168.917 115.718 252.632 115.718C336.346 115.718 404.211 167.077 404.211 230.431Z" fill="#ffffff"/>
+  </g>
   
   <!-- Crisp Vector Typography -->
-  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15" letter-spacing="1.2">POISON</text>
+  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.4">POISON</text>
 </svg>

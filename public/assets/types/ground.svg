@@ -1,19 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <!-- Right Dark Capsule -->
-  <path fill="#37374d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
+  <path fill="#2e303d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
   
   <!-- Left Square Base -->
   <path fill="#915121" d="M 4 0 C 1.8 0 0 1.8 0 4 L 0 32 C 0 34.2 1.8 36 4 36 L 36 36 L 36 0 Z" />
   
-  <!-- Icon Symbol -->
-  <g fill="#ffffff">
-      <path d="M 10 8 Q 14.5 6.5 13 11 Q 8.5 12.5 10 8 Z" />
-      <path d="M 23 10 Q 27.5 8.5 26 13 Q 21.5 14.5 23 10 Z" />
-      <path d="M 15.5 12 L 16.5 14 L 14 13.5 L 15.5 12 Z" />
-      <path d="M 17.5 16 L 28 20.5 L 17.5 25 L 8 20.5 L 17.5 16 Z" />
-      <path d="M 8.5 23 L 18.5 27 L 27.5 23 L 28 25 L 20.5 28 L 15.5 28 L 8 25 L 8.5 23 Z" />
-    </g>
+  <!-- Official High-Precision Vector Icon -->
+  <g transform="translate(6, 6) scale(0.046875)" fill="#ffffff">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M112.764 439.754C112.625 439.754 112.528 439.617 112.574 439.486L243.289 70.134C243.318 70.0537 243.394 70 243.479 70H383.021C383.106 70 383.183 70.0541 383.211 70.1349L511.987 439.487C512.032 439.618 511.935 439.754 511.797 439.754H116.692H112.764ZM0.201306 441.199C0.0609122 441.199 -0.0362852 441.059 0.0129607 440.928L97.3526 181.056C97.3821 180.977 97.4571 180.925 97.541 180.925H182.118C182.258 180.925 182.355 181.064 182.307 181.195L88.1823 441.067C88.1535 441.146 88.0779 441.199 87.9932 441.199H0.201306Z" fill="#ffffff"/>
+  </g>
   
   <!-- Crisp Vector Typography -->
-  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15" letter-spacing="1.2">GROUND</text>
+  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.4">GROUND</text>
 </svg>

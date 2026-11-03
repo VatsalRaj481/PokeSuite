@@ -1,17 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <!-- Right Dark Capsule -->
-  <path fill="#37374d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
+  <path fill="#2e303d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
   
   <!-- Left Square Base -->
   <path fill="#afa981" d="M 4 0 C 1.8 0 0 1.8 0 4 L 0 32 C 0 34.2 1.8 36 4 36 L 36 36 L 36 0 Z" />
   
-  <!-- Icon Symbol -->
-  <g fill="#ffffff">
-      <path d="M 13.5 8 L 22.5 8 L 24 9.5 L 22.5 9 L 21 9.5 L 27 14.5 L 26 18.5 L 28 23.5 L 24.5 28 L 11.5 28 L 8 23.5 L 10 18.5 L 9 14.5 L 15 9.5 L 13.5 9 L 12 9.5 L 13.5 8 Z" />
-      <path d="M 26.5 20 L 26 21.5 Q 26.5 25.5 23.5 26 L 20.5 27 L 26.5 20 Z" />
-      <path d="M 22.5 10 L 24.5 10 Q 26.8 9.3 26 11.5 L 25.5 14 L 22.5 10 Z" />
-    </g>
+  <!-- Official High-Precision Vector Icon -->
+  <g transform="translate(6, 6) scale(0.046875)" fill="#ffffff">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M395.138 244.757C395.109 244.717 395.097 244.667 395.105 244.618L427.769 54.1518C427.784 54.0641 427.861 54 427.949 54H438.287C438.367 54 438.437 54.0517 438.461 54.1277L512.051 287.131C512.074 287.203 512.049 287.283 511.989 287.33L457.73 329.693C457.649 329.756 457.532 329.74 457.471 329.657L395.138 244.757ZM-1 371.022C-1 371.101 -0.949204 371.171 -0.874109 371.196L110.975 407.767C111.029 407.785 111.089 407.776 111.136 407.744L361.145 235.144C361.187 235.115 361.215 235.07 361.222 235.02L388.032 55.1284C388.049 55.018 387.963 54.9188 387.852 54.9188H166.406C166.351 54.9188 166.3 54.943 166.265 54.9849L-0.957974 256.714C-0.98514 256.747 -1 256.788 -1 256.831V371.022ZM157.583 417.085L279.776 457.112C279.831 457.13 279.892 457.121 279.939 457.087L425.418 352.734C425.499 352.677 425.519 352.566 425.464 352.484L370.928 271.329C370.871 271.244 370.757 271.222 370.673 271.28L157.583 417.085Z" fill="#ffffff"/>
+  </g>
   
   <!-- Crisp Vector Typography -->
-  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="16" letter-spacing="1.5">ROCK</text>
+  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.4">ROCK</text>
 </svg>

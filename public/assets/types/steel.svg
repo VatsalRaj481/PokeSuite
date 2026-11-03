@@ -1,16 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <!-- Right Dark Capsule -->
-  <path fill="#37374d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
+  <path fill="#2e303d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
   
   <!-- Left Square Base -->
   <path fill="#60a1b8" d="M 4 0 C 1.8 0 0 1.8 0 4 L 0 32 C 0 34.2 1.8 36 4 36 L 36 36 L 36 0 Z" />
   
-  <!-- Icon Symbol -->
-  <g fill="#ffffff">
-      <path d="M 11 9 L 13 9.5 L 12 12 Q 15.7 13.5 15 10.5 L 14.5 9 L 25 9.5 L 24 13 Q 20.3 11.5 21 14.5 L 21.5 16 L 11 15.5 L 11 9 Z" />
-      <path d="M 22.5 13 Q 27.3 11.3 26 15.5 L 28 20.5 L 22.5 25 L 19 14.5 L 22.5 13 Z" />
-      <path d="M 16.5 20 Q 18.8 19.3 18 21.5 L 20 26.5 L 17.5 28 L 10 22.5 L 14.5 18 L 16.5 20 Z" />
-    </g>
+  <!-- Official High-Precision Vector Icon -->
+  <g transform="translate(6, 6) scale(0.046875)" fill="#ffffff">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.0511107 254.527C-0.0170046 254.411 -0.0170388 254.267 0.0510196 254.15L128.795 34.1843C128.862 34.0702 128.985 34 129.117 34H384.294C384.427 34 384.55 34.0708 384.617 34.1859L511.949 254.152C512.016 254.267 512.016 254.41 511.949 254.525L384.617 474.244C384.55 474.359 384.427 474.43 384.294 474.43H129.117C128.985 474.43 128.862 474.36 128.795 474.246L0.0511107 254.527ZM374.617 254.215C374.617 319.703 321.528 372.792 256.04 372.792C190.552 372.792 137.463 319.703 137.463 254.215C137.463 188.726 190.552 135.638 256.04 135.638C321.528 135.638 374.617 188.726 374.617 254.215Z" fill="#ffffff"/>
+  </g>
   
   <!-- Crisp Vector Typography -->
   <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.4">STEEL</text>

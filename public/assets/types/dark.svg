@@ -1,16 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 36" width="150" height="36" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <!-- Right Dark Capsule -->
-  <path fill="#37374d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
+  <path fill="#2e303d" d="M 36 0 L 146 0 C 148.2 0 150 1.8 150 4 L 150 32 C 150 34.2 148.2 36 146 36 L 36 36 Z" />
   
   <!-- Left Square Base -->
   <path fill="#50413f" d="M 4 0 C 1.8 0 0 1.8 0 4 L 0 32 C 0 34.2 1.8 36 4 36 L 36 36 L 36 0 Z" />
   
-  <!-- Icon Symbol -->
-  <g fill="#ffffff">
-      <path d="M 9.5 13 L 14 14 L 13 19.5 L 16.5 24 Q 21.3 24.8 22 21.5 L 21.5 19.5 L 23.5 14 L 28 13 L 29.5 17 Q 27.8 24.3 22.5 27.5 L 15.5 27.5 Q 9.8 24.3 8 17 L 9.5 13 Z" />
-      <path d="M 17 15 L 19 15 L 19 21 L 17 21 L 17 15 Z" />
-    </g>
+  <!-- Official High-Precision Vector Icon -->
+  <g transform="translate(6, 6) scale(0.046875)" fill="#ffffff">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M229.379 452.85C239.106 454.339 249.068 455.111 259.212 455.111C367.214 455.111 454.767 367.558 454.767 259.556C454.767 151.553 367.214 64 259.212 64C251.966 64 244.811 64.3941 237.77 65.1621C291.345 105.751 326.767 176.062 326.767 256C326.767 340.04 287.616 413.44 229.379 452.85ZM255.656 512C397.041 512 511.656 397.385 511.656 256C511.656 114.615 397.041 0 255.656 0C114.271 0 -0.34375 114.615 -0.34375 256C-0.34375 397.385 114.271 512 255.656 512Z" fill="#ffffff"/>
+  </g>
   
   <!-- Crisp Vector Typography -->
-  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="16" letter-spacing="1.5">DARK</text>
+  <text x="93" y="24" text-anchor="middle" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="15.5" letter-spacing="1.4">DARK</text>
 </svg>

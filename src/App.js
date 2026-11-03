@@ -1008,20 +1008,6 @@ function App() {
                 </button>
               </div>
 
-              {activeAppMode === "pokedex" && (
-                <div className="flex-grow max-w-xl min-w-0 hidden lg:block">
-                  <FilterType
-                    compact={true}
-                    key={`sticky-${filterResetKey}`}
-                    types={types}
-                    generations={generations}
-                    regions={regions}
-                    onSearchAndFilter={handleSearchAndFilter}
-                    isLoading={isLoading}
-                  />
-                </div>
-              )}
-
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
