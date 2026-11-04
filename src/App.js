@@ -1649,8 +1649,8 @@ function App() {
 
               {/* 4-Column Telemetry Stat Strip */}
               <div className="w-full mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-theme">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 divide-y sm:divide-y-0 sm:divide-x divide-theme w-full text-center">
-                  <div className="flex flex-col items-center px-2 sm:px-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 w-full text-center">
+                  <div className="flex flex-col items-center px-2 sm:px-4 pb-4 sm:pb-0 border-r border-b sm:border-b-0 border-theme">
                     <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-theme-primary tracking-tight font-mono-tech">
                       {pokemonList.length > 0 ? pokemonList.length.toLocaleString() : "1,025"}
                     </span>
@@ -1658,7 +1658,7 @@ function App() {
                       Canon Species
                     </span>
                   </div>
-                  <div className="flex flex-col items-center px-2 sm:px-4">
+                  <div className="flex flex-col items-center px-2 sm:px-4 pb-4 sm:pb-0 border-b sm:border-b-0 sm:border-r border-theme">
                     <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-theme-primary tracking-tight font-mono-tech">
                       {regions.length > 0 ? regions.length : 10}
                     </span>
@@ -1666,7 +1666,7 @@ function App() {
                       Canon Regions
                     </span>
                   </div>
-                  <div className="flex flex-col items-center px-2 sm:px-4 pt-4 sm:pt-0">
+                  <div className="flex flex-col items-center px-2 sm:px-4 pt-4 sm:pt-0 border-r border-theme">
                     <span className="text-xl sm:text-3xl md:text-4xl font-display font-black text-emerald-400 tracking-tight font-mono-tech">
                       {caughtCount}
                       <span className="text-xs sm:text-sm text-theme-secondary font-normal font-display ml-1">/ 1,025</span>
