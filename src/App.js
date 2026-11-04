@@ -129,6 +129,81 @@ const getDebutRegion = (pokemon) => {
   return null;
 };
 
+// Custom Pokémon-themed toast icon renderer
+const renderPokemonToastIcon = ({ type }) => {
+  switch (type) {
+    case "success":
+      return (
+        <div className="relative w-7 h-7 flex items-center justify-center flex-shrink-0" title="Success">
+          <svg viewBox="0 0 32 32" className="w-6 h-6 drop-shadow-sm" fill="none">
+            {/* Outer dark rim */}
+            <circle cx="16" cy="16" r="14.5" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            {/* Top red hemisphere */}
+            <path d="M 2 16 A 14 14 0 0 1 30 16 Z" fill="#e11d48" />
+            {/* Specular highlight */}
+            <path d="M 6 12 A 11 11 0 0 1 16 5" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5" strokeLinecap="round" />
+            {/* Bottom white hemisphere */}
+            <path d="M 2 16 A 14 14 0 0 0 30 16 Z" fill="#f8fafc" />
+            {/* Center black band */}
+            <line x1="2" y1="16" x2="30" y2="16" stroke="#0f172a" strokeWidth="2.5" />
+            {/* Center button outer ring */}
+            <circle cx="16" cy="16" r="4.5" fill="#0f172a" />
+            {/* Center button inner core (glowing emerald badge) */}
+            <circle cx="16" cy="16" r="2.5" fill="#10b981" stroke="#ffffff" strokeWidth="0.8" />
+          </svg>
+        </div>
+      );
+    case "error":
+      return (
+        <div className="relative w-7 h-7 flex items-center justify-center flex-shrink-0" title="System Alert">
+          <div className="w-6 h-6 rounded-full bg-rose-500/15 border border-rose-500/50 flex items-center justify-center shadow-xs">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+        </div>
+      );
+    case "warning":
+      return (
+        <div className="relative w-7 h-7 flex items-center justify-center flex-shrink-0" title="Caution">
+          <div className="w-6 h-6 rounded-full bg-amber-500/15 border border-amber-500/50 flex items-center justify-center shadow-xs">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-amber-400" fill="currentColor">
+              <path d="M13 2L3 14h8l-1 8 11-12h-8l1-8z" />
+            </svg>
+          </div>
+        </div>
+      );
+    case "info":
+    default:
+      return (
+        <div className="relative w-7 h-7 flex items-center justify-center flex-shrink-0" title="Pokédex Intel">
+          <div className="w-6 h-6 rounded-full bg-sky-500/15 border border-sky-500/50 flex items-center justify-center shadow-xs">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="3" fill="currentColor" />
+              <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+            </svg>
+          </div>
+        </div>
+      );
+  }
+};
+
+const PokemonToastCloseButton = ({ closeToast }) => (
+  <button
+    type="button"
+    onClick={closeToast}
+    className="w-6 h-6 rounded-md hover:bg-slate-700/30 text-theme-secondary hover:text-theme-primary flex items-center justify-center transition-colors cursor-pointer"
+    aria-label="Close notification"
+  >
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  </button>
+);
+
 function App() {
   const [pokemonList, setPokemonList] = useState([]);
   const [types, setTypes] = useState([]);
@@ -881,9 +956,17 @@ function App() {
 
       <ToastContainer
         position="top-right"
-        autoClose={2500}
-        theme="dark"
-        toastClassName="bg-theme-surface border-2 border-theme-accent text-theme-primary rounded-xl font-display"
+        autoClose={2600}
+        theme={theme}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        icon={renderPokemonToastIcon}
+        closeButton={PokemonToastCloseButton}
       />
 
       {/* Sticky Floating Top Bar */}

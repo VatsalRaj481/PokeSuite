@@ -532,8 +532,22 @@ export const CANONICAL_ITEMS = [
   },
 
   // --- BERRIES ---
+  // Recovery & Pinch HP Berries
   {
     id: 40,
+    name: "oran-berry",
+    displayName: "Oran Berry",
+    pocket: "berries",
+    category: "Recovery Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/oran-berry.png",
+    shortEffect: "Restores 10 HP when the holder's HP drops below 50%.",
+    description: "A Berry to be consumed by Pokémon. If held, it heals the holder by 10 HP when injured.",
+    flavor: "The quintessential early-route staple berry, renowned for its universally sweet nature and gentle curative pulp."
+  },
+  {
+    id: 41,
     name: "sitrus-berry",
     displayName: "Sitrus Berry",
     pocket: "berries",
@@ -546,7 +560,74 @@ export const CANONICAL_ITEMS = [
     flavor: "Large and plump, with a refreshing balance of sweet and sour flavor profiles."
   },
   {
-    id: 41,
+    id: 42,
+    name: "figy-berry",
+    displayName: "Figy Berry",
+    pocket: "berries",
+    category: "Pinch Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/figy-berry.png",
+    shortEffect: "Restores 1/3 max HP at 25% HP or less. Confuses Pokémon that dislike Spicy flavors (-Atk).",
+    description: "If held by a Pokémon, it restores 1/3 of max HP in a pinch, but causes confusion if the Pokémon dislikes its spicy taste.",
+    flavor: "Extremely dry and spicy; beloved by Brave, Adamant, Naughty, and Lonely natures."
+  },
+  {
+    id: 43,
+    name: "wiki-berry",
+    displayName: "Wiki Berry",
+    pocket: "berries",
+    category: "Pinch Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/wiki-berry.png",
+    shortEffect: "Restores 1/3 max HP at 25% HP or less. Confuses Pokémon that dislike Dry flavors (-SpA).",
+    description: "If held by a Pokémon, it restores 1/3 of max HP in a pinch, but causes confusion if the Pokémon dislikes its dry taste.",
+    flavor: "Lumpy and purplish; favorite of Modest, Mild, Quiet, and Rash Pokémon."
+  },
+  {
+    id: 44,
+    name: "mago-berry",
+    displayName: "Mago Berry",
+    pocket: "berries",
+    category: "Pinch Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mago-berry.png",
+    shortEffect: "Restores 1/3 max HP at 25% HP or less. Confuses Pokémon that dislike Sweet flavors (-Spe).",
+    description: "If held by a Pokémon, it restores 1/3 of max HP in a pinch, but causes confusion if the Pokémon dislikes its sweet taste.",
+    flavor: "Curved and sweet; favorite of Timid, Hasty, Jolly, and Naive speedsters."
+  },
+  {
+    id: 45,
+    name: "aguav-berry",
+    displayName: "Aguav Berry",
+    pocket: "berries",
+    category: "Pinch Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/aguav-berry.png",
+    shortEffect: "Restores 1/3 max HP at 25% HP or less. Confuses Pokémon that dislike Bitter flavors (-SpD).",
+    description: "If held by a Pokémon, it restores 1/3 of max HP in a pinch, but causes confusion if the Pokémon dislikes its bitter taste.",
+    flavor: "Deep green and remarkably bitter; favorite of Calm, Gentle, Sassy, and Careful natures."
+  },
+  {
+    id: 46,
+    name: "iapapa-berry",
+    displayName: "Iapapa Berry",
+    pocket: "berries",
+    category: "Pinch Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/iapapa-berry.png",
+    shortEffect: "Restores 1/3 max HP at 25% HP or less. Confuses Pokémon that dislike Sour flavors (-Def).",
+    description: "If held by a Pokémon, it restores 1/3 of max HP in a pinch, but causes confusion if the Pokémon dislikes its sour taste.",
+    flavor: "Vibrant yellow and puckeringly sour; favorite of Bold, Impish, Lax, and Relaxed defenders."
+  },
+
+  // Status Cure Berries
+  {
+    id: 47,
     name: "lum-berry",
     displayName: "Lum Berry",
     pocket: "berries",
@@ -559,7 +640,87 @@ export const CANONICAL_ITEMS = [
     flavor: "Slow to grow, but treasured for its miraculous detoxifying juices."
   },
   {
-    id: 42,
+    id: 48,
+    name: "cheri-berry",
+    displayName: "Cheri Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cheri-berry.png",
+    shortEffect: "Immediately cures paralysis when held or used on a Pokémon.",
+    description: "A Berry to be consumed by Pokémon. If held, it cures paralysis instantly.",
+    flavor: "Bright red with a sharp, stimulating spicy tang that snaps muscles out of paralysis."
+  },
+  {
+    id: 49,
+    name: "chesto-berry",
+    displayName: "Chesto Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/chesto-berry.png",
+    shortEffect: "Immediately awakens a sleeping Pokémon. Key component of the Resto-Chesto strategy.",
+    description: "A Berry to be consumed by Pokémon. If held, it cures sleep instantly.",
+    flavor: "Tough outer skin with a dry, bitter kick that instantly breaks slumber."
+  },
+  {
+    id: 50,
+    name: "pecha-berry",
+    displayName: "Pecha Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pecha-berry.png",
+    shortEffect: "Immediately neutralizes poison or bad poison (Toxic).",
+    description: "A Berry to be consumed by Pokémon. If held, it cures poison instantly.",
+    flavor: "Soft, sweet peach-like flesh containing natural neutralizing antivenom enzymes."
+  },
+  {
+    id: 51,
+    name: "rawst-berry",
+    displayName: "Rawst Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rawst-berry.png",
+    shortEffect: "Immediately cools down and heals a burn.",
+    description: "A Berry to be consumed by Pokémon. If held, it cures a burn instantly.",
+    flavor: "Frosty blue exterior that releases cooling moisture upon consumption."
+  },
+  {
+    id: 52,
+    name: "aspear-berry",
+    displayName: "Aspear Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/aspear-berry.png",
+    shortEffect: "Immediately thaws and defrosts a frozen Pokémon.",
+    description: "A Berry to be consumed by Pokémon. If held, it defrosts a frozen Pokémon instantly.",
+    flavor: "Crisp and sour, warming the internal body temperature to break through ice."
+  },
+  {
+    id: 53,
+    name: "persim-berry",
+    displayName: "Persim Berry",
+    pocket: "berries",
+    category: "Cure Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/persim-berry.png",
+    shortEffect: "Immediately cures confusion. Pairs effectively with Outrage, Thrash, and Petal Dance.",
+    description: "A Berry to be consumed by Pokémon. If held, it snaps the holder out of confusion.",
+    flavor: "Complex aromatic flavor that clears mental disarray and chaotic thoughts."
+  },
+
+  // PP Restoration Berries
+  {
+    id: 54,
     name: "leppa-berry",
     displayName: "Leppa Berry",
     pocket: "berries",
@@ -571,8 +732,181 @@ export const CANONICAL_ITEMS = [
     description: "A Berry to be consumed by Pokémon. If held, it restores 10 PP to one of its moves that ran out of PP.",
     flavor: "Vital for extended shiny hunting and chaining sessions where PP exhaustion is lethal."
   },
+
+  // Competitive Stat & Priority Berries
   {
-    id: 43,
+    id: 55,
+    name: "salac-berry",
+    displayName: "Salac Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/salac-berry.png",
+    shortEffect: "Raises Speed by +1 stage when the holder drops to 25% HP or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Speed in a pinch.",
+    flavor: "Cornerstone of iconic SubSalac sweepers and Endure setups."
+  },
+  {
+    id: 56,
+    name: "liechi-berry",
+    displayName: "Liechi Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/liechi-berry.png",
+    shortEffect: "Raises Attack by +1 stage when the holder drops to 25% HP or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Attack in a pinch.",
+    flavor: "Mystical crimson fruit said to hold the raw fiery power of the sea."
+  },
+  {
+    id: 57,
+    name: "petaya-berry",
+    displayName: "Petaya Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/petaya-berry.png",
+    shortEffect: "Raises Special Attack by +1 stage when the holder drops to 25% HP or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Sp. Atk in a pinch.",
+    flavor: "Rare mystical berry that awakens latent psychic and special energy."
+  },
+  {
+    id: 58,
+    name: "ganlon-berry",
+    displayName: "Ganlon Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ganlon-berry.png",
+    shortEffect: "Raises Defense by +1 stage when the holder drops to 25% HP or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Defense in a pinch.",
+    flavor: "Reinforces skeletal resilience and muscular density under extreme pressure."
+  },
+  {
+    id: 59,
+    name: "apicot-berry",
+    displayName: "Apicot Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/apicot-berry.png",
+    shortEffect: "Raises Special Defense by +1 stage when the holder drops to 25% HP or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Sp. Def in a pinch.",
+    flavor: "Rare blue berry that erects an invisible mental shield against elemental assaults."
+  },
+  {
+    id: 60,
+    name: "custap-berry",
+    displayName: "Custap Berry",
+    pocket: "berries",
+    category: "Priority Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/custap-berry.png",
+    shortEffect: "Allows the holder to move first within its priority bracket once when HP is 25% or lower.",
+    description: "A Berry to be consumed by Pokémon. If held, it allows the holder to move first once in a pinch.",
+    flavor: "Deadly competitive surprise item on suicide leads and Sturdy/Endure users like Skarmory and Forretress."
+  },
+  {
+    id: 61,
+    name: "kee-berry",
+    displayName: "Kee Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/kee-berry.png",
+    shortEffect: "Raises Defense by +1 stage after the holder is hit by a physical attack.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Defense when struck by a physical attack.",
+    flavor: "Hardens the holder's outer skin into durable armor upon kinetic impact."
+  },
+  {
+    id: 62,
+    name: "maranga-berry",
+    displayName: "Maranga Berry",
+    pocket: "berries",
+    category: "Stat Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/maranga-berry.png",
+    shortEffect: "Raises Special Defense by +1 stage after the holder is hit by a special attack.",
+    description: "A Berry to be consumed by Pokémon. If held, it raises Sp. Def when struck by a special attack.",
+    flavor: "Absorbs thermal and energetic blasts to reinforce special shielding."
+  },
+
+  // Complete Type-Resistance Berries (All 18 Types)
+  {
+    id: 63,
+    name: "chilan-berry",
+    displayName: "Chilan Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/chilan-berry.png",
+    shortEffect: "Halves the damage taken from a Normal-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a Normal-type attack against it.",
+    flavor: "Soft and yielding, absorbing the brunt of powerful Explosion or Boomburst strikes."
+  },
+  {
+    id: 64,
+    name: "occa-berry",
+    displayName: "Occa Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/occa-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Fire-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Fire-type attack against it.",
+    flavor: "Protects 4x Fire-weak titans like Scizor, Ferrothorn, and Metagross from instant fire OHKOs."
+  },
+  {
+    id: 65,
+    name: "passho-berry",
+    displayName: "Passho Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/passho-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Water-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Water-type attack against it.",
+    flavor: "Safeguards Fire, Ground, and Rock battlers against Hydro Pump and Surfing floods."
+  },
+  {
+    id: 66,
+    name: "wacan-berry",
+    displayName: "Wacan Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/wacan-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Electric-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Electric-type attack against it.",
+    flavor: "Grounds high-voltage thunderbolts, famously preserving Gyarados against 4x Electric shocks."
+  },
+  {
+    id: 67,
+    name: "rindo-berry",
+    displayName: "Rindo Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rindo-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Grass-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Grass-type attack against it.",
+    flavor: "Crucial survival lifeline for Water/Ground juggernauts like Swampert, Gastrodon, and Quagsire."
+  },
+  {
+    id: 68,
     name: "yache-berry",
     displayName: "Yache Berry",
     pocket: "berries",
@@ -585,7 +919,7 @@ export const CANONICAL_ITEMS = [
     flavor: "A staple defensive countermeasure on Dragon/Ground powerhouses like Garchomp."
   },
   {
-    id: 44,
+    id: 69,
     name: "chople-berry",
     displayName: "Chople Berry",
     pocket: "berries",
@@ -597,10 +931,233 @@ export const CANONICAL_ITEMS = [
     description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Fighting-type attack against it.",
     flavor: "Protects normal and dark types (Snorlax, Tyranitar, Kingambit) from Close Combat OHKOs."
   },
+  {
+    id: 70,
+    name: "kebia-berry",
+    displayName: "Kebia Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/kebia-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Poison-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Poison-type attack against it.",
+    flavor: "Averts Sludge Bomb and Gunk Shot strikes on defensive Fairy and Grass anchors."
+  },
+  {
+    id: 71,
+    name: "shuca-berry",
+    displayName: "Shuca Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shuca-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Ground-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Ground-type attack against it.",
+    flavor: "Shields premier Steel and Fire threats like Heatran and Dialga from devastating Earthquakes."
+  },
+  {
+    id: 72,
+    name: "coba-berry",
+    displayName: "Coba Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/coba-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Flying-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Flying-type attack against it.",
+    flavor: "Protects Fighting and Grass stalwarts against Brave Bird and Hurricane aerial strikes."
+  },
+  {
+    id: 73,
+    name: "payapa-berry",
+    displayName: "Payapa Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/payapa-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Psychic-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Psychic-type attack against it.",
+    flavor: "Dampens Expanding Force and Psychic waves targeting Fighting and Poison combatants."
+  },
+  {
+    id: 74,
+    name: "tanga-berry",
+    displayName: "Tanga Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tanga-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Bug-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Bug-type attack against it.",
+    flavor: "Prevents U-turn and First Impression from tearing through delicate Psychic and Dark pivots."
+  },
+  {
+    id: 75,
+    name: "charti-berry",
+    displayName: "Charti Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charti-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Rock-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Rock-type attack against it.",
+    flavor: "Crucial survival tool for Volcarona and Charizard to withstand catastrophic Stone Edge strikes."
+  },
+  {
+    id: 76,
+    name: "kasib-berry",
+    displayName: "Kasib Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/kasib-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Ghost-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Ghost-type attack against it.",
+    flavor: "Dispels shadowy specters, preserving frail Ghost and Psychic sweepers against Shadow Ball."
+  },
+  {
+    id: 77,
+    name: "haban-berry",
+    displayName: "Haban Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/haban-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Dragon-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Dragon-type attack against it.",
+    flavor: "Allows Dragons (Dragonite, Garchomp, Salamence) to survive Draco Meteors and retaliate."
+  },
+  {
+    id: 78,
+    name: "colbur-berry",
+    displayName: "Colbur Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/colbur-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Dark-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Dark-type attack against it.",
+    flavor: "Popular on Slowbro and Reuniclus to survive Knock Off and pursuit-style Dark attacks."
+  },
+  {
+    id: 79,
+    name: "babiri-berry",
+    displayName: "Babiri Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/babiri-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Steel-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Steel-type attack against it.",
+    flavor: "Protects Fairy and Rock aces (Togekiss, Clefable, Tyranitar) from Bullet Punch and Make It Rain."
+  },
+  {
+    id: 80,
+    name: "roseli-berry",
+    displayName: "Roseli Berry",
+    pocket: "berries",
+    category: "Resist Berries",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/roseli-berry.png",
+    shortEffect: "Halves the damage taken from a super-effective Fairy-type move.",
+    description: "A Berry to be consumed by Pokémon. If held, it weakens a super-effective Fairy-type attack against it.",
+    flavor: "Grants Fighting, Dark, and Dragon battlers the resilience to endure Dazzling Gleam and Moonblast."
+  },
+
+  // EV Training & Friendship Berries
+  {
+    id: 81,
+    name: "pomeg-berry",
+    displayName: "Pomeg Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pomeg-berry.png",
+    shortEffect: "Lowers HP EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base HP.",
+    flavor: "Staple tool for fine-tuning competitive EV spreads and optimizing party friendship."
+  },
+  {
+    id: 82,
+    name: "kelpsy-berry",
+    displayName: "Kelpsy Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/kelpsy-berry.png",
+    shortEffect: "Lowers Attack EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base Attack.",
+    flavor: "Used by special attackers to minimize physical Attack EVs for Foul Play and confusion reduction."
+  },
+  {
+    id: 83,
+    name: "qualot-berry",
+    displayName: "Qualot Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/qualot-berry.png",
+    shortEffect: "Lowers Defense EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base Defense.",
+    flavor: "Soft and sweet berry that trims defensive training to reallocate stat budgets."
+  },
+  {
+    id: 84,
+    name: "hondew-berry",
+    displayName: "Hondew Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hondew-berry.png",
+    shortEffect: "Lowers Special Attack EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base Sp. Atk.",
+    flavor: "Crisp and juicy melon-berry that clears unused special training allocations."
+  },
+  {
+    id: 85,
+    name: "grepa-berry",
+    displayName: "Grepa Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/grepa-berry.png",
+    shortEffect: "Lowers Special Defense EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base Sp. Def.",
+    flavor: "Astringent yellow berry prized by breeders reshaping stat profiles."
+  },
+  {
+    id: 86,
+    name: "tamato-berry",
+    displayName: "Tamato Berry",
+    pocket: "berries",
+    category: "EV & Friendship",
+    cost: 80,
+    flingPower: 10,
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tamato-berry.png",
+    shortEffect: "Lowers Speed EVs by 10 points while increasing Pokémon friendship.",
+    description: "A Berry to be consumed by Pokémon. Using it on a Pokémon makes it more friendly, but it lowers its base Speed.",
+    flavor: "Spicy tomato-like berry essential for crafting minimum-speed Trick Room team builds."
+  },
 
   // --- MEDICINE & VITAMINS ---
   {
-    id: 45,
+    id: 87,
     name: "full-restore",
     displayName: "Full Restore",
     pocket: "medicine",
@@ -613,7 +1170,7 @@ export const CANONICAL_ITEMS = [
     flavor: "The Champion's secret weapon, capable of turning the tide of Elite Four matches instantly."
   },
   {
-    id: 46,
+    id: 88,
     name: "max-potion",
     displayName: "Max Potion",
     pocket: "medicine",
@@ -626,7 +1183,7 @@ export const CANONICAL_ITEMS = [
     flavor: "High-grade medical spray synthesized in Silph and Devon laboratories."
   },
   {
-    id: 47,
+    id: 89,
     name: "max-revive",
     displayName: "Max Revive",
     pocket: "medicine",
@@ -639,7 +1196,7 @@ export const CANONICAL_ITEMS = [
     flavor: "Golden triangular crystal packed with concentrated regenerative revitalizing essence."
   },
   {
-    id: 48,
+    id: 90,
     name: "rare-candy",
     displayName: "Rare Candy",
     pocket: "medicine",
@@ -652,7 +1209,7 @@ export const CANONICAL_ITEMS = [
     flavor: "A legendary blue-wrapped confection with immense nutritional and developmental potency."
   },
   {
-    id: 49,
+    id: 91,
     name: "protein",
     displayName: "Protein",
     pocket: "medicine",
@@ -665,7 +1222,7 @@ export const CANONICAL_ITEMS = [
     flavor: "Formulated for competitive physical sweepers looking to reach maximum offensive damage thresholds."
   },
   {
-    id: 50,
+    id: 92,
     name: "carbos",
     displayName: "Carbos",
     pocket: "medicine",
@@ -678,7 +1235,7 @@ export const CANONICAL_ITEMS = [
     flavor: "Fast-acting carbohydrate elixir designed to optimize quick-strike agility and speed-tier benchmarks."
   },
   {
-    id: 51,
+    id: 93,
     name: "ability-patch",
     displayName: "Ability Patch",
     pocket: "medicine",
@@ -693,7 +1250,7 @@ export const CANONICAL_ITEMS = [
 
   // --- KEY ITEMS ---
   {
-    id: 52,
+    id: 94,
     name: "shiny-charm",
     displayName: "Shiny Charm",
     pocket: "key",
@@ -706,7 +1263,7 @@ export const CANONICAL_ITEMS = [
     flavor: "Awarded by the Game Freak Director only to trainers who completely finish the National Pokédex."
   },
   {
-    id: 53,
+    id: 95,
     name: "oval-charm",
     displayName: "Oval Charm",
     pocket: "key",
@@ -719,7 +1276,7 @@ export const CANONICAL_ITEMS = [
     flavor: "Radiates gentle warmth, comforting breeding pairs and stimulating egg discovery."
   },
   {
-    id: 54,
+    id: 96,
     name: "exp-share",
     displayName: "Exp. Share",
     pocket: "key",

@@ -313,3 +313,154 @@ body, div, select, input, button, span, h1, h2, h3, p, a, svg, line, circle {
     animation: none !important;
   }
 }
+
+/* ========================================================
+   POKÉDEX TECH TOAST NOTIFICATIONS (REACT-TOASTIFY THEME)
+   ======================================================== */
+
+.Toastify__toast-container {
+  width: 380px !important;
+  max-width: calc(100vw - 2rem) !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+}
+
+.Toastify__toast {
+  position: relative !important;
+  font-family: 'Fredoka', 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  border-radius: 1rem !important; /* 16px */
+  padding: 12px 14px 14px 14px !important;
+  margin-bottom: 0.75rem !important;
+  min-height: 56px !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Dark mode Pokédex toast */
+.Toastify__toast-theme--dark {
+  background: rgba(30, 41, 59, 0.95) !important; /* Elevated Slate 800 */
+  color: #f8fafc !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Light mode Pokédex toast */
+.Toastify__toast-theme--light {
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Watermark Poké Ball watermark on the right */
+.Toastify__toast::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: -15px;
+  width: 75px;
+  height: 75px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23ffffff' stroke-width='4' opacity='0.04'%3E%3Ccircle cx='50' cy='50' r='45'/%3E%3Cline x1='5' y1='50' x2='95' y2='50'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23ffffff'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%230f172a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.Toastify__toast-theme--light::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%230f172a' stroke-width='4' opacity='0.05'%3E%3Ccircle cx='50' cy='50' r='45'/%3E%3Cline x1='5' y1='50' x2='95' y2='50'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%230f172a'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+/* Toast Type Borders & Glowing Halos */
+.Toastify__toast--success {
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px -3px rgba(16, 185, 129, 0.25) !important;
+}
+
+.Toastify__toast--error {
+  border: 1px solid rgba(225, 29, 72, 0.45) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px -3px rgba(225, 29, 72, 0.28) !important;
+}
+
+.Toastify__toast--warning {
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px -3px rgba(245, 158, 11, 0.25) !important;
+}
+
+.Toastify__toast--info {
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px -3px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Toast Body */
+.Toastify__toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 0.85rem !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
+  z-index: 1 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Toast Icon Container */
+.Toastify__toast-icon {
+  margin-right: 12px !important;
+  width: 28px !important;
+  height: 28px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Toast Progress Bar - styled like Pokémon HP / EXP Bar */
+.Toastify__progress-bar--wrp {
+  height: 3.5px !important;
+  border-bottom-left-radius: 1rem !important;
+  border-bottom-right-radius: 1rem !important;
+  overflow: hidden !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+}
+
+.Toastify__progress-bar {
+  height: 100% !important;
+  opacity: 1 !important;
+}
+
+.Toastify__progress-bar--success {
+  background: linear-gradient(90deg, #10b981, #34d399) !important; /* Full HP Bar Green */
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6) !important;
+}
+
+.Toastify__progress-bar--error {
+  background: linear-gradient(90deg, #e11d48, #fb7185) !important; /* Crimson Critical HP Bar */
+  box-shadow: 0 0 8px rgba(251, 113, 133, 0.6) !important;
+}
+
+.Toastify__progress-bar--warning {
+  background: linear-gradient(90deg, #d97706, #fbbf24) !important; /* Amber Caution Bar */
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6) !important;
+}
+
+.Toastify__progress-bar--info {
+  background: linear-gradient(90deg, #0284c7, #38bdf8) !important; /* EXP Blue Bar */
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6) !important;
+}
+
+/* Close Button */
+.Toastify__close-button {
+  align-self: flex-start !important;
+  opacity: 0.6 !important;
+  transition: opacity 0.15s ease, transform 0.15s ease !important;
+  padding: 2px !important;
+  margin-left: 8px !important;
+  z-index: 1 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+}
