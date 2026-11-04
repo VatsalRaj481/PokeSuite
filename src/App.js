@@ -944,11 +944,13 @@ function App() {
   }, [filteredPokemon, currentPage]);
 
   const handleBrowseDex = useCallback(async () => {
+    setActiveAppMode("pokedex");
     setIsLoading(true);
     setSelectedPokemon(null);
     setSelectedPokemonDescription("");
     setShowScanner(false);
     setCurrentPage(1);
+    setFilterResetKey((currentKey) => currentKey + 1);
 
     let list = pokemonList;
     if (!hasFetchedAllPokemon || list.length === 0) {
@@ -959,6 +961,7 @@ function App() {
     }
     setFilteredPokemon(list);
     setIsLoading(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [hasFetchedAllPokemon, fetchAllPokemonData, pokemonList]);
 
   // Scroll listener for sticky header
@@ -973,6 +976,10 @@ function App() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isNationalDexActive =
+    activeAppMode === "pokedex" &&
+    (filteredPokemon.length > 0 || selectedPokemon !== null || isScanning || showScanner);
 
   return (
     <div className={`min-h-screen flex flex-col items-center transition-all duration-350 relative overflow-x-hidden w-full max-w-full ${getBackgroundStyle()}`}>
@@ -1028,9 +1035,10 @@ function App() {
               <button
                 onClick={handleGoHome}
                 className="flex items-center gap-2 focus:outline-none cursor-pointer group flex-shrink-0"
-                title="Pokédex Home"
+                title="Pokédex Home (Return to main screen)"
+                aria-label="Pokédex Home"
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
                   <svg viewBox="0 0 200 200" className="w-full h-full">
                     <circle cx="100" cy="100" r="95" fill="#f8fafc" stroke="#0f172a" strokeWidth="12" />
                     <path d="M5,100 a95,95 0 0,1 190,0" fill="var(--color-accent-red)" stroke="#0f172a" strokeWidth="12" />
@@ -1039,7 +1047,7 @@ function App() {
                     <circle cx="100" cy="100" r="16" fill="#cbd5e1" stroke="#475569" strokeWidth="4" />
                   </svg>
                 </div>
-                <span className="font-display font-extrabold text-base text-theme-primary hidden md:inline">
+                <span className="font-display font-extrabold text-base text-theme-primary hidden md:inline group-hover:text-theme-accent transition-colors">
                   Pokédex
                 </span>
               </button>
@@ -1047,24 +1055,21 @@ function App() {
               {/* Mode Switcher in Sticky Header */}
               <div className="flex items-center gap-0.5 sm:gap-1 bg-theme-input p-0.5 sm:p-1 rounded-xl border border-theme flex-shrink min-w-0 overflow-x-auto scrollbar-none">
                 <button
-                  onClick={() => {
-                    setActiveAppMode("pokedex");
-                    setSelectedPokemon(null);
-                    randomizeHeroPokemon();
-                  }}
+                  onClick={handleBrowseDex}
                   className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-display flex items-center gap-1 sm:gap-1.5 cursor-pointer transition-all flex-shrink-0 ${
-                    activeAppMode === "pokedex"
+                    isNationalDexActive
                       ? "bg-rose-600 text-white font-bold shadow-xs"
                       : "text-theme-secondary hover:text-theme-primary font-medium"
                   }`}
-                  title="National Pokédex"
+                  title="National Dex (Browse 1,025 Pokémon)"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <circle cx="12" cy="12" r="9" />
                     <path d="M3 12h6m6 0h6" />
                     <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity={0.2} />
                   </svg>
-                  <span className="hidden sm:inline">Pokédex</span>
+                  <span className="hidden sm:inline">National Dex</span>
+                  <span className="sm:hidden">Dex</span>
                 </button>
                 <button
                   onClick={() => setActiveAppMode("items")}
@@ -1176,20 +1181,22 @@ function App() {
                   )}
                 </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowScanner(true)}
-                  className="p-2 sm:px-3 py-2 bg-theme-accent text-white rounded-lg shadow-sm hover:opacity-95 cursor-pointer flex items-center gap-1.5 min-h-[36px]"
-                  title="Open Dex Scanner"
-                  aria-label="Scan Pokemon"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
-                  </svg>
-                  <span className="hidden sm:inline">Scanner</span>
-                </motion.button>
+                {(isNationalDexActive || activeAppMode !== "pokedex") && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowScanner(true)}
+                    className="p-2 sm:px-3 py-2 bg-theme-accent text-white rounded-lg shadow-sm hover:opacity-95 cursor-pointer flex items-center gap-1.5 min-h-[36px]"
+                    title="Open Dex Scanner"
+                    aria-label="Scan Pokemon"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+                    </svg>
+                    <span className="hidden sm:inline">Scanner</span>
+                  </motion.button>
+                )}
               </div>
             </div>
           </motion.header>
@@ -1200,16 +1207,17 @@ function App() {
         
         {/* Main Pokedex Header Title Bar */}
         <div className="w-full flex items-center justify-between mb-6 sm:mb-8 select-none">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <motion.button
+          <div
+            onClick={handleGoHome}
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
+            title="Pokédex Home (Return to main screen)"
+            aria-label="Pokédex Home"
+          >
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              type="button"
-              onClick={handleGoHome}
               className="rounded-full focus:outline-none focus:ring-4 focus:ring-theme-accent/50 cursor-pointer"
-              title="Pokédex Home"
-              aria-label="Go to main screen"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1222,10 +1230,9 @@ function App() {
                 <circle cx="100" cy="100" r="32" fill="#f8fafc" stroke="#0f172a" strokeWidth="12" />
                 <circle cx="100" cy="100" r="16" fill="#cbd5e1" stroke="#475569" strokeWidth="4" />
               </svg>
-            </motion.button>
+            </motion.div>
             <span
-              onClick={handleGoHome}
-              className="font-display font-extrabold text-2xl sm:text-4xl md:text-5xl tracking-[-0.02em] select-none cursor-pointer"
+              className="font-display font-extrabold text-2xl sm:text-4xl md:text-5xl tracking-[-0.02em] select-none cursor-pointer group-hover:opacity-90 transition-opacity"
               style={{
                 backgroundImage: "linear-gradient(to right, var(--color-accent-red), var(--color-text-primary))",
                 WebkitBackgroundClip: "text",
@@ -1253,20 +1260,22 @@ function App() {
               <span className="hidden sm:inline">Random</span>
             </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowScanner(true)}
-              className="px-2.5 sm:px-4 py-2 bg-theme-accent text-white font-display font-semibold text-xs rounded-lg shadow-sm hover:opacity-90 cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px]"
-              title="Launch Dex Scanner"
-              aria-label="Scan Pokemon"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
-              </svg>
-              <span className="hidden sm:inline">Scanner</span>
-            </motion.button>
+            {(isNationalDexActive || activeAppMode !== "pokedex") && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowScanner(true)}
+                className="px-2.5 sm:px-4 py-2 bg-theme-accent text-white font-display font-semibold text-xs rounded-lg shadow-sm hover:opacity-90 cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px]"
+                title="Launch Dex Scanner"
+                aria-label="Scan Pokemon"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 flex-shrink-0">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+                </svg>
+                <span className="hidden sm:inline">Scanner</span>
+              </motion.button>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1300,16 +1309,13 @@ function App() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            onClick={() => {
-              setActiveAppMode("pokedex");
-              setSelectedPokemon(null);
-              randomizeHeroPokemon();
-            }}
+            onClick={handleBrowseDex}
             className={`flex-1 min-w-[52px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-display text-[11px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 cursor-pointer transition-all flex-shrink-0 sm:flex-shrink ${
-              activeAppMode === "pokedex"
+              isNationalDexActive
                 ? "bg-rose-600 text-white font-extrabold shadow-sm"
                 : "text-theme-secondary hover:text-theme-primary hover:bg-theme-surface-hover font-semibold"
             }`}
+            title="National Dex (Browse 1,025 Pokémon)"
           >
             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="12" cy="12" r="9" />
@@ -1562,13 +1568,15 @@ function App() {
                   {/* Action CTA */}
                   <div className="flex flex-wrap gap-3 sm:gap-4 w-full">
                     <button
-                      onClick={handleBrowseDex}
+                      onClick={() => setShowScanner(true)}
                       className="px-6 sm:px-8 py-3.5 bg-theme-accent text-white font-display font-bold text-xs sm:text-sm rounded-lg shadow-[0_4px_16px_rgba(225,29,72,0.35)] hover:opacity-95 transition-transform active:scale-[0.97] focus:outline-none flex items-center justify-center gap-2 border border-theme-accent cursor-pointer min-h-[44px]"
+                      title="Launch AI Dex Scanner"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15.5a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.053 47.745 47.745 0 00-3.91-.228 2.192 2.192 0 00-1.736 1.053l-.822 1.316z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 13.5a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
                       </svg>
-                      Browse National Dex
+                      Launch Dex Scanner
                     </button>
                   </div>
                 </div>
