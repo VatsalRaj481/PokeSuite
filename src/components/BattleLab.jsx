@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import TypeBadge from "./TypeBadge";
 import NatureChartModal from "./NatureChartModal";
+import { formatPokemonName } from "../utils/loreData.js";
 
 const formatStatShort = (stat) => {
   if (!stat) return "";
@@ -327,7 +328,7 @@ export default function BattleLab({ pokemonList = [] }) {
     const updated = {
       id: pkmn.id,
       name: pkmn.name,
-      displayName: pkmn.name.charAt(0).toUpperCase() + pkmn.name.slice(1).replace("-", " "),
+      displayName: formatPokemonName(pkmn.displayName || pkmn.name),
       types,
       item: "Leftovers",
       ability: abilityName.split("-").map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" "),
@@ -474,7 +475,10 @@ export default function BattleLab({ pokemonList = [] }) {
 
         const cleanSlug = speciesName.toLowerCase().replace(/[^a-z0-9]/g, "-");
         const found = pokemonList.find(
-          (p) => p.name.toLowerCase() === cleanSlug || p.name.toLowerCase().includes(cleanSlug)
+          (p) =>
+            p.name.toLowerCase() === cleanSlug ||
+            formatPokemonName(p.displayName || p.name).toLowerCase() === speciesName.toLowerCase() ||
+            p.name.toLowerCase().includes(cleanSlug)
         );
 
         const id = found ? found.id : i + 1;
@@ -489,7 +493,7 @@ export default function BattleLab({ pokemonList = [] }) {
         newTeam.push({
           id,
           name: cleanSlug,
-          displayName: speciesName,
+          displayName: found ? formatPokemonName(found.displayName || found.name) : formatPokemonName(speciesName),
           types,
           item,
           ability,
@@ -518,7 +522,13 @@ export default function BattleLab({ pokemonList = [] }) {
   const filteredPickerList = useMemo(() => {
     if (!pickerSearch.trim()) return pokemonList.slice(0, 48);
     const q = pickerSearch.toLowerCase().trim();
-    return pokemonList.filter((p) => p.name.toLowerCase().includes(q) || String(p.id).includes(q)).slice(0, 48);
+    return pokemonList
+      .filter((p) => {
+        const raw = p.name.toLowerCase();
+        const formatted = formatPokemonName(p.displayName || p.name).toLowerCase();
+        return raw.includes(q) || formatted.includes(q) || String(p.id).includes(q);
+      })
+      .slice(0, 48);
   }, [pokemonList, pickerSearch]);
 
   return (
@@ -1098,14 +1108,14 @@ export default function BattleLab({ pokemonList = [] }) {
                     <div className="w-10 h-10 bg-theme-surface rounded-lg p-1 flex items-center justify-center flex-shrink-0">
                       <img
                         src={p.sprites?.other?.home?.front_default || p.sprites?.front_default}
-                        alt={p.name}
+                        alt={formatPokemonName(p.displayName || p.name)}
                         className="w-full h-full object-contain"
                       />
                     </div>
                     <div className="min-w-0">
                       <div className="text-[9px] font-mono-tech text-indigo-400 font-bold">#{String(p.id).padStart(3, "0")}</div>
-                      <div className="text-xs font-display font-bold text-theme-primary truncate capitalize">
-                        {p.name.replace("-", " ")}
+                      <div className="text-xs font-display font-bold text-theme-primary truncate">
+                        {formatPokemonName(p.displayName || p.name)}
                       </div>
                     </div>
                   </button>

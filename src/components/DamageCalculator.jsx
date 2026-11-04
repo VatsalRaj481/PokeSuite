@@ -11,6 +11,7 @@ import {
   getGmaxMoveForPokemon,
   GENERIC_MAX_MOVES,
 } from "../utils/calcData.js";
+import { formatPokemonName } from "../utils/loreData.js";
 
 const POPULAR_ATTACKERS = [
   { id: 987, name: "flutter-mane", displayName: "Flutter Mane", types: ["ghost", "fairy"], baseStats: { hp: 55, attack: 55, defense: 55, "special-attack": 135, "special-defense": 135, speed: 135 } },
@@ -207,7 +208,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
     return {
       id: p.id,
       name: p.name,
-      displayName: p.displayName || p.name.replace(/-/g, " "),
+      displayName: formatPokemonName(p.displayName || p.name),
       types: typesList,
       baseStats: statsObj,
     };
@@ -216,16 +217,30 @@ export default function DamageCalculator({ pokemonList = [] }) {
   // Filtered Pokémon list for attacker/defender searches
   const filteredAttackerList = useMemo(() => {
     if (!attackerSearch.trim()) return POPULAR_ATTACKERS;
-    const q = attackerSearch.toLowerCase();
+    const q = attackerSearch.toLowerCase().trim();
     const source = pokemonList.length > 0 ? pokemonList : POPULAR_ATTACKERS;
-    return source.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 8).map(mapPokemonToFighter);
+    return source
+      .filter((p) => {
+        const raw = p.name.toLowerCase();
+        const formatted = formatPokemonName(p.displayName || p.name).toLowerCase();
+        return raw.includes(q) || formatted.includes(q) || String(p.id).includes(q);
+      })
+      .slice(0, 8)
+      .map(mapPokemonToFighter);
   }, [attackerSearch, pokemonList]);
 
   const filteredDefenderList = useMemo(() => {
     if (!defenderSearch.trim()) return POPULAR_DEFENDERS;
-    const q = defenderSearch.toLowerCase();
+    const q = defenderSearch.toLowerCase().trim();
     const source = pokemonList.length > 0 ? pokemonList : POPULAR_DEFENDERS;
-    return source.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 8).map(mapPokemonToFighter);
+    return source
+      .filter((p) => {
+        const raw = p.name.toLowerCase();
+        const formatted = formatPokemonName(p.displayName || p.name).toLowerCase();
+        return raw.includes(q) || formatted.includes(q) || String(p.id).includes(q);
+      })
+      .slice(0, 8)
+      .map(mapPokemonToFighter);
   }, [defenderSearch, pokemonList]);
 
   // Run calculation
@@ -353,8 +368,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
                   </span>
                 )}
               </div>
-              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
-                {attackerPokemon.displayName}
+              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary truncate max-w-full">
+                {formatPokemonName(attackerPokemon.displayName || attackerPokemon.name)}
               </span>
               <div className="flex flex-wrap justify-center gap-1 mt-0.5 max-w-[100px] sm:max-w-none">
                 {attackerPokemon.types.map((t) => (
@@ -401,8 +416,8 @@ export default function DamageCalculator({ pokemonList = [] }) {
                   </span>
                 )}
               </div>
-              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary capitalize truncate max-w-full">
-                {defenderPokemon.displayName}
+              <span className="font-display font-extrabold text-xs sm:text-sm text-theme-primary truncate max-w-full">
+                {formatPokemonName(defenderPokemon.displayName || defenderPokemon.name)}
               </span>
               <div className="flex flex-wrap justify-center gap-1 mt-0.5 max-w-[100px] sm:max-w-none">
                 {defenderPokemon.types.map((t) => (
@@ -511,7 +526,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
                       setIsSearchingAttacker(false);
                       setAttackerSearch("");
                     }}
-                    className="p-1.5 bg-theme-surface hover:bg-theme-surface-hover rounded-lg text-left text-xs font-display text-theme-primary flex items-center gap-2 cursor-pointer capitalize"
+                    className="p-1.5 bg-theme-surface hover:bg-theme-surface-hover rounded-lg text-left text-xs font-display text-theme-primary flex items-center gap-2 cursor-pointer"
                   >
                     <span>{p.displayName}</span>
                   </button>
@@ -1003,7 +1018,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
                       setIsSearchingDefender(false);
                       setDefenderSearch("");
                     }}
-                    className="p-1.5 bg-theme-surface hover:bg-theme-surface-hover rounded-lg text-left text-xs font-display text-theme-primary flex items-center gap-2 cursor-pointer capitalize"
+                    className="p-1.5 bg-theme-surface hover:bg-theme-surface-hover rounded-lg text-left text-xs font-display text-theme-primary flex items-center gap-2 cursor-pointer"
                   >
                     <span>{p.displayName}</span>
                   </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { formatPokemonName } from "../utils/loreData.js";
 
 function PokemonScanner({
   pokemonList,
@@ -181,15 +182,17 @@ function PokemonScanner({
         result.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "Unknown";
 
       if (identifiedPokemonName.toLowerCase() !== "unknown") {
+        const cleanIdentified = identifiedPokemonName.toLowerCase();
         const foundPokemon = pokemonList.find(
           (pokemon) =>
-            pokemon.name.toLowerCase() === identifiedPokemonName.toLowerCase()
+            pokemon.name.toLowerCase() === cleanIdentified ||
+            formatPokemonName(pokemon.displayName || pokemon.name).toLowerCase() === cleanIdentified
         );
 
         if (foundPokemon) {
           onPokemonScanned(foundPokemon);
           fetchPokemonDescription(foundPokemon.name);
-          toast.success(`Match Found: ${foundPokemon.name}!`);
+          toast.success(`Match Found: ${formatPokemonName(foundPokemon.displayName || foundPokemon.name)}!`);
           onClose();
           return;
         }
