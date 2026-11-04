@@ -13,72 +13,7 @@ import ItemsDex from "./components/ItemsDex";
 import BattleLab from "./components/BattleLab";
 import DamageCalculator from "./components/DamageCalculator";
 import MinigamesHub from "./components/minigames/MinigamesHub";
-import { getPokemonArchetype, resolvePokemonEndpointTarget } from "./utils/loreData.js";
-
-const formatPokemonName = (rawName) => {
-  if (!rawName) return "";
-  let name = rawName.toLowerCase();
-  
-  const capitalize = (str) => {
-    if (!str) return "";
-    return str.split("-").map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
-  };
-
-  if (name.includes("-mega-x")) {
-    const base = name.replace("-mega-x", "");
-    return `Mega ${capitalize(base)} X`;
-  }
-  if (name.includes("-mega-y")) {
-    const base = name.replace("-mega-y", "");
-    return `Mega ${capitalize(base)} Y`;
-  }
-  if (name.includes("-mega")) {
-    const base = name.replace("-mega", "");
-    return `Mega ${capitalize(base)}`;
-  }
-  if (name.includes("-gmax")) {
-    const base = name.replace("-gmax", "");
-    return `Gmax ${capitalize(base)}`;
-  }
-  if (name.includes("-alola")) {
-    const base = name.replace("-alola", "");
-    return `Alolan ${capitalize(base)}`;
-  }
-  if (name.includes("-galar")) {
-    const base = name.replace("-galar", "");
-    return `Galarian ${capitalize(base)}`;
-  }
-  if (name.includes("-hisui")) {
-    const base = name.replace("-hisui", "");
-    return `Hisuian ${capitalize(base)}`;
-  }
-  if (name.includes("-paldea")) {
-    const base = name.replace("-paldea", "");
-    return `Paldean ${capitalize(base)}`;
-  }
-  if (name.endsWith("-white-striped")) {
-    const base = name.replace("-white-striped", "");
-    return `${capitalize(base)} (White-Striped)`;
-  }
-  if (name.endsWith("-red-striped")) {
-    const base = name.replace("-red-striped", "");
-    return `${capitalize(base)} (Red-Striped)`;
-  }
-  if (name.endsWith("-blue-striped")) {
-    const base = name.replace("-blue-striped", "");
-    return `${capitalize(base)} (Blue-Striped)`;
-  }
-  if (name.endsWith("-male")) {
-    const base = name.replace("-male", "");
-    return `${capitalize(base)} (Male)`;
-  }
-  if (name.endsWith("-female")) {
-    const base = name.replace("-female", "");
-    return `${capitalize(base)} (Female)`;
-  }
-  
-  return capitalize(rawName);
-};
+import { getPokemonArchetype, resolvePokemonEndpointTarget, formatPokemonName } from "./utils/loreData.js";
 
 // Stat configuration duplicating same colors from PokemonCard for comparison
 const statMeta = {

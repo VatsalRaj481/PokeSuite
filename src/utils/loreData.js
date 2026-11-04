@@ -502,3 +502,77 @@ export function resolvePokemonEndpointTarget(query) {
   return SPECIES_DEFAULT_VARIETY_MAP[clean] || clean;
 }
 
+/**
+ * Formats a raw Pokémon name or slug into its canonical human-readable display name.
+ * e.g. "hawlucha-mega" -> "Mega Hawlucha"
+ *      "charizard-mega-x" -> "Mega Charizard X"
+ *      "vulpix-alola" -> "Alolan Vulpix"
+ */
+export const formatPokemonName = (rawName) => {
+  if (!rawName) return "";
+  let name = String(rawName).toLowerCase().trim();
+
+  const capitalize = (str) => {
+    if (!str) return "";
+    return str
+      .split("-")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  };
+
+  if (name.includes("-mega-x")) {
+    const base = name.replace("-mega-x", "");
+    return `Mega ${capitalize(base)} X`;
+  }
+  if (name.includes("-mega-y")) {
+    const base = name.replace("-mega-y", "");
+    return `Mega ${capitalize(base)} Y`;
+  }
+  if (name.includes("-mega")) {
+    const base = name.replace("-mega", "");
+    return `Mega ${capitalize(base)}`;
+  }
+  if (name.includes("-gmax")) {
+    const base = name.replace("-gmax", "");
+    return `Gmax ${capitalize(base)}`;
+  }
+  if (name.includes("-alola")) {
+    const base = name.replace("-alola", "");
+    return `Alolan ${capitalize(base)}`;
+  }
+  if (name.includes("-galar")) {
+    const base = name.replace("-galar", "");
+    return `Galarian ${capitalize(base)}`;
+  }
+  if (name.includes("-hisui")) {
+    const base = name.replace("-hisui", "");
+    return `Hisuian ${capitalize(base)}`;
+  }
+  if (name.includes("-paldea")) {
+    const base = name.replace("-paldea", "");
+    return `Paldean ${capitalize(base)}`;
+  }
+  if (name.endsWith("-white-striped")) {
+    const base = name.replace("-white-striped", "");
+    return `${capitalize(base)} (White-Striped)`;
+  }
+  if (name.endsWith("-red-striped")) {
+    const base = name.replace("-red-striped", "");
+    return `${capitalize(base)} (Red-Striped)`;
+  }
+  if (name.endsWith("-blue-striped")) {
+    const base = name.replace("-blue-striped", "");
+    return `${capitalize(base)} (Blue-Striped)`;
+  }
+  if (name.endsWith("-male")) {
+    const base = name.replace("-male", "");
+    return `${capitalize(base)} (Male)`;
+  }
+  if (name.endsWith("-female")) {
+    const base = name.replace("-female", "");
+    return `${capitalize(base)} (Female)`;
+  }
+
+  return capitalize(name);
+};
+

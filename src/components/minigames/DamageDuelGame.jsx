@@ -4,6 +4,7 @@ import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
 import { calculateDamage } from "../../utils/damageCalc.js";
 import { BATTLE_QUIZ_SCENARIOS, generateProceduralScenario } from "../../utils/calcData.js";
+import { formatPokemonName } from "../../utils/loreData.js";
 
 const RANKS = [
   { minStreak: 0, title: "Bug Catcher" },
@@ -242,7 +243,7 @@ export default function DamageDuelGame({ onSelectPokemon }) {
               <div className="w-16 h-16 flex items-center justify-center">
                 <img
                   src={getSpriteUrl(scenario.attacker.id)}
-                  alt={scenario.attacker.name}
+                  alt={formatPokemonName(scenario.attacker.name)}
                   className="max-h-full max-w-full object-contain"
                   onError={(e) => {
                     e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${scenario.attacker.id}.png`;
@@ -253,8 +254,8 @@ export default function DamageDuelGame({ onSelectPokemon }) {
                 <span className="text-[10px] font-mono-tech text-rose-500 font-bold uppercase tracking-wide">
                   ATTACKER (Lv. {scenario.attacker.level})
                 </span>
-                <h3 className="text-lg font-display font-black text-theme-primary capitalize">
-                  {scenario.attacker.name}
+                <h3 className="text-lg font-display font-black text-theme-primary">
+                  {formatPokemonName(scenario.attacker.name)}
                 </h3>
                 <div className="flex gap-1 mt-0.5">
                   {scenario.attacker.types.map((t) => (
@@ -333,7 +334,7 @@ export default function DamageDuelGame({ onSelectPokemon }) {
               <div className="w-16 h-16 flex items-center justify-center">
                 <img
                   src={getSpriteUrl(scenario.defender.id)}
-                  alt={scenario.defender.name}
+                  alt={formatPokemonName(scenario.defender.name)}
                   className="max-h-full max-w-full object-contain"
                   onError={(e) => {
                     e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${scenario.defender.id}.png`;
@@ -344,8 +345,8 @@ export default function DamageDuelGame({ onSelectPokemon }) {
                 <span className="text-[10px] font-mono-tech text-sky-400 font-bold uppercase tracking-wide">
                   DEFENDER (Lv. {scenario.defender.level})
                 </span>
-                <h3 className="text-lg font-display font-black text-theme-primary capitalize">
-                  {scenario.defender.name}
+                <h3 className="text-lg font-display font-black text-theme-primary">
+                  {formatPokemonName(scenario.defender.name)}
                 </h3>
                 <div className="flex gap-1 mt-0.5">
                   {scenario.defender.types.map((t) => (

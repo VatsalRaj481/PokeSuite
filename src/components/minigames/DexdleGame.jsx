@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
 import { ICONIC_POKEMON_POOL } from "../../utils/calcData.js";
+import { formatPokemonName } from "../../utils/loreData.js";
 
 // Helper to determine generation from ID
 const getGenFromId = (id) => {
@@ -110,7 +111,12 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
     const q = searchQuery.toLowerCase().trim();
     const alreadyGuessed = new Set(guesses.map((g) => g.name.toLowerCase()));
     return activePool
-      .filter((p) => p.name.toLowerCase().includes(q) && !alreadyGuessed.has(p.name.toLowerCase()))
+      .filter((p) => {
+        if (alreadyGuessed.has(p.name.toLowerCase())) return false;
+        const rawName = p.name.toLowerCase();
+        const formatted = formatPokemonName(p.displayName || p.name).toLowerCase();
+        return rawName.includes(q) || formatted.includes(q);
+      })
       .slice(0, 6);
   }, [searchQuery, activePool, guesses]);
 
@@ -166,7 +172,7 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
     return {
       pokemon: guess,
       name: guess.name,
-      displayName: guess.displayName || guess.name,
+      displayName: formatPokemonName(guess.displayName || guess.name),
       id: guess.id,
       gen: { value: guessGen, match: guessGen === targetGen ? "correct" : guessGen < targetGen ? "higher" : "lower" },
       type1: { value: guessTypes[0], match: type1Match },
@@ -230,7 +236,10 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
         e.preventDefault();
         const q = searchQuery.toLowerCase().trim();
         const exact = activePool.find(
-          (p) => p.name.toLowerCase() === q || (p.displayName && p.displayName.toLowerCase() === q)
+          (p) =>
+            p.name.toLowerCase() === q ||
+            (p.displayName && p.displayName.toLowerCase() === q) ||
+            formatPokemonName(p.displayName || p.name).toLowerCase() === q
         );
         if (exact) {
           handleMakeGuess(exact);
@@ -388,7 +397,7 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
                         alt={p.name}
                         className="w-8 h-8 object-contain"
                       />
-                      <span className="capitalize">{p.displayName || p.name}</span>
+                      <span>{formatPokemonName(p.displayName || p.name)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-mono-tech text-theme-secondary">
@@ -425,8 +434,8 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
               <span className={`text-xs font-display font-extrabold uppercase tracking-wider ${isWon ? "text-emerald-400" : "text-rose-500"}`}>
                 {isWon ? "Caught It in " + guesses.length + "/6 Guesses" : "Out of Poké Balls"}
               </span>
-              <h2 className="text-2xl font-display font-black text-theme-primary capitalize">
-                {targetPokemon.displayName || targetPokemon.name}
+              <h2 className="text-2xl font-display font-black text-theme-primary">
+                {formatPokemonName(targetPokemon.displayName || targetPokemon.name)}
               </h2>
               <div className="flex gap-1 mt-1">
                 {getTypes(targetPokemon).map((t) => (
@@ -501,7 +510,7 @@ export default function DexdleGame({ pokemonList = [], onSelectPokemon }) {
                   alt={g.name}
                   className="w-6 h-6 object-contain"
                 />
-                <span className="font-bold truncate text-[11px] capitalize">{g.displayName}</span>
+                <span className="font-bold truncate text-[11px]">{g.displayName || formatPokemonName(g.name)}</span>
               </div>
 
               {/* Gen */}

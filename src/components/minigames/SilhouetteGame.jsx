@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import confetti from "../../utils/confetti";
 import TypeBadge from "../TypeBadge";
 import { ICONIC_POKEMON_POOL } from "../../utils/calcData.js";
+import { formatPokemonName } from "../../utils/loreData.js";
 
 export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -103,10 +104,17 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
   // Handle Guess
   const handleGuess = (guessedName) => {
     if (isRevealed || !currentPokemon) return;
+    const cleanGuess = guessedName.toLowerCase().trim();
+    const rawName = currentPokemon.name.toLowerCase().trim();
+    const formattedName = formatPokemonName(currentPokemon.name).toLowerCase().trim();
+    const displayName = (currentPokemon.displayName || "").toLowerCase().trim();
+    const spacedName = rawName.replace(/-/g, " ");
+
     const isCorrect =
-      guessedName.toLowerCase().trim() === currentPokemon.name.toLowerCase().trim() ||
-      guessedName.toLowerCase().trim() ===
-        (currentPokemon.displayName || currentPokemon.name).toLowerCase().trim();
+      cleanGuess === rawName ||
+      cleanGuess === formattedName ||
+      (displayName && cleanGuess === displayName) ||
+      cleanGuess === spacedName;
 
     if (isCorrect) {
       setIsRevealed(true);
@@ -124,7 +132,10 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
         spread: 70,
         origin: { y: 0.6 },
       });
-      setFeedbackMessage({ type: "success", text: "It's " + (currentPokemon.displayName || currentPokemon.name) + "!" });
+      setFeedbackMessage({
+        type: "success",
+        text: "It's " + formatPokemonName(currentPokemon.displayName || currentPokemon.name) + "!",
+      });
     } else {
       setStreak(0);
       setFeedbackMessage({ type: "error", text: "Not quite! Try again or reveal." });
@@ -231,8 +242,8 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
             animate={{ opacity: 1, y: 0 }}
             className="mt-4 z-20 flex flex-col items-center gap-2 text-center"
           >
-            <h2 className="text-2xl sm:text-3xl font-display font-black text-white capitalize tracking-wide drop-shadow-md">
-              {currentPokemon.displayName || currentPokemon.name}
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-white tracking-wide drop-shadow-md">
+              {formatPokemonName(currentPokemon.displayName || currentPokemon.name)}
             </h2>
             <div className="flex gap-1.5">
               {(currentPokemon.types || []).map((t) => (
@@ -322,9 +333,9 @@ export default function SilhouetteGame({ pokemonList = [], onSelectPokemon }) {
                 key={opt.name}
                 type="button"
                 onClick={() => handleGuess(opt.name)}
-                className="py-3 px-4 bg-theme-surface hover:bg-theme-surface-hover border border-theme rounded-2xl font-display font-extrabold text-sm sm:text-base text-theme-primary capitalize shadow-sm transition-all transform active:scale-95 cursor-pointer text-center min-h-[44px]"
+                className="py-3 px-4 bg-theme-surface hover:bg-theme-surface-hover border border-theme rounded-2xl font-display font-extrabold text-sm sm:text-base text-theme-primary shadow-sm transition-all transform active:scale-95 cursor-pointer text-center min-h-[44px]"
               >
-                {opt.displayName || opt.name.replace(/-/g, " ")}
+                {formatPokemonName(opt.displayName || opt.name)}
               </button>
             ))}
           </div>
