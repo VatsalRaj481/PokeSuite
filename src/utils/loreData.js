@@ -456,3 +456,49 @@ export function getPokemonSignatureAbilities(pokemonName) {
   }
   return [];
 }
+
+/**
+ * Canonical default variety mapping for species where PokéAPI has no bare /pokemon/{species} endpoint.
+ * In PokéAPI, these species only exist under /pokemon-species/{name}, and their playable varieties
+ * are keyed with variety suffixes (e.g., basculin-red-striped, basculegion-male, etc.).
+ */
+export const SPECIES_DEFAULT_VARIETY_MAP = {
+  basculin: "basculin-red-striped",
+  basculegion: "basculegion-male",
+  meowstic: "meowstic-male",
+  indeedee: "indeedee-male",
+  oinkologne: "oinkologne-male",
+  zygarde: "zygarde-50",
+  pumpkaboo: "pumpkaboo-average",
+  gourgeist: "gourgeist-average",
+  giratina: "giratina-altered",
+  deoxys: "deoxys-normal",
+  wormadam: "wormadam-plant",
+  shaymin: "shaymin-land",
+  aegislash: "aegislash-shield",
+  mimikyu: "mimikyu-disguised",
+  enamorus: "enamorus-incarnate",
+  urshifu: "urshifu-single-strike",
+  toxtricity: "toxtricity-amped",
+  eiscue: "eiscue-ice",
+  morpeko: "morpeko-full-belly",
+  keldeo: "keldeo-ordinary",
+  meloetta: "meloetta-aria",
+  darmanitan: "darmanitan-standard",
+  tornadus: "tornadus-incarnate",
+  thundurus: "thundurus-incarnate",
+  landorus: "landorus-incarnate",
+  lycanroc: "lycanroc-midday",
+  wishiwashi: "wishiwashi-solo",
+  minior: "minior-red-meteor",
+};
+
+/**
+ * Resolves a query string to its canonical /pokemon/ endpoint target slug.
+ */
+export function resolvePokemonEndpointTarget(query) {
+  if (!query) return "";
+  const clean = String(query).trim().toLowerCase();
+  return SPECIES_DEFAULT_VARIETY_MAP[clean] || clean;
+}
+

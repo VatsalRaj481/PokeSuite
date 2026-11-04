@@ -10,6 +10,7 @@ import {
   isPokemonSignatureAbility,
   getPokemonSignatureMoves,
   getPokemonSignatureAbilities,
+  resolvePokemonEndpointTarget,
 } from "../utils/loreData.js";
 
 // Defines brand-accurate flat type colors with subtle 1px border for definition
@@ -178,6 +179,26 @@ const formatPokemonName = (rawName) => {
     const base = name.replace("-paldea", "");
     return `Paldean ${capitalize(base)}`;
   }
+  if (name.endsWith("-white-striped")) {
+    const base = name.replace("-white-striped", "");
+    return `${capitalize(base)} (White-Striped)`;
+  }
+  if (name.endsWith("-red-striped")) {
+    const base = name.replace("-red-striped", "");
+    return `${capitalize(base)} (Red-Striped)`;
+  }
+  if (name.endsWith("-blue-striped")) {
+    const base = name.replace("-blue-striped", "");
+    return `${capitalize(base)} (Blue-Striped)`;
+  }
+  if (name.endsWith("-male")) {
+    const base = name.replace("-male", "");
+    return `${capitalize(base)} (Male)`;
+  }
+  if (name.endsWith("-female")) {
+    const base = name.replace("-female", "");
+    return `${capitalize(base)} (Female)`;
+  }
 
   return capitalize(rawName);
 };
@@ -199,6 +220,17 @@ const toSentenceCase = (text) => {
 const parseEvolutionDetails = (details) => {
   if (!details || details.length === 0) return null;
   const d = details[0];
+  if (d.trigger?.name === "recoil-damage") {
+    if (d.min_damage_taken) {
+      if (d.gender === 2) return `${d.min_damage_taken}+ Recoil (♂ Male)`;
+      if (d.gender === 1) return `${d.min_damage_taken}+ Recoil (♀ Female)`;
+      return `${d.min_damage_taken}+ Recoil Dmg`;
+    }
+    return "Recoil Damage";
+  }
+  if (d.trigger?.name === "three-critical-hits") return "3 Critical Hits";
+  if (d.trigger?.name === "strong-style-move") return "Strong Style Move";
+  if (d.min_steps) return `Walk ${d.min_steps} Steps`;
   if (d.item) return d.item.name.replace(/-/g, " ");
   if (d.held_item) return `Hold ${d.held_item.name.replace(/-/g, " ")}`;
   if (d.min_happiness) {
@@ -226,9 +258,65 @@ const parseEvolutionTree = (chainNode) => {
   };
 
   const buildNode = (node, incomingTrigger = null) => {
+    const speciesId = getId(node.species?.url);
+    const speciesName = node.species?.name?.toLowerCase();
+
+    // Canonical handling for Basculin -> Basculegion
+    // In Pokémon canon: Only White-Striped Basculin (Hisui) evolves into Basculegion Male or Female
+    if (speciesName === "basculin") {
+      const hasBasculegion = (node.evolves_to || []).some(
+        (child) => child.species?.name?.toLowerCase() === "basculegion"
+      );
+
+      if (hasBasculegion) {
+        return {
+          id: "10247",
+          spriteId: "10247",
+          speciesId: speciesId || "550",
+          speciesName: "basculin",
+          dexNumber: "550",
+          name: "basculin-white-striped",
+          displayName: "Basculin (White-Striped)",
+          formBadge: "Hisuian Form",
+          isHisuianWhiteStriped: true,
+          trigger: incomingTrigger,
+          evolvesTo: [
+            {
+              id: "902",
+              spriteId: "902",
+              speciesId: "902",
+              speciesName: "basculegion",
+              dexNumber: "902",
+              name: "basculegion-male",
+              displayName: "Basculegion (Male)",
+              formBadge: "♂ Male",
+              trigger: "294+ Recoil (♂ Male)",
+              evolvesTo: [],
+            },
+            {
+              id: "10248",
+              spriteId: "10248",
+              speciesId: "902",
+              speciesName: "basculegion",
+              dexNumber: "902",
+              name: "basculegion-female",
+              displayName: "Basculegion (Female)",
+              formBadge: "♀ Female",
+              trigger: "294+ Recoil (♀ Female)",
+              evolvesTo: [],
+            },
+          ],
+        };
+      }
+    }
+
     return {
-      id: getId(node.species?.url),
-      name: node.species?.name,
+      id: speciesId,
+      speciesId,
+      speciesName,
+      dexNumber: speciesId,
+      name: speciesName,
+      displayName: formatPokemonName(speciesName),
       trigger: incomingTrigger,
       evolvesTo: (node.evolves_to || []).map((child) =>
         buildNode(child, parseEvolutionDetails(child.evolution_details))
@@ -240,24 +328,32 @@ const parseEvolutionTree = (chainNode) => {
 };
 
 // Stage card component for rendering a single evolution node
-function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
+function EvolutionStageCard({ node, currentPokemonId, currentPokemonName, onSelectPokemon }) {
   if (!node) return null;
-  const isCurrent = String(node.id) === String(currentPokemonId);
-  const homeSpriteUrl = node.id
-    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${node.id}.png`
-    : null;
+  const isCurrent =
+    (node.name && currentPokemonName && node.name.toLowerCase() === currentPokemonName.toLowerCase()) ||
+    (String(node.id) === String(currentPokemonId)) ||
+    (node.speciesId && String(node.speciesId) === String(currentPokemonId) && node.isDefault);
+
+  const spriteId = node.spriteId || node.id;
+  const homeSpriteUrl = node.spriteUrl || (spriteId
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${spriteId}.png`
+    : null);
+
+  const displayName = node.displayName || formatPokemonName(node.name);
+  const displayId = node.dexNumber || node.speciesId || node.id;
 
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={() => onSelectPokemon && onSelectPokemon(node.name)}
-      className={`flex flex-col items-center p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none group relative flex-shrink-0 w-24 sm:w-28 md:w-32 ${
+      onClick={() => onSelectPokemon && onSelectPokemon(node.name || node.id)}
+      className={`flex flex-col items-center p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none group relative flex-shrink-0 w-28 sm:w-32 md:w-36 ${
         isCurrent
           ? "ring-2 ring-theme-accent/60 bg-theme-surface/80 shadow-md"
           : "hover:bg-theme-surface/40"
       }`}
-      title={`View ${formatPokemonName(node.name)}`}
+      title={`View ${displayName}`}
     >
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 flex items-center justify-center p-1 flex-shrink-0">
         {/* Subtle Ambient Halo on active / hover */}
@@ -271,11 +367,11 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
         {homeSpriteUrl ? (
           <img
             src={homeSpriteUrl}
-            alt={node.name}
+            alt={displayName}
             className="w-full h-full object-contain drop-shadow-md group-hover:scale-108 transition-transform duration-200 z-10"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${node.id}.png`;
+              e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
             }}
           />
         ) : (
@@ -283,17 +379,22 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
         )}
       </div>
       <span
-        className={`text-xs sm:text-sm font-sans font-bold capitalize text-center mt-1 transition-colors truncate w-full ${
+        className={`text-xs sm:text-[13px] font-sans font-bold capitalize text-center mt-1 transition-colors leading-tight px-1 w-full line-clamp-2 ${
           isCurrent
             ? "text-theme-accent"
             : "text-theme-primary group-hover:text-theme-accent"
         }`}
       >
-        {formatPokemonName(node.name)}
+        {displayName}
       </span>
       <span className="text-[10px] sm:text-xs font-mono-tech text-theme-secondary font-semibold">
-        #{String(node.id).padStart(4, "0")}
+        #{String(displayId).padStart(4, "0")}
       </span>
+      {node.formBadge && (
+        <span className="mt-1 px-2 py-0.5 rounded-full text-[8.5px] font-mono-tech font-bold bg-theme-surface border border-theme text-theme-secondary shadow-2xs">
+          {node.formBadge}
+        </span>
+      )}
       {isCurrent && (
         <span className="mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-mono-tech font-bold bg-theme-accent text-white uppercase tracking-wider shadow-xs">
           Current
@@ -306,9 +407,9 @@ function EvolutionStageCard({ node, currentPokemonId, onSelectPokemon }) {
 // Fixed-width, beautifully aligned conduit connector between evolution stages
 function EvolutionConnector({ trigger }) {
   return (
-    <div className="flex flex-col items-center justify-center px-1 sm:px-2 flex-shrink-0 min-w-[96px] sm:min-w-[112px] md:min-w-[124px] max-w-[148px] select-none my-auto">
+    <div className="flex flex-col items-center justify-center px-1 sm:px-2 flex-shrink-0 min-w-[100px] sm:min-w-[120px] md:min-w-[136px] max-w-[170px] select-none my-auto">
       <span
-        className="px-2 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] sm:text-[10px] font-mono-tech font-bold text-theme-primary text-center tracking-tight capitalize max-w-full shadow-2xs mb-1.5 whitespace-nowrap overflow-hidden text-ellipsis"
+        className="px-2.5 py-0.5 rounded-full bg-theme-surface border border-theme text-[9px] sm:text-[9.5px] font-mono-tech font-bold text-theme-primary text-center tracking-tight capitalize max-w-full shadow-2xs mb-1.5 whitespace-nowrap overflow-hidden text-ellipsis"
         title={trigger || "Evolves"}
       >
         {trigger || "Evolves"}
@@ -337,7 +438,7 @@ function EvolutionConnector({ trigger }) {
 }
 
 // Unified, recursive evolution tree branch component with consistent spacing
-function EvolutionBranch({ node, currentPokemonId, onSelectPokemon }) {
+function EvolutionBranch({ node, currentPokemonId, currentPokemonName, onSelectPokemon }) {
   if (!node) return null;
   const hasChildren = node.evolvesTo && node.evolvesTo.length > 0;
 
@@ -346,6 +447,7 @@ function EvolutionBranch({ node, currentPokemonId, onSelectPokemon }) {
       <EvolutionStageCard
         node={node}
         currentPokemonId={currentPokemonId}
+        currentPokemonName={currentPokemonName}
         onSelectPokemon={onSelectPokemon}
       />
 
@@ -357,6 +459,7 @@ function EvolutionBranch({ node, currentPokemonId, onSelectPokemon }) {
               <EvolutionBranch
                 node={child}
                 currentPokemonId={currentPokemonId}
+                currentPokemonName={currentPokemonName}
                 onSelectPokemon={onSelectPokemon}
               />
             </div>
@@ -405,7 +508,7 @@ function EvolutionConnectorVertical({ trigger }) {
 }
 
 // Mobile-optimized vertical evolution tree component (prevents horizontal scrolling)
-function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
+function MobileEvolutionTree({ node, currentPokemonId, currentPokemonName, onSelectPokemon }) {
   if (!node) return null;
   const hasChildren = node.evolvesTo && node.evolvesTo.length > 0;
   const isBranching = hasChildren && node.evolvesTo.length > 1;
@@ -415,6 +518,7 @@ function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
       <EvolutionStageCard
         node={node}
         currentPokemonId={currentPokemonId}
+        currentPokemonName={currentPokemonName}
         onSelectPokemon={onSelectPokemon}
       />
 
@@ -424,6 +528,7 @@ function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
           <MobileEvolutionTree
             node={node.evolvesTo[0]}
             currentPokemonId={currentPokemonId}
+            currentPokemonName={currentPokemonName}
             onSelectPokemon={onSelectPokemon}
           />
         </div>
@@ -466,6 +571,7 @@ function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
                 <EvolutionStageCard
                   node={child}
                   currentPokemonId={currentPokemonId}
+                  currentPokemonName={currentPokemonName}
                   onSelectPokemon={onSelectPokemon}
                 />
                 {/* Check if branch evolves again, e.g. Wurmple -> Silcoon -> Beautifly or Applin -> Dipplin -> Hydrapple */}
@@ -475,6 +581,7 @@ function MobileEvolutionTree({ node, currentPokemonId, onSelectPokemon }) {
                     <EvolutionStageCard
                       node={child.evolvesTo[0]}
                       currentPokemonId={currentPokemonId}
+                      currentPokemonName={currentPokemonName}
                       onSelectPokemon={onSelectPokemon}
                     />
                   </div>
@@ -821,8 +928,9 @@ function PokemonCard({
         // If target had empty moves (e.g. lucario-mega-z, special varieties), fetch base species
         const baseName = pokemon.species?.name || pokemon.name?.split("-")[0];
         if (baseName && baseName.toLowerCase() !== target) {
+          const resolvedBase = resolvePokemonEndpointTarget(baseName.toLowerCase());
           const baseRes = await axios.get(
-            `https://pokeapi.co/api/v2/pokemon/${baseName.toLowerCase()}`
+            `https://pokeapi.co/api/v2/pokemon/${resolvedBase}`
           );
           if (isMounted && baseRes.data?.moves) {
             setBaseMoves(baseRes.data.moves);
@@ -849,7 +957,7 @@ function PokemonCard({
       pokemon.species?.name || pokemon.name.split("-")[0]
     ).toLowerCase();
 
-    if (rootName === currentBaseName) {
+    if (rootName === currentBaseName || evolutionTree.speciesName === currentBaseName) {
       setPreEvoEggMoves([]);
       return;
     }
@@ -857,8 +965,9 @@ function PokemonCard({
     let isMounted = true;
     const fetchPreEvoEggMoves = async () => {
       try {
+        const resolvedRoot = resolvePokemonEndpointTarget(rootName);
         const res = await axios.get(
-          `https://pokeapi.co/api/v2/pokemon/${rootName}`
+          `https://pokeapi.co/api/v2/pokemon/${resolvedRoot}`
         );
         if (isMounted && res.data?.moves) {
           const eggMoves = [];
@@ -1683,10 +1792,11 @@ function PokemonCard({
     // 6. Evolution Hierarchy (Basic, Stage 1, Final Evolution, Single Stage)
     if (evolutionTree) {
       const rootName = evolutionTree.name?.toLowerCase();
+      const rootSpecies = evolutionTree.speciesName?.toLowerCase() || rootName;
       const firstBranch = evolutionTree.evolvesTo || [];
 
       // Does not evolve and has no pre-evolution
-      if (rootName === baseName && firstBranch.length === 0) {
+      if ((rootName === baseName || rootSpecies === baseName) && firstBranch.length === 0) {
         return {
           label: "Single Stage",
           badge: "bg-blue-500/15 text-blue-400 border-blue-500/30",
@@ -1694,7 +1804,7 @@ function PokemonCard({
       }
 
       // Root of chain with evolution(s)
-      if (rootName === baseName && firstBranch.length > 0) {
+      if ((rootName === baseName || rootSpecies === baseName) && firstBranch.length > 0) {
         return {
           label: "Basic Pokémon",
           badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
@@ -1702,7 +1812,9 @@ function PokemonCard({
       }
 
       // Second stage in chain
-      const stage1Node = firstBranch.find((n) => n.name?.toLowerCase() === baseName);
+      const stage1Node = firstBranch.find(
+        (n) => n.name?.toLowerCase() === baseName || n.speciesName?.toLowerCase() === baseName
+      );
       if (stage1Node) {
         if (!stage1Node.evolvesTo || stage1Node.evolvesTo.length === 0) {
           return {
@@ -1718,7 +1830,9 @@ function PokemonCard({
 
       // Third stage in chain
       for (const s1 of firstBranch) {
-        const stage2Node = (s1.evolvesTo || []).find((n) => n.name?.toLowerCase() === baseName);
+        const stage2Node = (s1.evolvesTo || []).find(
+          (n) => n.name?.toLowerCase() === baseName || n.speciesName?.toLowerCase() === baseName
+        );
         if (stage2Node) {
           return {
             label: "Final Evolution",
@@ -1733,6 +1847,18 @@ function PokemonCard({
       badge: "bg-slate-500/15 text-slate-400 border-slate-500/30",
     };
   }, [pokemon, internalSpeciesData, evolutionTree]);
+
+  const isBasculinEvolution = useMemo(() => {
+    const name = pokemon?.name?.toLowerCase() || "";
+    const rootName = evolutionTree?.name?.toLowerCase() || "";
+    return (
+      name.includes("basculin") ||
+      name.includes("basculegion") ||
+      rootName.includes("basculin") ||
+      rootName.includes("basculegion") ||
+      Boolean(evolutionTree?.isHisuianWhiteStriped)
+    );
+  }, [pokemon?.name, evolutionTree]);
 
   if (!pokemon) return null;
 
@@ -2997,7 +3123,7 @@ function PokemonCard({
       <div className="flex flex-col gap-6 sm:gap-8 w-full border-t border-theme pt-6 sm:pt-8">
         {/* Evolution Chain Section */}
         <div className="bg-theme-bg border border-theme rounded-2xl p-3 sm:p-6 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-display font-bold text-theme-secondary flex items-center gap-2 uppercase tracking-wider">
               <span>Evolution Chain</span>
             </h3>
@@ -3007,6 +3133,21 @@ function PokemonCard({
               </span>
             )}
           </div>
+
+          {/* Lore & Evolution Notice for White-Striped Basculin -> Basculegion */}
+          {isBasculinEvolution && (
+            <div className="flex items-start sm:items-center gap-2.5 px-3.5 py-2.5 mb-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs font-sans shadow-xs">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 mt-1 sm:mt-0 ring-4 ring-cyan-400/20 flex-shrink-0 animate-pulse" />
+              <div className="leading-relaxed">
+                <span className="font-bold text-cyan-300 mr-1.5 font-mono-tech tracking-wide uppercase text-[10.5px]">
+                  Evolutionary Requirement:
+                </span>
+                <span className="text-slate-200 text-xs">
+                  Only <strong>White-Striped Basculin (Hisuian Form)</strong> evolves into <strong>Basculegion</strong> (by taking 294+ recoil damage in battle without fainting). Red-Striped and Blue-Striped Basculin do not evolve.
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="w-full py-2 sm:py-4 flex items-center justify-center">
             {loadingEvolution ? (
@@ -3026,6 +3167,7 @@ function PokemonCard({
                       }
                     }
                     currentPokemonId={pokemon.id}
+                    currentPokemonName={pokemon.name}
                     onSelectPokemon={onSelectPokemon}
                   />
                 </div>
@@ -3041,6 +3183,7 @@ function PokemonCard({
                       }
                     }
                     currentPokemonId={pokemon.id}
+                    currentPokemonName={pokemon.name}
                     onSelectPokemon={onSelectPokemon}
                   />
                 </div>

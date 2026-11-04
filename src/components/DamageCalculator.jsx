@@ -72,6 +72,28 @@ export function getStatusImmunities(types = [], isTera = false, teraType = "") {
   };
 }
 
+export function isMatchingEvs(current = {}, target = {}) {
+  return (
+    (current.hp || 0) === (target.hp || 0) &&
+    (current.attack || 0) === (target.attack || 0) &&
+    (current.defense || 0) === (target.defense || 0) &&
+    (current["special-attack"] || 0) === (target["special-attack"] || 0) &&
+    (current["special-defense"] || 0) === (target["special-defense"] || 0) &&
+    (current.speed || 0) === (target.speed || 0)
+  );
+}
+
+export function formatEvSummary(evs = {}) {
+  const parts = [];
+  if (evs.hp) parts.push(`${evs.hp} HP`);
+  if (evs.attack) parts.push(`${evs.attack} Atk`);
+  if (evs.defense) parts.push(`${evs.defense} Def`);
+  if (evs["special-attack"]) parts.push(`${evs["special-attack"]} SpA`);
+  if (evs["special-defense"]) parts.push(`${evs["special-defense"]} SpD`);
+  if (evs.speed) parts.push(`${evs.speed} Spe`);
+  return parts.length > 0 ? parts.join(" / ") : "0 EVs";
+}
+
 export default function DamageCalculator({ pokemonList = [] }) {
   // Attacker State
   const [attackerPokemon, setAttackerPokemon] = useState(POPULAR_ATTACKERS[0]);
@@ -452,9 +474,12 @@ export default function DamageCalculator({ pokemonList = [] }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Attacker (5 cols) */}
         <div className="lg:col-span-5 bg-theme-surface border border-theme rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-theme pb-3">
+          <div className="flex items-center justify-between border-b border-theme pb-3 min-h-[38px]">
             <h3 className="font-display font-extrabold text-sm sm:text-base text-theme-primary uppercase tracking-wide flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+              </span>
               Attacker Configuration
             </h3>
             <button
@@ -498,9 +523,11 @@ export default function DamageCalculator({ pokemonList = [] }) {
           {/* Level, Nature & Ability */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Level
-              </label>
+              <div className="h-6 flex items-center mb-1.5">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Level
+                </label>
+              </div>
               <input
                 type="number"
                 min="1"
@@ -511,7 +538,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="h-6 flex items-center justify-between mb-1.5">
                 <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
                   Nature
                 </label>
@@ -521,14 +548,14 @@ export default function DamageCalculator({ pokemonList = [] }) {
                     setNatureModalTarget("attacker");
                     setShowNatureModal(true);
                   }}
-                  className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs border border-indigo-400/40 font-display text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all hover:scale-105 active:scale-95"
+                  className="px-1.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs border border-indigo-400/40 font-mono-tech text-[9px] font-bold flex items-center gap-1 cursor-pointer transition-all hover:scale-105 active:scale-95"
                   title="Open Nature Chart"
                 >
                   <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
                   </svg>
-                  <span>Nature Chart</span>
+                  <span>Chart</span>
                 </button>
               </div>
               <select
@@ -544,9 +571,11 @@ export default function DamageCalculator({ pokemonList = [] }) {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Ability
-              </label>
+              <div className="h-6 flex items-center mb-1.5">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Ability
+                </label>
+              </div>
               <select
                 value={attackerAbility}
                 onChange={(e) => setAttackerAbility(e.target.value)}
@@ -747,21 +776,33 @@ export default function DamageCalculator({ pokemonList = [] }) {
           </div>
 
           {/* Quick EV Presets */}
-          <div className="flex flex-col gap-1.5 pt-1 border-t border-theme">
-            <span className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
-              Attacker EV Presets:
-            </span>
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-theme">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                Attacker EV Presets:
+              </span>
+              <span className="text-[9px] font-mono-tech text-rose-400 font-bold truncate max-w-[150px]">
+                {formatEvSummary(attackerEvs)}
+              </span>
+            </div>
             <div className="grid grid-cols-3 gap-1">
-              {EV_PRESETS.slice(0, 3).map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => setAttackerEvs(preset.evs)}
-                  className="px-1.5 py-1 bg-theme-bg hover:bg-theme-surface border border-theme rounded text-[9px] font-mono-tech text-theme-primary truncate cursor-pointer text-center"
-                >
-                  {preset.label.split(" (")[0]}
-                </button>
-              ))}
+              {EV_PRESETS.slice(0, 3).map((preset) => {
+                const isActive = isMatchingEvs(attackerEvs, preset.evs);
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setAttackerEvs(preset.evs)}
+                    className={`px-1.5 py-1 rounded text-[9px] font-mono-tech truncate cursor-pointer text-center transition-all border ${
+                      isActive
+                        ? "bg-rose-600 text-white font-black border-rose-400 shadow-xs ring-1 ring-rose-500/40"
+                        : "bg-theme-bg hover:bg-theme-surface text-theme-secondary hover:text-theme-primary border-theme font-medium"
+                    }`}
+                  >
+                    {isActive ? "✓ " : ""}{preset.label.split(" (")[0]}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -822,9 +863,9 @@ export default function DamageCalculator({ pokemonList = [] }) {
         </div>
 
         {/* Center Column: Field & Environment (2 cols) */}
-        <div className="lg:col-span-2 bg-theme-surface border border-theme rounded-2xl p-4 flex flex-col gap-4 text-xs font-display">
-          <div className="border-b border-theme pb-2 text-center">
-            <h3 className="font-extrabold uppercase text-theme-primary tracking-wide text-xs">
+        <div className="lg:col-span-2 bg-theme-surface border border-theme rounded-2xl p-4 sm:p-5 flex flex-col gap-4 text-xs font-display">
+          <div className="flex items-center justify-center border-b border-theme pb-3 min-h-[38px] text-center">
+            <h3 className="font-display font-extrabold text-sm sm:text-base text-theme-primary uppercase tracking-wide">
               Field & Weather
             </h3>
           </div>
@@ -925,9 +966,12 @@ export default function DamageCalculator({ pokemonList = [] }) {
 
         {/* Right Column: Defender (5 cols) */}
         <div className="lg:col-span-5 bg-theme-surface border border-theme rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-theme pb-3">
+          <div className="flex items-center justify-between border-b border-theme pb-3 min-h-[38px]">
             <h3 className="font-display font-extrabold text-sm sm:text-base text-theme-primary uppercase tracking-wide flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+              </span>
               Defender Configuration
             </h3>
             <button
@@ -971,9 +1015,11 @@ export default function DamageCalculator({ pokemonList = [] }) {
           {/* Level, Nature & Ability */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Level
-              </label>
+              <div className="h-6 flex items-center mb-1.5">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Level
+                </label>
+              </div>
               <input
                 type="number"
                 min="1"
@@ -984,7 +1030,7 @@ export default function DamageCalculator({ pokemonList = [] }) {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="h-6 flex items-center justify-between mb-1.5">
                 <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
                   Nature
                 </label>
@@ -994,14 +1040,14 @@ export default function DamageCalculator({ pokemonList = [] }) {
                     setNatureModalTarget("defender");
                     setShowNatureModal(true);
                   }}
-                  className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs border border-indigo-400/40 font-display text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all hover:scale-105 active:scale-95"
+                  className="px-1.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs border border-indigo-400/40 font-mono-tech text-[9px] font-bold flex items-center gap-1 cursor-pointer transition-all hover:scale-105 active:scale-95"
                   title="Open Nature Chart"
                 >
                   <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
                   </svg>
-                  <span>Nature Chart</span>
+                  <span>Chart</span>
                 </button>
               </div>
               <select
@@ -1017,9 +1063,11 @@ export default function DamageCalculator({ pokemonList = [] }) {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-mono-tech text-theme-secondary uppercase block mb-1">
-                Ability
-              </label>
+              <div className="h-6 flex items-center mb-1.5">
+                <label className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                  Ability
+                </label>
+              </div>
               <select
                 value={defenderAbility}
                 onChange={(e) => setDefenderAbility(e.target.value)}
@@ -1073,22 +1121,6 @@ export default function DamageCalculator({ pokemonList = [] }) {
                 </option>
               </select>
             </div>
-          </div>
-
-          {/* Current Defender HP % Slider */}
-          <div className="flex flex-col gap-1 p-2 bg-theme-bg border border-theme rounded-xl">
-            <div className="flex justify-between items-center text-[10px] font-mono-tech text-theme-secondary">
-              <span className="uppercase font-bold">Current HP %</span>
-              <span className="text-theme-primary font-bold">{defenderHpPercent}%</span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="100"
-              value={defenderHpPercent}
-              onChange={(e) => setDefenderHpPercent(Number(e.target.value))}
-              className="w-full accent-theme-accent cursor-pointer"
-            />
           </div>
 
           {/* Terastallize */}
@@ -1182,21 +1214,63 @@ export default function DamageCalculator({ pokemonList = [] }) {
           </div>
 
           {/* Quick EV Presets */}
-          <div className="border-t border-theme pt-3 flex flex-col gap-1.5">
-            <span className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
-              Quick EV Presets:
-            </span>
-            <div className="grid grid-cols-2 gap-1.5">
-              {EV_PRESETS.slice(2, 6).map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => setDefenderEvs(preset.evs)}
-                  className="px-2 py-1 bg-theme-bg hover:bg-theme-surface border border-theme rounded text-[10px] font-mono-tech text-theme-primary truncate cursor-pointer"
-                >
-                  {preset.label}
-                </button>
-              ))}
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-theme">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono-tech text-theme-secondary uppercase font-bold">
+                Defender EV Presets:
+              </span>
+              <span className="text-[9px] font-mono-tech text-blue-400 font-bold truncate max-w-[150px]">
+                {formatEvSummary(defenderEvs)}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { label: "Bulky Phys", evs: { hp: 252, attack: 0, defense: 252, "special-attack": 0, "special-defense": 4, speed: 0 } },
+                { label: "Bulky Spec", evs: { hp: 252, attack: 0, defense: 4, "special-attack": 0, "special-defense": 252, speed: 0 } },
+                { label: "Max HP / Bal", evs: { hp: 252, attack: 0, defense: 128, "special-attack": 0, "special-defense": 128, speed: 0 } },
+              ].map((preset) => {
+                const isActive = isMatchingEvs(defenderEvs, preset.evs);
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setDefenderEvs(preset.evs)}
+                    className={`px-1.5 py-1 rounded text-[9px] font-mono-tech truncate cursor-pointer text-center transition-all border ${
+                      isActive
+                        ? "bg-blue-600 text-white font-black border-blue-400 shadow-xs ring-1 ring-blue-500/40"
+                        : "bg-theme-bg hover:bg-theme-surface text-theme-secondary hover:text-theme-primary border-theme font-medium"
+                    }`}
+                  >
+                    {isActive ? "✓ " : ""}{preset.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Current Defender Health & Survival */}
+          <div className="border-t border-theme pt-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-display font-bold text-theme-primary uppercase">
+                Defender Health
+              </span>
+              <span className="text-[11px] font-mono-tech text-theme-accent font-bold">
+                {defenderHpPercent}% HP
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5 p-2 bg-theme-bg border border-theme rounded-xl">
+              <input
+                type="range"
+                min="1"
+                max="100"
+                value={defenderHpPercent}
+                onChange={(e) => setDefenderHpPercent(Number(e.target.value))}
+                className="w-full accent-theme-accent cursor-pointer"
+              />
+              <div className="flex justify-between items-center text-[10px] font-mono-tech text-theme-secondary">
+                <span>Start: {defenderHpPercent}%</span>
+                <span>Max: {calcResult.hpMax} HP</span>
+              </div>
             </div>
           </div>
         </div>

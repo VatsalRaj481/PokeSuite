@@ -13,7 +13,7 @@ import ItemsDex from "./components/ItemsDex";
 import BattleLab from "./components/BattleLab";
 import DamageCalculator from "./components/DamageCalculator";
 import MinigamesHub from "./components/minigames/MinigamesHub";
-import { getPokemonArchetype } from "./utils/loreData.js";
+import { getPokemonArchetype, resolvePokemonEndpointTarget } from "./utils/loreData.js";
 
 const formatPokemonName = (rawName) => {
   if (!rawName) return "";
@@ -55,6 +55,26 @@ const formatPokemonName = (rawName) => {
   if (name.includes("-paldea")) {
     const base = name.replace("-paldea", "");
     return `Paldean ${capitalize(base)}`;
+  }
+  if (name.endsWith("-white-striped")) {
+    const base = name.replace("-white-striped", "");
+    return `${capitalize(base)} (White-Striped)`;
+  }
+  if (name.endsWith("-red-striped")) {
+    const base = name.replace("-red-striped", "");
+    return `${capitalize(base)} (Red-Striped)`;
+  }
+  if (name.endsWith("-blue-striped")) {
+    const base = name.replace("-blue-striped", "");
+    return `${capitalize(base)} (Blue-Striped)`;
+  }
+  if (name.endsWith("-male")) {
+    const base = name.replace("-male", "");
+    return `${capitalize(base)} (Male)`;
+  }
+  if (name.endsWith("-female")) {
+    const base = name.replace("-female", "");
+    return `${capitalize(base)} (Female)`;
   }
   
   return capitalize(rawName);
@@ -572,7 +592,8 @@ function App() {
       // Fast direct lookup for exact name or ID query
       if (queryLower && !typeQuery && !selectedRegion && !selectedGenerationId && !selectedCategory && !selectedCollection && !selectedArchetype) {
         try {
-          const directRes = await axios.get(`https://pokeapi.co/api/v2/pokemon/${queryLower}`);
+          const target = resolvePokemonEndpointTarget(queryLower);
+          const directRes = await axios.get(`https://pokeapi.co/api/v2/pokemon/${target}`);
           if (directRes.data) {
             setSelectedPokemon(directRes.data);
             fetchPokemonDescription(directRes.data.name);
@@ -852,10 +873,34 @@ function App() {
       setActiveAppMode("pokedex");
       try {
         const query = String(nameOrId).trim().toLowerCase();
-        const res = await axios.get(
-          `https://pokeapi.co/api/v2/pokemon/${query}`
-        );
-        if (res.data) {
+        let target = resolvePokemonEndpointTarget(query);
+
+        let res;
+        try {
+          res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${target}`);
+        } catch (fetchErr) {
+          // If direct pokemon endpoint failed, resolve via pokemon-species
+          try {
+            const speciesRes = await axios.get(
+              `https://pokeapi.co/api/v2/pokemon-species/${query}`
+            );
+            const varieties = speciesRes.data?.varieties || [];
+            const defaultVariety =
+              varieties.find((v) => v.is_default)?.pokemon?.name ||
+              varieties[0]?.pokemon?.name;
+            if (defaultVariety) {
+              res = await axios.get(
+                `https://pokeapi.co/api/v2/pokemon/${defaultVariety}`
+              );
+            } else {
+              throw fetchErr;
+            }
+          } catch (speciesErr) {
+            throw fetchErr;
+          }
+        }
+
+        if (res && res.data) {
           setSelectedPokemon(res.data);
           fetchPokemonDescription(res.data.name);
           setFilteredPokemon([]);
