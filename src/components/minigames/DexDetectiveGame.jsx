@@ -536,38 +536,25 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
     }
   };
 
-  // Unlock sequential hints: each hint costs 1 attempt, must unlock strictly in order (1 -> 2 -> 3)
+  // Unlock hints: each hint costs 1 attempt, can be chosen freely in any order
   const unlockClue = (clueKey) => {
     if (isSolved || isFailed || attemptsLeft <= 1) return;
+    if (revealedClues[clueKey]) return;
 
-    if (clueKey === "gen") {
-      if (revealedClues.gen) return;
-      const nextAttempts = attemptsLeft - 1;
-      setAttemptsLeft(nextAttempts);
-      setRevealedClues((p) => ({ ...p, gen: true }));
-      setFeedback({
-        type: "warning",
-        text: `Hint 1 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
-      });
-    } else if (clueKey === "types") {
-      if (!revealedClues.gen || revealedClues.types) return;
-      const nextAttempts = attemptsLeft - 1;
-      setAttemptsLeft(nextAttempts);
-      setRevealedClues((p) => ({ ...p, types: true }));
-      setFeedback({
-        type: "warning",
-        text: `Hint 2 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
-      });
-    } else if (clueKey === "category") {
-      if (!revealedClues.types || revealedClues.category) return;
-      const nextAttempts = attemptsLeft - 1;
-      setAttemptsLeft(nextAttempts);
-      setRevealedClues((p) => ({ ...p, category: true }));
-      setFeedback({
-        type: "warning",
-        text: `Hint 3 (Dex Category) unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining!`,
-      });
-    }
+    const nextAttempts = attemptsLeft - 1;
+    setAttemptsLeft(nextAttempts);
+    setRevealedClues((p) => ({ ...p, [clueKey]: true }));
+
+    const labelMap = {
+      gen: "Region / Gen hint",
+      types: "Typing hint",
+      category: "Dex Category hint",
+    };
+
+    setFeedback({
+      type: "warning",
+      text: `${labelMap[clueKey] || "Hint"} unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
+    });
   };
 
   // Keyboard navigation for dropdown
@@ -851,15 +838,15 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
           )}
         </AnimatePresence>
 
-        {/* Sequential Hints Section (Only visible during active gameplay) */}
+        {/* Available Hints Section (Only visible during active gameplay) */}
         {!isSolved && !isFailed && (
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-[10px] font-mono-tech uppercase font-bold text-theme-secondary tracking-wider">
-                Sequential Hints:
+                Available Hints:
               </span>
               <span className="text-[11px] font-display text-theme-secondary/70 hidden sm:inline">
-                Each hint costs 1 attempt • Unlocked strictly in order (1 → 2 → 3)
+                Each hint costs 1 attempt • Choose any hint in any order
               </span>
             </div>
 
@@ -882,9 +869,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Hint 1 Unlocked"
+                        ? "Region / Gen Unlocked"
                         : canUnlock
-                        ? "Unlock Hint 1 (Costs 1 attempt)"
+                        ? "Unlock Region / Gen (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
@@ -895,7 +882,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         <path d="M2 12h20" />
                       </svg>
                       <span className="truncate">
-                        {isUnlocked ? generationText : "Hint 1: Region / Gen"}
+                        {isUnlocked ? generationText : "Hint: Region / Gen"}
                       </span>
                     </span>
                     {isUnlocked ? (
@@ -914,8 +901,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               {/* Hint 2: Typings */}
               {(() => {
                 const isUnlocked = revealedClues.types;
-                const isPrereqMet = revealedClues.gen;
-                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                const canUnlock = !isUnlocked && attemptsLeft > 1;
                 return (
                   <button
                     type="button"
@@ -930,25 +916,16 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Hint 2 Unlocked"
-                        : !isPrereqMet
-                        ? "Unlock Hint 1 first"
+                        ? "Typings Unlocked"
                         : canUnlock
-                        ? "Unlock Hint 2 (Costs 1 attempt)"
+                        ? "Unlock Typings (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
                     <span className="flex items-center gap-1.5 truncate mr-1">
-                      {!isPrereqMet && !isUnlocked ? (
-                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                      ) : (
-                        <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      )}
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
                       {isUnlocked && currentCase?.types ? (
                         <span className="flex items-center gap-1">
                           {currentCase.types.map((t) => {
@@ -957,18 +934,12 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                           })}
                         </span>
                       ) : (
-                        <span className="truncate">
-                          {!isPrereqMet ? "Hint 2: Typings (Locked)" : "Hint 2: Typings"}
-                        </span>
+                        <span className="truncate">Hint: Typings</span>
                       )}
                     </span>
                     {isUnlocked ? (
                       <span className="text-[10px] uppercase font-mono-tech font-bold text-emerald-400 flex-shrink-0">
                         Unlocked
-                      </span>
-                    ) : !isPrereqMet ? (
-                      <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">
-                        Locked
                       </span>
                     ) : (
                       <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
@@ -982,8 +953,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               {/* Hint 3: Dex Category / Classification */}
               {(() => {
                 const isUnlocked = revealedClues.category;
-                const isPrereqMet = revealedClues.types;
-                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                const canUnlock = !isUnlocked && attemptsLeft > 1;
                 return (
                   <button
                     type="button"
@@ -998,41 +968,26 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Hint 3 Unlocked"
-                        : !isPrereqMet
-                        ? "Unlock Hint 2 first"
+                        ? "Dex Category Unlocked"
                         : canUnlock
-                        ? "Unlock Hint 3 (Costs 1 attempt)"
+                        ? "Unlock Dex Category (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
                     <span className="flex items-center gap-1.5 truncate mr-1">
-                      {!isPrereqMet && !isUnlocked ? (
-                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                      ) : (
-                        <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                          <line x1="7" y1="7" x2="7.01" y2="7" />
-                        </svg>
-                      )}
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                      </svg>
                       <span className="truncate">
                         {isUnlocked
                           ? `The “${currentCase?.category || "Mystery Pokémon"}”`
-                          : !isPrereqMet
-                          ? "Hint 3: Dex Category (Locked)"
-                          : "Hint 3: Dex Category"}
+                          : "Hint: Dex Category"}
                       </span>
                     </span>
                     {isUnlocked ? (
                       <span className="text-[10px] uppercase font-mono-tech font-bold text-amber-400 flex-shrink-0">
                         Unlocked
-                      </span>
-                    ) : !isPrereqMet ? (
-                      <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">
-                        Locked
                       </span>
                     ) : (
                       <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
