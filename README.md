@@ -57,9 +57,9 @@ A dedicated minigames hub (`src/components/minigames/MinigamesHub.jsx`) with per
 2. **Who's That Cry? (Audio Quiz)**:
    - Pure acoustic challenge. Listen to the sound clip and identify the Pokémon.
    - Features **Modern 3D** vs. **Retro 8-Bit** audio toggles, animated soundwave visualizer, and progressive lifelines (Region, Primary Type, BST bracket).
-3. **Dex Detective (Lore Mystery)**:
-   - Deduce the mystery Pokémon from authentic, redacted Pokédex flavor text field entries.
-   - Features archival game origin badges (e.g., *Pokémon Emerald*, *Platinum*, *Violet*), a 3-attempt investigation stamina system, and predictive autocomplete.
+3. **Dex Riddle (Lore Puzzle)**:
+   - Guess the mystery Pokémon from authentic, redacted Pokédex flavor text entries.
+   - Features hidden game origin (revealed on solve), a 4-attempt guess system, sequential ordered hints (Region → Typings → Silhouette), and predictive autocomplete.
 4. **Dexdle (Poké-Wordle)**:
    - 6-guess deductive puzzle available in Daily Challenge (calendar seeded) and Unlimited Practice modes.
    - Color-coded comparison tiles for Generation, Primary/Secondary Types, Height, Weight, and BST.

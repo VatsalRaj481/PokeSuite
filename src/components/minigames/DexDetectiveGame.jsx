@@ -194,7 +194,12 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(() => {
     try {
-      return parseInt(localStorage.getItem("pokedex_dex_detective_best") || "0", 10);
+      return parseInt(
+        localStorage.getItem("pokedex_dex_riddle_best") ||
+        localStorage.getItem("pokedex_dex_detective_best") ||
+        "0",
+        10
+      );
     } catch (e) {
       return 0;
     }
@@ -470,7 +475,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
       if (nextStreak > bestStreak) {
         setBestStreak(nextStreak);
         try {
-          localStorage.setItem("pokedex_dex_detective_best", String(nextStreak));
+          localStorage.setItem("pokedex_dex_riddle_best", String(nextStreak));
         } catch (e) {}
       }
 
@@ -502,7 +507,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
     }
   };
 
-  // Unlock sequential clues: each clue costs 1 attempt, must unlock strictly in order (1 -> 2 -> 3)
+  // Unlock sequential hints: each hint costs 1 attempt, must unlock strictly in order (1 -> 2 -> 3)
   const unlockClue = (clueKey) => {
     if (isSolved || isFailed || attemptsLeft <= 1) return;
 
@@ -513,7 +518,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
       setRevealedClues((p) => ({ ...p, gen: true }));
       setFeedback({
         type: "warning",
-        text: `Clue 1 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
+        text: `Hint 1 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
       });
     } else if (clueKey === "types") {
       if (!revealedClues.gen || revealedClues.types) return;
@@ -522,7 +527,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
       setRevealedClues((p) => ({ ...p, types: true }));
       setFeedback({
         type: "warning",
-        text: `Clue 2 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
+        text: `Hint 2 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
       });
     } else if (clueKey === "silhouette") {
       if (!revealedClues.types || revealedClues.silhouette) return;
@@ -531,7 +536,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
       setRevealedClues((p) => ({ ...p, silhouette: true }));
       setFeedback({
         type: "warning",
-        text: `Clue 3 (Silhouette) unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining!`,
+        text: `Hint 3 (Silhouette) unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining!`,
       });
     }
   };
@@ -584,20 +589,21 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              <path d="M11 8a3 3 0 0 0-3 3" />
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+              <path d="M6 6h10" />
+              <path d="M6 10h10" />
+              <path d="M9 16h6" />
             </svg>
           </div>
           <div>
             <h2 className="text-lg font-display font-black text-theme-primary flex items-center gap-2">
-              <span>Dex Detective</span>
+              <span>Dex Riddle</span>
               <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-mono-tech font-bold uppercase">
-                Lore Mystery
+                Lore Puzzle
               </span>
             </h2>
             <p className="text-xs font-display text-theme-secondary">
-              Deduce the mystery Pokémon from redacted in-game field entries.
+              Guess the mystery Pokémon from its in-game Pokédex entry.
             </p>
           </div>
         </div>
@@ -614,19 +620,19 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         </div>
       </div>
 
-      {/* Case File Card - overflow is visible so autocomplete dropdown floats without clipping */}
+      {/* Entry Puzzle Card - overflow is visible so autocomplete dropdown floats without clipping */}
       <div className="relative bg-theme-surface border border-theme rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col gap-6">
-        {/* Status Deck: Redacted origin during play, unsealed version once solved/failed */}
+        {/* Status Deck: Hidden origin during play, revealed version once solved/failed */}
         <div className="flex items-center justify-between flex-wrap gap-2 border-b border-theme/60 pb-4">
           <div className="flex items-center gap-2">
             {!isSolved && !isFailed ? (
               <>
                 <span className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono-tech text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  Classified Archive
+                  Mystery Dex Entry
                 </span>
                 <span className="text-xs font-display text-theme-secondary hidden sm:inline">
-                  Origin Game Redacted
+                  Game Origin Hidden
                 </span>
               </>
             ) : (
@@ -643,10 +649,10 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     <path d="M6 6h10" />
                     <path d="M6 10h10" />
                   </svg>
-                  Archived in {gameVersion}
+                  From {gameVersion}
                 </span>
                 <span className="text-xs font-display text-theme-secondary hidden sm:inline">
-                  Archival Record Unsealed
+                  Pokédex Entry Unsealed
                 </span>
               </>
             )}
@@ -681,7 +687,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         <div className="p-6 sm:p-8 rounded-2xl bg-theme-bg/80 border border-theme/80 shadow-inner flex flex-col justify-center min-h-[140px] relative">
           {isLoadingCase ? (
             <div className="flex items-center justify-center gap-2 text-theme-secondary text-sm font-display animate-pulse">
-              <span>Opening archival case file...</span>
+              <span>Loading mystery Pokédex entry...</span>
             </div>
           ) : (
             <blockquote className="text-base sm:text-lg md:text-xl font-display font-medium text-theme-primary leading-relaxed text-center italic">
@@ -745,7 +751,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         : "bg-rose-500/20 text-rose-300 border-rose-500/40"
                     }`}
                   >
-                    {isSolved ? "Correct Guess (+1 Streak)" : "Out of Attempts — Suspect Identified"}
+                    {isSolved ? "Correct Guess (+1 Streak)" : "Out of Attempts — Pokémon Revealed"}
                   </span>
                   <span className="font-mono-tech text-xs text-theme-secondary font-bold">
                     #{String(currentCase.id).padStart(4, "0")}
@@ -782,7 +788,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     onClick={loadNextCase}
                     className="px-6 py-2.5 bg-theme-accent hover:bg-theme-accent/90 text-white font-display font-extrabold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2"
                   >
-                    <span>Next Case</span>
+                    <span>Next Riddle</span>
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
@@ -808,20 +814,20 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
           )}
         </AnimatePresence>
 
-        {/* Sequential Forensic Clues Section (Only visible during active gameplay) */}
+        {/* Sequential Hints Section (Only visible during active gameplay) */}
         {!isSolved && !isFailed && (
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-[10px] font-mono-tech uppercase font-bold text-theme-secondary tracking-wider">
-                Sequential Forensic Clues:
+                Sequential Hints:
               </span>
               <span className="text-[11px] font-display text-theme-secondary/70 hidden sm:inline">
-                Each clue costs 1 attempt • Unlocked strictly in order (1 → 2 → 3)
+                Each hint costs 1 attempt • Unlocked strictly in order (1 → 2 → 3)
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {/* Clue 1: Region / Gen */}
+              {/* Hint 1: Region / Gen */}
               {(() => {
                 const isUnlocked = revealedClues.gen;
                 const canUnlock = !isUnlocked && attemptsLeft > 1;
@@ -839,9 +845,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Clue 1 Unlocked"
+                        ? "Hint 1 Unlocked"
                         : canUnlock
-                        ? "Unlock Clue 1 (Costs 1 attempt)"
+                        ? "Unlock Hint 1 (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
@@ -854,9 +860,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                       <span className="truncate">
                         {isUnlocked
                           ? generationText
-                          : canUnlock
-                          ? "Clue 1: Region / Gen"
-                          : "Clue 1: Region / Gen"}
+                          : "Hint 1: Region / Gen"}
                       </span>
                     </span>
                     {isUnlocked ? (
@@ -870,7 +874,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                 );
               })()}
 
-              {/* Clue 2: Typings */}
+              {/* Hint 2: Typings */}
               {(() => {
                 const isUnlocked = revealedClues.types;
                 const isPrereqMet = revealedClues.gen;
@@ -889,11 +893,11 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Clue 2 Unlocked"
+                        ? "Hint 2 Unlocked"
                         : !isPrereqMet
-                        ? "Unlock Clue 1 first"
+                        ? "Unlock Hint 1 first"
                         : canUnlock
-                        ? "Unlock Clue 2 (Costs 1 attempt)"
+                        ? "Unlock Hint 2 (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
@@ -917,7 +921,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         </span>
                       ) : (
                         <span className="truncate">
-                          {!isPrereqMet ? "Clue 2: Typings (Locked)" : "Clue 2: Typings"}
+                          {!isPrereqMet ? "Hint 2: Typings (Locked)" : "Hint 2: Typings"}
                         </span>
                       )}
                     </span>
@@ -934,7 +938,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                 );
               })()}
 
-              {/* Clue 3: Silhouette */}
+              {/* Hint 3: Silhouette */}
               {(() => {
                 const isUnlocked = revealedClues.silhouette;
                 const isPrereqMet = revealedClues.types;
@@ -953,11 +957,11 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }`}
                     title={
                       isUnlocked
-                        ? "Clue 3 Unlocked"
+                        ? "Hint 3 Unlocked"
                         : !isPrereqMet
-                        ? "Unlock Clue 2 first"
+                        ? "Unlock Hint 2 first"
                         : canUnlock
-                        ? "Unlock Clue 3 (Costs 1 attempt)"
+                        ? "Unlock Hint 3 (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
@@ -977,8 +981,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         {isUnlocked
                           ? "Silhouette Profile"
                           : !isPrereqMet
-                          ? "Clue 3: Silhouette (Locked)"
-                          : "Clue 3: Silhouette"}
+                          ? "Hint 3: Silhouette (Locked)"
+                          : "Hint 3: Silhouette"}
                       </span>
                     </span>
                     {isUnlocked ? (
@@ -1010,7 +1014,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                   />
                 </div>
                 <span className="text-[10px] font-mono-tech uppercase text-theme-secondary/80 mt-1">
-                  Classified Silhouette
+                  Mystery Silhouette
                 </span>
               </motion.div>
             )}
@@ -1054,7 +1058,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                   }}
                   onFocus={() => setShowDropdown(true)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Identify this Pokémon (e.g. Meloetta, Lucario, Gengar)..."
+                  placeholder="Guess this Pokémon (e.g. Meloetta, Lucario, Gengar)..."
                   className="w-full pl-10 pr-10 py-3 bg-theme-bg border border-theme rounded-2xl text-sm font-display text-theme-primary placeholder:text-theme-secondary/60 focus:outline-none focus:ring-2 focus:ring-amber-500/80 focus:border-amber-500/80 transition-all shadow-inner"
                 />
 
@@ -1112,15 +1116,15 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                 type="submit"
                 className="px-6 py-3 bg-amber-500 hover:bg-amber-400 active:scale-98 text-slate-950 font-display font-black text-sm rounded-2xl shadow-md transition-all cursor-pointer flex items-center gap-1.5 flex-shrink-0"
               >
-                <span>Investigate</span>
+                <span>Guess</span>
               </button>
             </form>
 
-            {/* Incorrect Guesses History */}
+            {/* Wrong Guesses History */}
             {guessHistory.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
                 <span className="text-[10px] font-mono-tech uppercase text-theme-secondary font-bold">
-                  Incorrect Guesses:
+                  Wrong Guesses:
                 </span>
                 {guessHistory.map((g, i) => (
                   <span
