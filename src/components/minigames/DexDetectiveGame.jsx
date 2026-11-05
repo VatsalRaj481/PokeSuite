@@ -182,6 +182,17 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
     silhouette: false,
   });
 
+  // Track hints used in the immediately preceding round (cannot be used consecutively)
+  const [hintsUsedLastRound, setHintsUsedLastRound] = useState({
+    gen: false,
+    types: false,
+    silhouette: false,
+  });
+  const revealedCluesRef = useRef(revealedClues);
+  useEffect(() => {
+    revealedCluesRef.current = revealedClues;
+  }, [revealedClues]);
+
   // User Guess Input & Autocomplete
   const [guessInput, setGuessInput] = useState("");
   const [guessHistory, setGuessHistory] = useState([]);
@@ -351,6 +362,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
 
   // Load a new mystery case
   const loadNextCase = useCallback(async () => {
+    // Record hints used in the round that just ended (so they go on 1-round cooldown)
+    setHintsUsedLastRound({ ...revealedCluesRef.current });
+
     setIsLoadingCase(true);
     setIsSolved(false);
     setIsFailed(false);
@@ -507,9 +521,18 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
     }
   };
 
-  // Unlock sequential hints: each hint costs 1 attempt, must unlock strictly in order (1 -> 2 -> 3)
+  // Unlock sequential hints: each hint costs 1 attempt, 1-round cooldown after use, must unlock in order
   const unlockClue = (clueKey) => {
     if (isSolved || isFailed || attemptsLeft <= 1) return;
+
+    // Reject if hint is on cooldown from the immediate previous round
+    if (hintsUsedLastRound[clueKey]) {
+      setFeedback({
+        type: "warning",
+        text: `This hint is on cooldown because you used it in the previous round!`,
+      });
+      return;
+    }
 
     if (clueKey === "gen") {
       if (revealedClues.gen) return;
@@ -521,7 +544,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         text: `Hint 1 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
       });
     } else if (clueKey === "types") {
-      if (!revealedClues.gen || revealedClues.types) return;
+      const isGenPrereqMet = hintsUsedLastRound.gen || revealedClues.gen;
+      if (!isGenPrereqMet || revealedClues.types) return;
       const nextAttempts = attemptsLeft - 1;
       setAttemptsLeft(nextAttempts);
       setRevealedClues((p) => ({ ...p, types: true }));
@@ -530,7 +554,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         text: `Hint 2 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
       });
     } else if (clueKey === "silhouette") {
-      if (!revealedClues.types || revealedClues.silhouette) return;
+      const isGenPrereqMet = hintsUsedLastRound.gen || revealedClues.gen;
+      const isTypesPrereqMet = hintsUsedLastRound.types ? isGenPrereqMet : revealedClues.types;
+      if (!isTypesPrereqMet || revealedClues.silhouette) return;
       const nextAttempts = attemptsLeft - 1;
       setAttemptsLeft(nextAttempts);
       setRevealedClues((p) => ({ ...p, silhouette: true }));
@@ -822,7 +848,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                 Sequential Hints:
               </span>
               <span className="text-[11px] font-display text-theme-secondary/70 hidden sm:inline">
-                Each hint costs 1 attempt • Unlocked strictly in order (1 → 2 → 3)
+                Each hint costs 1 attempt • 1-round cooldown after use • Unlocked in order
               </span>
             </div>
 
@@ -830,7 +856,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               {/* Hint 1: Region / Gen */}
               {(() => {
                 const isUnlocked = revealedClues.gen;
-                const canUnlock = !isUnlocked && attemptsLeft > 1;
+                const isOnCooldown = hintsUsedLastRound.gen;
+                const canUnlock = !isOnCooldown && !isUnlocked && attemptsLeft > 1;
                 return (
                   <button
                     type="button"
@@ -839,6 +866,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
                       isUnlocked
                         ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-400 cursor-default"
+                        : isOnCooldown
+                        ? "bg-theme-bg/30 border-theme/30 text-theme-secondary/40 cursor-not-allowed opacity-60"
                         : canUnlock
                         ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
                         : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
@@ -846,25 +875,38 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     title={
                       isUnlocked
                         ? "Hint 1 Unlocked"
+                        : isOnCooldown
+                        ? "Used in the previous round. On cooldown until the next round."
                         : canUnlock
                         ? "Unlock Hint 1 (Costs 1 attempt)"
                         : "Requires at least 2 attempts to unlock"
                     }
                   >
                     <span className="flex items-center gap-1.5 truncate mr-1">
-                      <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                        <path d="M2 12h20" />
-                      </svg>
+                      {isOnCooldown ? (
+                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                          <path d="M2 12h20" />
+                        </svg>
+                      )}
                       <span className="truncate">
                         {isUnlocked
                           ? generationText
+                          : isOnCooldown
+                          ? "Hint 1: Region (Cooldown)"
                           : "Hint 1: Region / Gen"}
                       </span>
                     </span>
                     {isUnlocked ? (
                       <span className="text-[10px] uppercase font-mono-tech font-bold text-indigo-400 flex-shrink-0">Unlocked</span>
+                    ) : isOnCooldown ? (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/60 font-bold flex-shrink-0">Cooldown</span>
                     ) : (
                       <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
                         {canUnlock ? "-1 Attempt" : "Need ≥2"}
@@ -877,8 +919,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               {/* Hint 2: Typings */}
               {(() => {
                 const isUnlocked = revealedClues.types;
-                const isPrereqMet = revealedClues.gen;
-                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                const isOnCooldown = hintsUsedLastRound.types;
+                const isGenPrereqMet = hintsUsedLastRound.gen || revealedClues.gen;
+                const canUnlock = !isOnCooldown && isGenPrereqMet && !isUnlocked && attemptsLeft > 1;
                 return (
                   <button
                     type="button"
@@ -887,6 +930,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
                       isUnlocked
                         ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 cursor-default"
+                        : isOnCooldown
+                        ? "bg-theme-bg/30 border-theme/30 text-theme-secondary/40 cursor-not-allowed opacity-60"
                         : canUnlock
                         ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
                         : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
@@ -894,7 +939,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     title={
                       isUnlocked
                         ? "Hint 2 Unlocked"
-                        : !isPrereqMet
+                        : isOnCooldown
+                        ? "Used in the previous round. On cooldown until the next round."
+                        : !isGenPrereqMet
                         ? "Unlock Hint 1 first"
                         : canUnlock
                         ? "Unlock Hint 2 (Costs 1 attempt)"
@@ -902,7 +949,12 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }
                   >
                     <span className="flex items-center gap-1.5 truncate mr-1">
-                      {!isPrereqMet && !isUnlocked ? (
+                      {isOnCooldown ? (
+                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      ) : !isGenPrereqMet && !isUnlocked ? (
                         <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -921,13 +973,19 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         </span>
                       ) : (
                         <span className="truncate">
-                          {!isPrereqMet ? "Hint 2: Typings (Locked)" : "Hint 2: Typings"}
+                          {isOnCooldown
+                            ? "Hint 2: Typings (Cooldown)"
+                            : !isGenPrereqMet
+                            ? "Hint 2: Typings (Locked)"
+                            : "Hint 2: Typings"}
                         </span>
                       )}
                     </span>
                     {isUnlocked ? (
                       <span className="text-[10px] uppercase font-mono-tech font-bold text-emerald-400 flex-shrink-0">Unlocked</span>
-                    ) : !isPrereqMet ? (
+                    ) : isOnCooldown ? (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/60 font-bold flex-shrink-0">Cooldown</span>
+                    ) : !isGenPrereqMet ? (
                       <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">Locked</span>
                     ) : (
                       <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
@@ -941,8 +999,10 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               {/* Hint 3: Silhouette */}
               {(() => {
                 const isUnlocked = revealedClues.silhouette;
-                const isPrereqMet = revealedClues.types;
-                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                const isOnCooldown = hintsUsedLastRound.silhouette;
+                const isGenPrereqMet = hintsUsedLastRound.gen || revealedClues.gen;
+                const isTypesPrereqMet = hintsUsedLastRound.types ? isGenPrereqMet : revealedClues.types;
+                const canUnlock = !isOnCooldown && isTypesPrereqMet && !isUnlocked && attemptsLeft > 1;
                 return (
                   <button
                     type="button"
@@ -951,6 +1011,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
                       isUnlocked
                         ? "bg-amber-500/15 border-amber-500/30 text-amber-400 cursor-default"
+                        : isOnCooldown
+                        ? "bg-theme-bg/30 border-theme/30 text-theme-secondary/40 cursor-not-allowed opacity-60"
                         : canUnlock
                         ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
                         : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
@@ -958,7 +1020,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     title={
                       isUnlocked
                         ? "Hint 3 Unlocked"
-                        : !isPrereqMet
+                        : isOnCooldown
+                        ? "Used in the previous round. On cooldown until the next round."
+                        : !isTypesPrereqMet
                         ? "Unlock Hint 2 first"
                         : canUnlock
                         ? "Unlock Hint 3 (Costs 1 attempt)"
@@ -966,7 +1030,12 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     }
                   >
                     <span className="flex items-center gap-1.5 truncate mr-1">
-                      {!isPrereqMet && !isUnlocked ? (
+                      {isOnCooldown ? (
+                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      ) : !isTypesPrereqMet && !isUnlocked ? (
                         <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -980,14 +1049,18 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                       <span className="truncate">
                         {isUnlocked
                           ? "Silhouette Profile"
-                          : !isPrereqMet
+                          : isOnCooldown
+                          ? "Hint 3: Silhouette (Cooldown)"
+                          : !isTypesPrereqMet
                           ? "Hint 3: Silhouette (Locked)"
                           : "Hint 3: Silhouette"}
                       </span>
                     </span>
                     {isUnlocked ? (
                       <span className="text-[10px] uppercase font-mono-tech font-bold text-amber-400 flex-shrink-0">Unlocked</span>
-                    ) : !isPrereqMet ? (
+                    ) : isOnCooldown ? (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/60 font-bold flex-shrink-0">Cooldown</span>
+                    ) : !isTypesPrereqMet ? (
                       <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">Locked</span>
                     ) : (
                       <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
