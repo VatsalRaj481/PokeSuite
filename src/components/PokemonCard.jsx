@@ -2882,7 +2882,7 @@ function PokemonCard({
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-purple-500 animate-ping" />
                     <h3 className="text-xs font-display font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                      ★ Exclusive Signature Traits
+                      Exclusive Signature Traits
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono-tech px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold uppercase">
@@ -2907,7 +2907,7 @@ function PokemonCard({
                         <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-mono-tech font-bold text-purple-400">
-                              ⚔ SIGNATURE MOVE:
+                              SIGNATURE MOVE:
                             </span>
                             <span className="font-display font-bold text-theme-primary text-sm">
                               {mName}
@@ -2963,7 +2963,7 @@ function PokemonCard({
                         <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-mono-tech font-bold text-purple-400">
-                              ✦ SIGNATURE ABILITY:
+                              SIGNATURE ABILITY:
                             </span>
                             <span className="font-display font-bold text-theme-primary text-sm">
                               {aName}

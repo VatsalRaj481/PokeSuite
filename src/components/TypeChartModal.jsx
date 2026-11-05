@@ -693,7 +693,14 @@ export default function TypeChartModal({ isOpen, onClose, initialType = null }) 
                 {/* Left Column: Offensive Potential (When attacking) */}
                 <div className="bg-theme-bg border border-theme rounded-2xl p-5 flex flex-col gap-4">
                   <div className="flex items-center gap-2 border-b border-theme pb-3">
-                    <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold">⚔</span>
+                    <span className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
+                        <line x1="13" y1="19" x2="19" y2="13" />
+                        <line x1="16" y1="16" x2="20" y2="20" />
+                        <line x1="19" y1="21" x2="21" y2="19" />
+                      </svg>
+                    </span>
                     <h4 className="text-sm font-display font-extrabold text-theme-primary uppercase tracking-wider">
                       Offensive Effectiveness
                     </h4>
@@ -749,7 +756,11 @@ export default function TypeChartModal({ isOpen, onClose, initialType = null }) 
                 {/* Right Column: Defensive Resilience (When being attacked) */}
                 <div className="bg-theme-bg border border-theme rounded-2xl p-5 flex flex-col gap-4">
                   <div className="flex items-center gap-2 border-b border-theme pb-3">
-                    <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold">🛡</span>
+                    <span className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      </svg>
+                    </span>
                     <h4 className="text-sm font-display font-extrabold text-theme-primary uppercase tracking-wider">
                       Defensive Resilience
                     </h4>

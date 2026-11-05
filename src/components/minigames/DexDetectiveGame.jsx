@@ -373,9 +373,9 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
 
         {/* Streaks Counter */}
         <div className="flex items-center gap-2.5 font-mono-tech text-xs">
-          <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold flex items-center gap-1.5">
-            <span>🕵️ Solved:</span>
-            <span className="text-sm font-black">{streak}</span>
+          <div className="px-3 py-1.5 rounded-xl bg-theme-bg border border-theme text-theme-primary font-bold flex items-center gap-1.5">
+            <span className="text-theme-secondary text-[11px] uppercase tracking-wider">Solved:</span>
+            <span className="text-sm font-black text-amber-400">{streak}</span>
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-theme-bg border border-theme text-theme-secondary font-bold">
             Best: <span className="text-theme-primary font-black">{bestStreak}</span>
@@ -389,24 +389,25 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         <div className="flex items-center justify-between flex-wrap gap-2 border-b border-theme/60 pb-4">
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono-tech text-xs font-bold uppercase">
-              📑 {gameVersion}
+              {gameVersion}
             </span>
             <span className="text-xs font-display text-theme-secondary">Classified Field Report</span>
           </div>
 
           {/* Remaining Attempts */}
-          <div className="flex items-center gap-1.5 font-mono-tech text-xs font-bold text-theme-secondary">
-            <span>Attempts:</span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3].map((heart) => (
+          <div className="flex items-center gap-2 font-mono-tech text-xs font-bold text-theme-secondary">
+            <span className="uppercase text-[10px]">Attempts:</span>
+            <div className="flex items-center gap-1.5">
+              {[1, 2, 3].map((slot) => (
                 <span
-                  key={heart}
-                  className={`text-base transition-all ${
-                    heart <= attemptsLeft ? "text-rose-500 scale-100" : "text-zinc-600 scale-75 opacity-40"
+                  key={slot}
+                  className={`inline-block w-2.5 h-2.5 rounded-full transition-all ${
+                    slot <= attemptsLeft
+                      ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"
+                      : "bg-theme-secondary/25 border border-theme"
                   }`}
-                >
-                  ❤️
-                </span>
+                  title={`${attemptsLeft} attempts remaining`}
+                />
               ))}
             </div>
           </div>
@@ -514,7 +515,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     : "bg-theme-bg border-theme text-theme-secondary hover:text-theme-primary"
                 }`}
               >
-                {revealedClues.gen ? `📍 ${generationText}` : "🔍 Clue 1: Region / Gen"}
+                {revealedClues.gen ? generationText : "Clue 1: Region / Gen"}
               </button>
 
               {/* Clue 2: Types */}
@@ -537,7 +538,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     })}
                   </span>
                 ) : (
-                  "🔥 Clue 2: Typings"
+                  "Clue 2: Typings"
                 )}
               </button>
 
@@ -552,7 +553,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     : "bg-theme-bg border-theme text-theme-secondary hover:text-theme-primary"
                 }`}
               >
-                {revealedClues.silhouette ? "👤 Silhouette Unlocked" : "👤 Clue 3: Silhouette"}
+                {revealedClues.silhouette ? "Silhouette Unlocked" : "Clue 3: Silhouette"}
               </button>
             </div>
 

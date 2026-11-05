@@ -260,9 +260,9 @@ export default function CryQuizGame({ pokemonList = [], onSelectPokemon }) {
 
         {/* Streaks Counter */}
         <div className="flex items-center gap-2.5 font-mono-tech text-xs">
-          <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold flex items-center gap-1.5">
-            <span>🔥 Streak:</span>
-            <span className="text-sm font-black">{streak}</span>
+          <div className="px-3 py-1.5 rounded-xl bg-theme-bg border border-theme text-theme-primary font-bold flex items-center gap-1.5">
+            <span className="text-theme-secondary text-[11px] uppercase tracking-wider">Streak:</span>
+            <span className="text-sm font-black text-amber-400">{streak}</span>
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-theme-bg border border-theme text-theme-secondary font-bold">
             Best: <span className="text-theme-primary font-black">{bestStreak}</span>
@@ -498,7 +498,7 @@ export default function CryQuizGame({ pokemonList = [], onSelectPokemon }) {
                     : "bg-theme-bg border-theme text-theme-secondary hover:text-theme-primary"
                 }`}
               >
-                {revealedClues.region ? `📍 ${regionName}` : "🔍 Clue 1: Region"}
+                {revealedClues.region ? regionName : "Clue 1: Region"}
               </button>
 
               {/* Clue 2: Primary Type */}
@@ -518,7 +518,7 @@ export default function CryQuizGame({ pokemonList = [], onSelectPokemon }) {
                     <TypeBadge type={primaryType} size="xs" />
                   </span>
                 ) : (
-                  "🔥 Clue 2: Type"
+                  "Clue 2: Type"
                 )}
               </button>
 
@@ -533,7 +533,7 @@ export default function CryQuizGame({ pokemonList = [], onSelectPokemon }) {
                     : "bg-theme-bg border-theme text-theme-secondary hover:text-theme-primary"
                 }`}
               >
-                {revealedClues.bst ? `📊 BST: ${bstValue}` : "⚡ Clue 3: Stat Total"}
+                {revealedClues.bst ? `BST: ${bstValue}` : "Clue 3: Stat Total"}
               </button>
             </div>
           </div>
