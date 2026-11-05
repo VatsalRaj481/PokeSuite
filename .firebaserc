@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "pokedex-32631"
+  },
+  "targets": {
+    "pokedex-32631": {
+      "hosting": {
+        "pokesuite": [
+          "pokesuite"
+        ],
+        "legacy": [
+          "pokedex-32631"
+        ]
+      }
+    }
   }
 }

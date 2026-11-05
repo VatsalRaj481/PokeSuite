@@ -16,10 +16,21 @@ jobs:
       - run: npm run build
         env:
           CI: false
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy Live App to PokéSuite
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_POKEDEX_32631 }}'
           channelId: live
           projectId: pokedex-32631
+          target: pokesuite
+          firebaseToolsVersion: '13.31.0'
+      - name: Deploy Legacy Redirect to pokedex-32631
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_POKEDEX_32631 }}'
+          channelId: live
+          projectId: pokedex-32631
+          target: legacy
           firebaseToolsVersion: '13.31.0'

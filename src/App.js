@@ -980,8 +980,8 @@ function App() {
               <button
                 onClick={handleGoHome}
                 className="flex items-center gap-2 focus:outline-none cursor-pointer group flex-shrink-0"
-                title="Pokédex Home (Return to main screen)"
-                aria-label="Pokédex Home"
+                title="PokéSuite Home (Return to main screen)"
+                aria-label="PokéSuite Home"
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
                   <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -993,7 +993,7 @@ function App() {
                   </svg>
                 </div>
                 <span className="font-display font-extrabold text-base text-theme-primary hidden md:inline group-hover:text-theme-accent transition-colors">
-                  Pokédex
+                  PokéSuite
                 </span>
               </button>
 
@@ -1167,13 +1167,13 @@ function App() {
 
       <div className="flex-grow flex flex-col items-center w-full py-6 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-7xl z-10">
         
-        {/* Main Pokedex Header Title Bar */}
+        {/* Main PokéSuite Header Title Bar */}
         <div className="w-full flex items-center justify-between mb-6 sm:mb-8 select-none">
           <div
             onClick={handleGoHome}
             className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
-            title="Pokédex Home (Return to main screen)"
-            aria-label="Pokédex Home"
+            title="PokéSuite Home (Return to main screen)"
+            aria-label="PokéSuite Home"
           >
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -1202,7 +1202,7 @@ function App() {
                 display: "inline-block",
               }}
             >
-              Pokédex
+              PokéSuite
             </span>
           </div>
 

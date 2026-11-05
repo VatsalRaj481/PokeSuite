@@ -1,8 +1,10 @@
-# Pokedex
+# PokéSuite
 
-A modern, responsive Pokédex web application featuring comprehensive species data, a Generational Sprite Archive, an interactive 18×18 Type Chart, a Gen 9 Competitive Damage Calculator & Battle Lab, a 5-game PokéArcade suite, Trainer's Bag item encyclopedia, and an AI-powered camera scanner. 
+A modern, responsive all-in-one Pokémon companion web application featuring comprehensive species data, a Generational Sprite Archive, an interactive 18×18 Type Chart, a Gen 9 Competitive Damage Calculator & Battle Lab, a 5-game PokéArcade suite, Trainer's Bag item encyclopedia, and an AI-powered camera scanner. 
 
-The frontend is deployed to Firebase Hosting with automated CI/CD via GitHub Actions, while the camera scanner proxy runs on Render with the Gemini API key protected server-side.
+- **Live URL**: [https://pokesuite.web.app](https://pokesuite.web.app) *(Legacy domain auto-redirects from `pokedex-32631.web.app`)*
+- **Frontend**: Deployed to Firebase Hosting with automated CI/CD via GitHub Actions.
+- **Backend Proxy**: AI camera scanner proxy runs on Render with the Gemini API key protected server-side.
 
 ---
 
@@ -96,7 +98,7 @@ A dedicated minigames hub (`src/components/minigames/MinigamesHub.jsx`) with per
 ## Project Structure
 
 ```text
-pokedex/
+pokesuite/
 ├── .github/
 │   └── workflows/
 │       ├── firebase-hosting-merge.yml        # CI/CD deployment on push to main
@@ -170,8 +172,16 @@ GEMINI_API_KEY=your_gemini_api_key
 
 - Node.js (v18 or higher recommended)
 - npm
+- Git
 
-### 2. Frontend Setup
+### 2. Clone Repository
+
+```bash
+git clone https://github.com/VatsalRaj481/pokesuite.git
+cd pokesuite
+```
+
+### 3. Frontend Setup
 
 Install dependencies:
 
@@ -193,7 +203,7 @@ To create an optimized production build:
 npm run build
 ```
 
-### 3. Backend Setup (Optional for Local Scanner)
+### 4. Backend Setup (Optional for Local Scanner)
 
 In a separate terminal:
 
@@ -235,7 +245,7 @@ Deployments are automated through `.github/workflows/firebase-hosting-merge.yml`
 1. Checks out the repository.
 2. Installs frontend dependencies.
 3. Builds the production bundle (`npm run build`).
-4. Deploys to Firebase Hosting using repository secret `FIREBASE_SERVICE_ACCOUNT_POKEDEX_32631`.
+4. Deploys live to Firebase Hosting (`https://pokesuite.web.app`) and configures legacy domain redirection.
 
 ### Manual Deployment
 
@@ -266,3 +276,9 @@ firebase deploy --only hosting
 - Species data, moves, items, and abilities: [PokeAPI](https://pokeapi.co/)
 - Animated battle sprites: Pokémon Showdown
 - AI identification: Google Gemini 2.5 Flash
+
+---
+
+## Legal & Disclaimer
+
+PokéSuite is a non-commercial, open-source fan project built for educational, research, and competitive community purposes. Pokémon and all associated names, characters, and trademarks are the intellectual property of Nintendo, Creatures Inc., and Game Freak. This project is not affiliated with, endorsed by, or sponsored by Nintendo or The Pokémon Company.
