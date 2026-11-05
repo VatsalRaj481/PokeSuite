@@ -172,7 +172,8 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
   const [isLoadingCase, setIsLoadingCase] = useState(false);
 
   // Clues & Attempts
-  const [attemptsLeft, setAttemptsLeft] = useState(3);
+  const TOTAL_ATTEMPTS = 4;
+  const [attemptsLeft, setAttemptsLeft] = useState(TOTAL_ATTEMPTS);
   const [isSolved, setIsSolved] = useState(false);
   const [isFailed, setIsFailed] = useState(false);
   const [revealedClues, setRevealedClues] = useState({
@@ -348,7 +349,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
     setIsLoadingCase(true);
     setIsSolved(false);
     setIsFailed(false);
-    setAttemptsLeft(3);
+    setAttemptsLeft(TOTAL_ATTEMPTS);
     setGuessInput("");
     setGuessHistory([]);
     setFeedback(null);
@@ -490,14 +491,48 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         setStreak(0);
         setFeedback({
           type: "error",
-          text: `Out of Leads! The mystery Pokémon was ${formatPokemonName(currentCase.displayName || currentCase.name)}.`,
+          text: `Out of Attempts! The mystery Pokémon was ${formatPokemonName(currentCase.displayName || currentCase.name)}.`,
         });
       } else {
         setFeedback({
           type: "warning",
-          text: `Incorrect lead: "${formattedGuess}". ${nextAttempts} ${nextAttempts === 1 ? "lead" : "leads"} remaining.`,
+          text: `Incorrect guess: "${formattedGuess}". ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
         });
       }
+    }
+  };
+
+  // Unlock sequential clues: each clue costs 1 attempt, must unlock strictly in order (1 -> 2 -> 3)
+  const unlockClue = (clueKey) => {
+    if (isSolved || isFailed || attemptsLeft <= 1) return;
+
+    if (clueKey === "gen") {
+      if (revealedClues.gen) return;
+      const nextAttempts = attemptsLeft - 1;
+      setAttemptsLeft(nextAttempts);
+      setRevealedClues((p) => ({ ...p, gen: true }));
+      setFeedback({
+        type: "warning",
+        text: `Clue 1 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
+      });
+    } else if (clueKey === "types") {
+      if (!revealedClues.gen || revealedClues.types) return;
+      const nextAttempts = attemptsLeft - 1;
+      setAttemptsLeft(nextAttempts);
+      setRevealedClues((p) => ({ ...p, types: true }));
+      setFeedback({
+        type: "warning",
+        text: `Clue 2 unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining.`,
+      });
+    } else if (clueKey === "silhouette") {
+      if (!revealedClues.types || revealedClues.silhouette) return;
+      const nextAttempts = attemptsLeft - 1;
+      setAttemptsLeft(nextAttempts);
+      setRevealedClues((p) => ({ ...p, silhouette: true }));
+      setFeedback({
+        type: "warning",
+        text: `Clue 3 (Silhouette) unlocked! (-1 Attempt). ${nextAttempts} ${nextAttempts === 1 ? "attempt" : "attempts"} remaining!`,
+      });
     }
   };
 
@@ -617,11 +652,11 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
             )}
           </div>
 
-          {/* Remaining Leads (Attempts) */}
+          {/* Remaining Attempts */}
           <div className="flex items-center gap-2 font-mono-tech text-xs font-bold text-theme-secondary">
-            <span className="uppercase text-[10px] tracking-wider">Leads:</span>
+            <span className="uppercase text-[10px] tracking-wider">Attempts:</span>
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3].map((slot) => {
+              {[1, 2, 3, 4].map((slot) => {
                 const isActive = slot <= attemptsLeft;
                 return (
                   <span
@@ -631,11 +666,14 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         ? "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)] border border-amber-300"
                         : "bg-theme-bg border border-theme opacity-35"
                     }`}
-                    title={`${attemptsLeft} lead${attemptsLeft === 1 ? "" : "s"} remaining`}
+                    title={`${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} remaining`}
                   />
                 );
               })}
             </div>
+            <span className="text-[11px] text-theme-primary font-bold">
+              {attemptsLeft}/4
+            </span>
           </div>
         </div>
 
@@ -707,7 +745,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         : "bg-rose-500/20 text-rose-300 border-rose-500/40"
                     }`}
                   >
-                    {isSolved ? "Correct Guess (+1 Streak)" : "Out of Leads — Suspect Identified"}
+                    {isSolved ? "Correct Guess (+1 Streak)" : "Out of Attempts — Suspect Identified"}
                   </span>
                   <span className="font-mono-tech text-xs text-theme-secondary font-bold">
                     #{String(currentCase.id).padStart(4, "0")}
@@ -770,90 +808,191 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
           )}
         </AnimatePresence>
 
-        {/* Forensic Clues Section (Only visible during active gameplay) */}
+        {/* Sequential Forensic Clues Section (Only visible during active gameplay) */}
         {!isSolved && !isFailed && (
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-[10px] font-mono-tech uppercase font-bold text-theme-secondary tracking-wider">
-                Forensic Clues:
+                Sequential Forensic Clues:
               </span>
               <span className="text-[11px] font-display text-theme-secondary/70 hidden sm:inline">
-                Unlock confidential field intel if you are stuck
+                Each clue costs 1 attempt • Unlocked strictly in order (1 → 2 → 3)
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Clue 1: Region / Gen */}
-              <button
-                type="button"
-                onClick={() => setRevealedClues((p) => ({ ...p, gen: true }))}
-                disabled={revealedClues.gen}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between cursor-pointer ${
-                  revealedClues.gen
-                    ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-400"
-                    : "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                    <path d="M2 12h20" />
-                  </svg>
-                  <span>{revealedClues.gen ? generationText : "Clue 1: Region / Gen"}</span>
-                </span>
-                {revealedClues.gen && <span className="text-[10px] uppercase font-mono-tech">Unlocked</span>}
-              </button>
+              {(() => {
+                const isUnlocked = revealedClues.gen;
+                const canUnlock = !isUnlocked && attemptsLeft > 1;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => unlockClue("gen")}
+                    disabled={!canUnlock && !isUnlocked}
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
+                      isUnlocked
+                        ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-400 cursor-default"
+                        : canUnlock
+                        ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
+                        : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
+                    }`}
+                    title={
+                      isUnlocked
+                        ? "Clue 1 Unlocked"
+                        : canUnlock
+                        ? "Unlock Clue 1 (Costs 1 attempt)"
+                        : "Requires at least 2 attempts to unlock"
+                    }
+                  >
+                    <span className="flex items-center gap-1.5 truncate mr-1">
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                        <path d="M2 12h20" />
+                      </svg>
+                      <span className="truncate">
+                        {isUnlocked
+                          ? generationText
+                          : canUnlock
+                          ? "Clue 1: Region / Gen"
+                          : "Clue 1: Region / Gen"}
+                      </span>
+                    </span>
+                    {isUnlocked ? (
+                      <span className="text-[10px] uppercase font-mono-tech font-bold text-indigo-400 flex-shrink-0">Unlocked</span>
+                    ) : (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
+                        {canUnlock ? "-1 Attempt" : "Need ≥2"}
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
 
               {/* Clue 2: Typings */}
-              <button
-                type="button"
-                onClick={() => setRevealedClues((p) => ({ ...p, types: true }))}
-                disabled={revealedClues.types}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between cursor-pointer ${
-                  revealedClues.types
-                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
-                    : "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  {revealedClues.types && currentCase?.types ? (
-                    <span className="flex items-center gap-1">
-                      {currentCase.types.map((t) => {
-                        const tName = typeof t === "string" ? t : t?.type?.name;
-                        return <TypeBadge key={tName} type={tName} size="xs" />;
-                      })}
+              {(() => {
+                const isUnlocked = revealedClues.types;
+                const isPrereqMet = revealedClues.gen;
+                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => unlockClue("types")}
+                    disabled={!canUnlock && !isUnlocked}
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
+                      isUnlocked
+                        ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 cursor-default"
+                        : canUnlock
+                        ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
+                        : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
+                    }`}
+                    title={
+                      isUnlocked
+                        ? "Clue 2 Unlocked"
+                        : !isPrereqMet
+                        ? "Unlock Clue 1 first"
+                        : canUnlock
+                        ? "Unlock Clue 2 (Costs 1 attempt)"
+                        : "Requires at least 2 attempts to unlock"
+                    }
+                  >
+                    <span className="flex items-center gap-1.5 truncate mr-1">
+                      {!isPrereqMet && !isUnlocked ? (
+                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      )}
+                      {isUnlocked && currentCase?.types ? (
+                        <span className="flex items-center gap-1">
+                          {currentCase.types.map((t) => {
+                            const tName = typeof t === "string" ? t : t?.type?.name;
+                            return <TypeBadge key={tName} type={tName} size="xs" />;
+                          })}
+                        </span>
+                      ) : (
+                        <span className="truncate">
+                          {!isPrereqMet ? "Clue 2: Typings (Locked)" : "Clue 2: Typings"}
+                        </span>
+                      )}
                     </span>
-                  ) : (
-                    <span>Clue 2: Typings</span>
-                  )}
-                </span>
-                {revealedClues.types && <span className="text-[10px] uppercase font-mono-tech">Unlocked</span>}
-              </button>
+                    {isUnlocked ? (
+                      <span className="text-[10px] uppercase font-mono-tech font-bold text-emerald-400 flex-shrink-0">Unlocked</span>
+                    ) : !isPrereqMet ? (
+                      <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">Locked</span>
+                    ) : (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
+                        {canUnlock ? "-1 Attempt" : "Need ≥2"}
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
 
               {/* Clue 3: Silhouette */}
-              <button
-                type="button"
-                onClick={() => setRevealedClues((p) => ({ ...p, silhouette: true }))}
-                disabled={revealedClues.silhouette}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between cursor-pointer ${
-                  revealedClues.silhouette
-                    ? "bg-amber-500/15 border-amber-500/30 text-amber-400"
-                    : "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="4" />
-                  </svg>
-                  <span>{revealedClues.silhouette ? "Silhouette Profile" : "Clue 3: Silhouette"}</span>
-                </span>
-                {revealedClues.silhouette && <span className="text-[10px] uppercase font-mono-tech">Unlocked</span>}
-              </button>
+              {(() => {
+                const isUnlocked = revealedClues.silhouette;
+                const isPrereqMet = revealedClues.types;
+                const canUnlock = isPrereqMet && !isUnlocked && attemptsLeft > 1;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => unlockClue("silhouette")}
+                    disabled={!canUnlock && !isUnlocked}
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-display font-bold border transition-all flex items-center justify-between ${
+                      isUnlocked
+                        ? "bg-amber-500/15 border-amber-500/30 text-amber-400 cursor-default"
+                        : canUnlock
+                        ? "bg-theme-bg hover:bg-theme-surface border-theme text-theme-secondary hover:text-theme-primary cursor-pointer hover:border-amber-500/50"
+                        : "bg-theme-bg/40 border-theme/40 text-theme-secondary/40 cursor-not-allowed"
+                    }`}
+                    title={
+                      isUnlocked
+                        ? "Clue 3 Unlocked"
+                        : !isPrereqMet
+                        ? "Unlock Clue 2 first"
+                        : canUnlock
+                        ? "Unlock Clue 3 (Costs 1 attempt)"
+                        : "Requires at least 2 attempts to unlock"
+                    }
+                  >
+                    <span className="flex items-center gap-1.5 truncate mr-1">
+                      {!isPrereqMet && !isUnlocked ? (
+                        <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <circle cx="12" cy="12" r="10" />
+                          <circle cx="12" cy="12" r="4" />
+                        </svg>
+                      )}
+                      <span className="truncate">
+                        {isUnlocked
+                          ? "Silhouette Profile"
+                          : !isPrereqMet
+                          ? "Clue 3: Silhouette (Locked)"
+                          : "Clue 3: Silhouette"}
+                      </span>
+                    </span>
+                    {isUnlocked ? (
+                      <span className="text-[10px] uppercase font-mono-tech font-bold text-amber-400 flex-shrink-0">Unlocked</span>
+                    ) : !isPrereqMet ? (
+                      <span className="text-[10px] uppercase font-mono-tech text-theme-secondary/50 flex-shrink-0">Locked</span>
+                    ) : (
+                      <span className="text-[10px] uppercase font-mono-tech text-amber-400/90 font-bold flex-shrink-0">
+                        {canUnlock ? "-1 Attempt" : "Need ≥2"}
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
             </div>
 
             {/* Silhouette reveal box */}
@@ -977,11 +1116,11 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
               </button>
             </form>
 
-            {/* Eliminated Leads History */}
+            {/* Incorrect Guesses History */}
             {guessHistory.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
                 <span className="text-[10px] font-mono-tech uppercase text-theme-secondary font-bold">
-                  Eliminated Suspects:
+                  Incorrect Guesses:
                 </span>
                 {guessHistory.map((g, i) => (
                   <span
