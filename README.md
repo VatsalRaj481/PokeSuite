@@ -1,27 +1,87 @@
 # Pokedex
 
-A modern, responsive Pokédex web application featuring comprehensive species data, a Generational Sprite Archive, interactive Battle Lab, Trainer's Bag item encyclopedia, and an AI-powered camera scanner. The frontend is hosted on Firebase Hosting with automated CI/CD via GitHub Actions, while the image scanning proxy runs on Render with the Gemini API key protected server-side.
+A modern, responsive Pokédex web application featuring comprehensive species data, a Generational Sprite Archive, an interactive 18×18 Type Chart, a Gen 9 Competitive Damage Calculator & Battle Lab, a 5-game PokéArcade suite, Trainer's Bag item encyclopedia, and an AI-powered camera scanner. 
 
-## Features
+The frontend is deployed to Firebase Hosting with automated CI/CD via GitHub Actions, while the camera scanner proxy runs on Render with the Gemini API key protected server-side.
 
-- **National Dex**: Search and browse across 1,025+ species with real-time name, ID, type, and generational filters.
-- **Generational Sprite Archive**: Explore historical sprites across generations (Gen 1 through Gen 9, 3D HOME artwork, animated Gen 5, Showdown battle gifs, and Dream World vector art) with shiny variant toggles where supported.
-- **Audio Archive**: Playback for official modern Pokémon cries and classic 8-bit retro sound clips.
-- **Interactive Type Chart**: Full 18×18 crosshair matchup matrix, Dual-Type Defender calculator, and single-type offensive/defensive deep dives.
-- **Type Matchups & Defenses**: Detailed damage multipliers for weaknesses, resistances, and immunities rendered with crisp, scalable vector badges.
-- **Move Learnsets**: Filterable moves categorized into Level-Up, TM/HM Machines, Egg Moves, and Tutor Moves with physical, special, and status damage classes.
-- **Battle Lab**: Interactive team sheet builder with EV/IV stat calculators, role assignments, dynamic type coverage analysis, and Pokémon Showdown import/export format support.
-- **Damage Calculator**: Canonical Gen 9 battle damage calculator with 16 rolls, weather, terrain, items, abilities, and Terastallization.
-- **PokéArcade**: 5 distinct minigames including "Who's That Pokémon?" (silhouette guessing), "Who's That Cry?" (audio recognition), "Dex Detective" (Pokédex flavor text mystery), "Dexdle" (daily/unlimited Poké-Wordle), and "Damage Duel" (battle IQ quiz).
-- **Trainer's Bag**: Item database covering Poké Balls, held battle items, evolutionary stones, berries, vitamins, and key adventure items.
-- **AI Camera Scanner**: Live camera scanning powered by Google Gemini 2.5 Flash through a rate-limited backend proxy.
-- **Appearance & Themes**: Integrated Light and Dark mode toggle with persistent state.
+---
+
+## Key Highlights & Feature Suite
+
+### 1. National Dex & Species Dossiers
+- **Complete National Dex**: Search and browse across 1,025+ species with instantaneous real-time filtering by Name, National ID, Elemental Type, Generation (Gen 1–9), Region (Kanto through Paldea), Living Dex Status, Special Archetypes (Starters, Legendaries, Mythicals, Paradox, Ultra Beasts, Fossils, Babies), and Regional Forms (Alolan, Galarian, Hisuian, Paldean, Mega, Gigantamax).
+- **Generational Sprite Archive**: High-definition sprite toggle across eras: Gen 1 through Gen 9, 3D Pokémon HOME models, animated Pokémon Showdown battle GIFs, and Dream World vector art, complete with shiny variant toggles.
+- **Acoustic Audio Archive**: Dual audio playback for both official modern high-fidelity Pokémon cries and nostalgic classic 8-bit retro chiptune cries.
+- **Compound Type Matchups & Defenses**: Exact damage multipliers for all incoming elemental attacks ($4\times, 2\times, 1\times, \frac{1}{2}\times, \frac{1}{4}\times, 0\times$) rendered with vector type badges.
+- **Comprehensive Move Learnsets**: Filterable moves categorized into Level-Up, TM/HM Machines, Egg Moves, and Tutor Moves with physical, special, and status damage classes, power, accuracy, and PP metrics.
+- **Training & Breeding Intelligence**: In-depth biometrics including EV yield distributions, catch rate gauge, gender ratio split bar, egg groups, growth rates, base experience, and wild encounter locations.
+- **Exclusive Signature Traits**: Automatic detection and highlighting of canonical signature moves and abilities unique to each evolutionary line.
+- **Head-to-Head Comparison**: Side-by-side stat radar, biometric comparison, and matchup analysis for up to 3 Pokémon simultaneously.
+
+---
+
+### 2. Interactive Type Chart & Defensive Calculator
+- **18×18 Matchup Matrix**:
+  - Full elemental matrix mapping Attacking Move Types (rows) against Defending Pokémon Types (columns).
+  - High-visibility color-coded badges: Super Effective ($2\times$), Not Very Effective ($\frac{1}{2}\times$), and Immune ($0\times$).
+  - **Dynamic Crosshair Intel**: Real-time crosshair tracking that highlights active row and column headers on hover with instantaneous outcome readouts.
+  - **Type Isolation**: One-click type pinning to isolate any type's offensive spread or defensive vulnerabilities.
+- **Dual-Type Defender Calculator**:
+  - Interactive sandbox to combine primary and secondary typings (e.g. *Water / Ground* or *Steel / Fairy*).
+  - Groups all 18 attacking types into clear multiplier tiers: Extreme Weakness ($4\times$), Weakness ($2\times$), Neutral ($1\times$), Resistance ($\frac{1}{2}\times$), Extreme Resistance ($\frac{1}{4}\times$), and Immunity ($0\times$).
+- **Single-Type Deep-Dive Dossier**:
+  - Two-column offensive and defensive breakdown for any chosen element.
+- **Ubiquitous Accessibility**: Available via top header and sticky bar shortcuts, as well as embedded directly within Battle Lab, Damage Calculator, and individual species cards.
+
+---
+
+### 3. Competitive Battle Suite
+- **Battle Lab (Team Sheet Builder)**:
+  - 6-Pokémon team roster compiler supporting standard formats (Lv. 50 VGC and Lv. 100 Smogon OU).
+  - Fine-grained EV/IV sliders with automated 508 EV budget enforcement and 25 Nature stat multipliers.
+  - Loadout customization including held items, abilities, Tera types, and 4-move slots.
+  - **Team Defensive Synergy & Weakness Radar**: Cumulative 18-type defensive heatmap flagging critical hazard liabilities ($3+$ weaknesses without resistances).
+  - **Speed Tier Radar**: Comparative speed benchmarks across your entire party.
+  - **Showdown & Poképaste Interoperability**: One-click export to Pokémon Showdown text format and paste-based team importing.
+- **Competitive Damage Calculator**:
+  - Canonical Gen 9 damage engine (`src/utils/damageCalc.js`) calculating damage based on base stats, IVs, EVs, Natures, and stat stages ($-6$ to $+6$).
+  - Full condition support: Singles / Doubles, Terastallization, Weather (Sun, Rain, Sandstorm, Snow), Terrains (Electric, Grassy, Psychic, Misty), Screens (Reflect, Light Screen, Aurora Veil), and Entry Hazards.
+  - **16 Discrete Rolls & Probability**: Generates the complete 16-roll damage distribution ($85\%-100\%$) and computes exact KO probabilities (*Guaranteed OHKO*, *X% chance to 2HKO*, etc.).
+
+---
+
+### 4. PokéArcade Minigames Lounge
+A dedicated minigames hub (`src/components/minigames/MinigamesHub.jsx`) with persistent streak tracking in `localStorage`:
+1. **Who's That Pokémon?**:
+   - Classic mystery silhouette guessing game with audio cry cues, generation filters, multiple choice and expert typing modes, and confetti celebrations.
+2. **Who's That Cry? (Audio Quiz)**:
+   - Pure acoustic challenge. Listen to the sound clip and identify the Pokémon.
+   - Features **Modern 3D** vs. **Retro 8-Bit** audio toggles, animated soundwave visualizer, and progressive lifelines (Region, Primary Type, BST bracket).
+3. **Dex Detective (Lore Mystery)**:
+   - Deduce the mystery Pokémon from authentic, redacted Pokédex flavor text field entries.
+   - Features archival game origin badges (e.g., *Pokémon Emerald*, *Platinum*, *Violet*), a 3-attempt investigation stamina system, and predictive autocomplete.
+4. **Dexdle (Poké-Wordle)**:
+   - 6-guess deductive puzzle available in Daily Challenge (calendar seeded) and Unlimited Practice modes.
+   - Color-coded comparison tiles for Generation, Primary/Secondary Types, Height, Weight, and BST.
+5. **Damage Duel ("Is the Calc Right?")**:
+   - Procedural battle IQ quiz testing trainers on complex damage scenarios with EV spreads, weather, items, and abilities.
+   - Competitive trainer rankings from *Bug Catcher* to *VGC World Champion*.
+
+---
+
+### 5. Trainer Utilities & AI Scanner
+- **Trainer's Bag (ItemsDex)**: Searchable encyclopedia covering Poké Balls, held battle items, evolution stones, berries, medicine, and key items with evolutionary compatibility and wild drop rates.
+- **Trainer Living Dex Tracker**: LocalStorage-backed tracker for Caught, Shiny, and Unseen statuses with progress bars.
+- **AI Camera Scanner**: Live camera scanning powered by Google Gemini 2.5 Flash through a rate-limited Express backend proxy.
+- **Appearance & Theming**: Integrated Dark and Light mode themes with custom Poké Ball loaders and custom Poké-toasts.
 - **Automated CI/CD**: Automatic production deployments to Firebase Hosting on push to `main` via GitHub Actions.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: React 19, Create React App, Tailwind CSS, Framer Motion, Lucide React, Canvas Confetti, React Toastify
-- **Data & Assets**: PokeAPI, Showdown Sprite Archives, Pokémon HOME Artwork
+- **Frontend**: React 19, Create React App, Tailwind CSS, Framer Motion, Canvas Confetti, React Toastify
+- **Data & Assets**: PokeAPI REST API, Pokémon Showdown Sprite & Cry Archives, Pokémon HOME 3D Artwork
 - **Backend Proxy**: Node.js, Express, node-fetch
 - **Cloud & Hosting**: Firebase Hosting, Render
 - **AI**: Google Gemini API (Gemini 2.5 Flash)
