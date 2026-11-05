@@ -3,19 +3,48 @@ import { motion, AnimatePresence } from "framer-motion";
 import SilhouetteGame from "./SilhouetteGame";
 import DexdleGame from "./DexdleGame";
 import DamageDuelGame from "./DamageDuelGame";
+import CryQuizGame from "./CryQuizGame";
+import DexDetectiveGame from "./DexDetectiveGame";
 
 const ARCADE_GAMES = [
   {
     id: "silhouette",
     title: "Who's That Pokémon?",
     subtitle: "Audio cries, mystery silhouettes & classic anime nostalgia",
-    badge: "Fan Favorite",
+    badge: "Classic",
     color: "from-amber-500/20 to-orange-500/10 border-amber-500/30",
     renderIcon: () => (
       <svg className="w-8 h-8 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
         <circle cx="12" cy="12" r="10" />
         <circle cx="12" cy="12" r="6" />
         <circle cx="12" cy="12" r="2" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    id: "cry-quiz",
+    title: "Who's That Cry?",
+    subtitle: "Audio recognition challenge with modern 3D and 8-bit retro sound clips",
+    badge: "Audio Quiz",
+    color: "from-purple-500/20 to-indigo-500/10 border-purple-500/30",
+    renderIcon: () => (
+      <svg className="w-8 h-8 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    ),
+  },
+  {
+    id: "dex-detective",
+    title: "Dex Detective",
+    subtitle: "Crack the case: deduce the mystery Pokémon from redacted Pokédex field entries",
+    badge: "Lore Mystery",
+    color: "from-amber-500/20 to-yellow-500/10 border-amber-500/30",
+    renderIcon: () => (
+      <svg className="w-8 h-8 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <path d="M11 8a3 3 0 0 0-3 3" />
       </svg>
     ),
   },
@@ -58,6 +87,22 @@ export default function MinigamesHub({ pokemonList = [], onSelectPokemon }) {
   const silhouetteBest = (() => {
     try {
       return parseInt(localStorage.getItem("pokedex_silhouette_best") || "0", 10);
+    } catch (e) {
+      return 0;
+    }
+  })();
+
+  const cryQuizBest = (() => {
+    try {
+      return parseInt(localStorage.getItem("pokedex_cry_quiz_best") || "0", 10);
+    } catch (e) {
+      return 0;
+    }
+  })();
+
+  const dexDetectiveBest = (() => {
+    try {
+      return parseInt(localStorage.getItem("pokedex_dex_detective_best") || "0", 10);
     } catch (e) {
       return 0;
     }
@@ -107,7 +152,7 @@ export default function MinigamesHub({ pokemonList = [], onSelectPokemon }) {
                 <span>PokéArcade</span>
               </h1>
               <p className="text-xs font-display text-theme-secondary mt-0.5">
-                Challenge your Pokémon knowledge with daily deductive puzzles, silhouettes, and competitive battle quizzes.
+                Challenge your Pokémon mastery with audio cry quizzes, detective lore puzzles, silhouettes, and competitive battle duels.
               </p>
             </div>
           )}
@@ -132,7 +177,7 @@ export default function MinigamesHub({ pokemonList = [], onSelectPokemon }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {ARCADE_GAMES.map((game) => (
               <div
@@ -161,6 +206,8 @@ export default function MinigamesHub({ pokemonList = [], onSelectPokemon }) {
                 <div className="pt-6 mt-6 border-t border-theme/40 flex items-center justify-between">
                   <div className="text-[11px] font-mono-tech text-theme-secondary">
                     {game.id === "silhouette" && `Best Streak: ${silhouetteBest}`}
+                    {game.id === "cry-quiz" && `Best Streak: ${cryQuizBest}`}
+                    {game.id === "dex-detective" && `Best Streak: ${dexDetectiveBest}`}
                     {game.id === "dexdle" && `Wins: ${dexdleStats.wins} | Streak: ${dexdleStats.streak}`}
                     {game.id === "damage-duel" && `Best Streak: ${damageDuelBest}`}
                   </div>
@@ -182,6 +229,12 @@ export default function MinigamesHub({ pokemonList = [], onSelectPokemon }) {
           >
             {activeGame === "silhouette" && (
               <SilhouetteGame pokemonList={pokemonList} onSelectPokemon={onSelectPokemon} />
+            )}
+            {activeGame === "cry-quiz" && (
+              <CryQuizGame pokemonList={pokemonList} onSelectPokemon={onSelectPokemon} />
+            )}
+            {activeGame === "dex-detective" && (
+              <DexDetectiveGame pokemonList={pokemonList} onSelectPokemon={onSelectPokemon} />
             )}
             {activeGame === "dexdle" && (
               <DexdleGame pokemonList={pokemonList} onSelectPokemon={onSelectPokemon} />

@@ -7,9 +7,12 @@ A modern, responsive Pokédex web application featuring comprehensive species da
 - **National Dex**: Search and browse across 1,025+ species with real-time name, ID, type, and generational filters.
 - **Generational Sprite Archive**: Explore historical sprites across generations (Gen 1 through Gen 9, 3D HOME artwork, animated Gen 5, Showdown battle gifs, and Dream World vector art) with shiny variant toggles where supported.
 - **Audio Archive**: Playback for official modern Pokémon cries and classic 8-bit retro sound clips.
+- **Interactive Type Chart**: Full 18×18 crosshair matchup matrix, Dual-Type Defender calculator, and single-type offensive/defensive deep dives.
 - **Type Matchups & Defenses**: Detailed damage multipliers for weaknesses, resistances, and immunities rendered with crisp, scalable vector badges.
 - **Move Learnsets**: Filterable moves categorized into Level-Up, TM/HM Machines, Egg Moves, and Tutor Moves with physical, special, and status damage classes.
 - **Battle Lab**: Interactive team sheet builder with EV/IV stat calculators, role assignments, dynamic type coverage analysis, and Pokémon Showdown import/export format support.
+- **Damage Calculator**: Canonical Gen 9 battle damage calculator with 16 rolls, weather, terrain, items, abilities, and Terastallization.
+- **PokéArcade**: 5 distinct minigames including "Who's That Pokémon?" (silhouette guessing), "Who's That Cry?" (audio recognition), "Dex Detective" (Pokédex flavor text mystery), "Dexdle" (daily/unlimited Poké-Wordle), and "Damage Duel" (battle IQ quiz).
 - **Trainer's Bag**: Item database covering Poké Balls, held battle items, evolutionary stones, berries, vitamins, and key adventure items.
 - **AI Camera Scanner**: Live camera scanning powered by Google Gemini 2.5 Flash through a rate-limited backend proxy.
 - **Appearance & Themes**: Integrated Light and Dark mode toggle with persistent state.
@@ -49,13 +52,23 @@ pokedex/
 │   └── index.html                            # Root HTML template
 ├── src/
 │   ├── components/
+│   │   ├── minigames/
+│   │   │   ├── CryQuizGame.jsx               # Audio cry recognition quiz
+│   │   │   ├── DamageDuelGame.jsx            # Battle IQ calculation quiz
+│   │   │   ├── DexdleGame.jsx                # Daily & unlimited Poké-Wordle
+│   │   │   ├── DexDetectiveGame.jsx          # Pokédex flavor text mystery game
+│   │   │   ├── MinigamesHub.jsx              # PokéArcade hub and selector
+│   │   │   └── SilhouetteGame.jsx            # Classic silhouette guessing
 │   │   ├── BattleLab.jsx                     # Competitive team builder & Showdown tools
+│   │   ├── DamageCalculator.jsx              # Canonical Gen 9 battle damage calculator
 │   │   ├── FilterType.jsx                    # Type and generation filtering controls
 │   │   ├── Footer.jsx                        # App footer
 │   │   ├── ItemsDex.jsx                      # Trainer's Bag item encyclopedia
+│   │   ├── NatureChartModal.jsx              # 5×5 interactive Nature matrix modal
 │   │   ├── PokemonCard.jsx                   # Detailed modal card (stats, sprites, moves)
 │   │   ├── PokemonScanner.jsx                # AI camera scanner interface
-│   │   └── TypeBadge.jsx                     # Scalable vector type badge component
+│   │   ├── TypeBadge.jsx                     # Scalable vector type badge component
+│   │   └── TypeChartModal.jsx                # 18×18 matchup matrix & dual-type calculator
 │   ├── utils/
 │   │   ├── moveMeta.js                       # Move damage class and power metadata
 │   │   └── typeIcons.js                      # Type metadata, colors, and asset mappings

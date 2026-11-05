@@ -537,6 +537,7 @@ function PokemonCard({
   onSelectPokemon,
   onToggleCompare,
   isCompared = false,
+  onOpenTypeChart,
 }) {
   const [abilityDetails, setAbilityDetails] = useState({});
   const [expandedAbility, setExpandedAbility] = useState(null);
@@ -2633,9 +2634,29 @@ function PokemonCard({
 
           {/* Compound Type Effectiveness Matchups */}
           <div className="bg-theme-bg border border-theme rounded-2xl p-4 sm:p-5">
-            <h3 className="text-xs font-display font-bold text-theme-secondary uppercase tracking-wider mb-3">
-              Type Matchups & Defenses
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-display font-bold text-theme-secondary uppercase tracking-wider">
+                Type Matchups & Defenses
+              </h3>
+              {onOpenTypeChart && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const primary = pokemon?.types?.[0]?.type?.name || pokemon?.types?.[0] || "normal";
+                    onOpenTypeChart(primary);
+                  }}
+                  className="text-[10px] font-mono-tech text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Open Interactive Type Chart"
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a10 10 0 0 1 10 10" />
+                    <path d="M12 12 2 12" />
+                  </svg>
+                  <span>Interactive Type Chart →</span>
+                </button>
+              )}
+            </div>
             {loadingEffects ? (
               <div className="flex items-center gap-2 text-theme-secondary text-xs font-display">
                 <svg

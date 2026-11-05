@@ -13,6 +13,7 @@ import ItemsDex from "./components/ItemsDex";
 import BattleLab from "./components/BattleLab";
 import DamageCalculator from "./components/DamageCalculator";
 import MinigamesHub from "./components/minigames/MinigamesHub";
+import TypeChartModal from "./components/TypeChartModal";
 import { getPokemonArchetype, resolvePokemonEndpointTarget, formatPokemonName } from "./utils/loreData.js";
 
 // Stat configuration duplicating same colors from PokemonCard for comparison
@@ -215,6 +216,15 @@ function App() {
   // Compare View states
   const [comparedPokemon, setComparedPokemon] = useState([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+
+  // Type Chart Modal states
+  const [showTypeChartModal, setShowTypeChartModal] = useState(false);
+  const [typeChartInitialType, setTypeChartInitialType] = useState(null);
+
+  const handleOpenTypeChart = useCallback((type = null) => {
+    setTypeChartInitialType(type);
+    setShowTypeChartModal(true);
+  }, []);
 
   // Theme toggle state (persisted)
   const [theme, setTheme] = useState(() => localStorage.getItem("pokedex-theme") || "dark");
@@ -1116,6 +1126,23 @@ function App() {
                   )}
                 </motion.button>
 
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleOpenTypeChart()}
+                  className="p-2 sm:px-3 py-2 bg-theme-surface border border-theme hover:border-indigo-500 text-theme-primary rounded-lg shadow-sm cursor-pointer flex items-center gap-1.5 min-h-[36px]"
+                  title="Open Type Effectiveness Chart"
+                  aria-label="Type Chart"
+                >
+                  <svg className="w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a10 10 0 0 1 10 10" />
+                    <path d="M12 12 2 12" />
+                    <path d="m12 12 7.07-7.07" />
+                  </svg>
+                  <span className="hidden sm:inline">Type Chart</span>
+                </motion.button>
+
                 {(isNationalDexActive || activeAppMode !== "pokedex") && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -1211,6 +1238,23 @@ function App() {
                 <span className="hidden sm:inline">Scanner</span>
               </motion.button>
             )}
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleOpenTypeChart()}
+              className="px-2.5 sm:px-4 py-2 bg-theme-surface border border-theme hover:border-indigo-500 text-theme-primary rounded-lg font-display font-semibold text-xs tracking-wide cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px] shadow-xs"
+              title="Open Type Effectiveness Chart"
+              aria-label="Type Chart"
+            >
+              <svg className="w-4 h-4 text-indigo-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+                <path d="M12 12 2 12" />
+                <path d="m12 12 7.07-7.07" />
+              </svg>
+              <span className="hidden sm:inline">Type Chart</span>
+            </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1354,6 +1398,16 @@ function App() {
           />
         )}
 
+        {/* Type Chart Component Modal */}
+        <TypeChartModal
+          isOpen={showTypeChartModal}
+          onClose={() => {
+            setShowTypeChartModal(false);
+            setTypeChartInitialType(null);
+          }}
+          initialType={typeChartInitialType}
+        />
+
         {/* Mode 1: Trainer's Bag (Items Database) */}
         {activeAppMode === "items" && (
           <ItemsDex
@@ -1366,12 +1420,18 @@ function App() {
 
         {/* Mode 2: Battle Lab (Competitive Corner) */}
         {activeAppMode === "battle-lab" && (
-          <BattleLab pokemonList={memoizedPokemonList} />
+          <BattleLab
+            pokemonList={memoizedPokemonList}
+            onOpenTypeChart={handleOpenTypeChart}
+          />
         )}
 
         {/* Mode 4: Damage Calculator */}
         {activeAppMode === "damage-calc" && (
-          <DamageCalculator pokemonList={memoizedPokemonList} />
+          <DamageCalculator
+            pokemonList={memoizedPokemonList}
+            onOpenTypeChart={handleOpenTypeChart}
+          />
         )}
 
         {/* Mode 5: PokéArcade Minigames Lounge */}
@@ -1417,6 +1477,7 @@ function App() {
               description={selectedPokemonDescription}
               speciesData={selectedSpeciesData}
               onSelectPokemon={handleSelectPokemonByName}
+              onOpenTypeChart={handleOpenTypeChart}
             />
           </div>
         )}

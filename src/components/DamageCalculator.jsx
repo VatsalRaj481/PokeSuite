@@ -95,7 +95,7 @@ export function formatEvSummary(evs = {}) {
   return parts.length > 0 ? parts.join(" / ") : "0 EVs";
 }
 
-export default function DamageCalculator({ pokemonList = [] }) {
+export default function DamageCalculator({ pokemonList = [], onOpenTypeChart }) {
   // Attacker State
   const [attackerPokemon, setAttackerPokemon] = useState(POPULAR_ATTACKERS[0]);
   const [attackerLevel, setAttackerLevel] = useState(50);
@@ -469,19 +469,37 @@ export default function DamageCalculator({ pokemonList = [] }) {
 
         {/* 16 Rolls Pills */}
         <div className="mt-4 pt-3 border-t border-theme flex items-center justify-between flex-wrap gap-2 text-xs">
-          <span className="text-theme-secondary font-mono-tech uppercase text-[10px] font-bold">
-            16 Damage Rolls (85% → 100%):
-          </span>
-          <div className="flex flex-wrap gap-1">
-            {calcResult.damageRolls.map((roll, idx) => (
-              <span
-                key={idx}
-                className="px-1.5 py-0.5 rounded bg-theme-bg text-[10px] font-mono-tech text-theme-primary border border-theme"
-              >
-                {roll}
-              </span>
-            ))}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-theme-secondary font-mono-tech uppercase text-[10px] font-bold">
+              16 Damage Rolls (85% → 100%):
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {calcResult.damageRolls.map((roll, idx) => (
+                <span
+                  key={idx}
+                  className="px-1.5 py-0.5 rounded bg-theme-bg text-[10px] font-mono-tech text-theme-primary border border-theme"
+                >
+                  {roll}
+                </span>
+              ))}
+            </div>
           </div>
+
+          {onOpenTypeChart && (
+            <button
+              type="button"
+              onClick={() => onOpenTypeChart(selectedMove.type)}
+              className="px-2.5 py-1 bg-theme-bg hover:bg-theme-surface-hover border border-theme text-theme-primary font-display font-bold text-[10px] rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+              title="Open Type Effectiveness Chart"
+            >
+              <svg className="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+                <path d="M12 12 2 12" />
+              </svg>
+              <span>Check Type Matchup Matrix →</span>
+            </button>
+          )}
         </div>
       </motion.div>
 

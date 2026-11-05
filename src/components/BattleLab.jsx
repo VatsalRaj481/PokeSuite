@@ -227,7 +227,7 @@ const SAMPLE_TEAM = [
   }
 ];
 
-export default function BattleLab({ pokemonList = [] }) {
+export default function BattleLab({ pokemonList = [], onOpenTypeChart }) {
   const [team, setTeam] = useState(SAMPLE_TEAM);
   const [activeSlot, setActiveSlot] = useState(0);
   const [battleLevel, setBattleLevel] = useState(50); // 50 (VGC standard) or 100 (Smogon standard)
@@ -981,7 +981,7 @@ export default function BattleLab({ pokemonList = [] }) {
 
       {/* Team Defensive Weakness Radar / Heatmap */}
       <div className="w-full bg-theme-surface border border-theme rounded-2xl p-5 shadow-sm mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div>
             <h4 className="text-base font-display font-extrabold text-theme-primary flex items-center gap-2">
               <svg className="w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -993,6 +993,20 @@ export default function BattleLab({ pokemonList = [] }) {
               Cumulative defensive profiles across all 18 elemental types for your active 6-Pokémon roster.
             </p>
           </div>
+          {onOpenTypeChart && (
+            <button
+              type="button"
+              onClick={() => onOpenTypeChart()}
+              className="px-3 py-1.5 bg-theme-bg hover:bg-theme-surface-hover border border-theme text-theme-primary font-display font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors"
+            >
+              <svg className="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+                <path d="M12 12 2 12" />
+              </svg>
+              <span>Full Type Matrix →</span>
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 mt-4">
@@ -1003,7 +1017,9 @@ export default function BattleLab({ pokemonList = [] }) {
             return (
               <div
                 key={type}
-                className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+                onClick={() => onOpenTypeChart && onOpenTypeChart(type)}
+                title="Click to view type effectiveness in Type Chart"
+                className={`p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer hover:border-indigo-500/50 transition-colors ${
                   hasCriticalWeakness
                     ? "bg-rose-500/10 border-rose-500/40"
                     : "bg-theme-input/50 border-theme"
