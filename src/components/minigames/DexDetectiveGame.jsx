@@ -476,7 +476,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
       setIsSolved(true);
       setFeedback({
         type: "success",
-        text: `Case Solved! It was indeed ${formatPokemonName(currentCase.displayName || currentCase.name)}!`,
+        text: `Correct Guess! It was indeed ${formatPokemonName(currentCase.displayName || currentCase.name)}!`,
       });
       confetti({ particleCount: 85, spread: 80, origin: { y: 0.6 } });
     } else {
@@ -490,7 +490,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
         setStreak(0);
         setFeedback({
           type: "error",
-          text: `Case Closed! The mystery Pokémon was ${formatPokemonName(currentCase.displayName || currentCase.name)}.`,
+          text: `Out of Leads! The mystery Pokémon was ${formatPokemonName(currentCase.displayName || currentCase.name)}.`,
         });
       } else {
         setFeedback({
@@ -685,7 +685,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                     isSolved ? "bg-emerald-400" : "bg-rose-400"
                   }`}
                 />
-                <div className="w-36 h-36 sm:w-44 sm:h-44 relative flex items-center justify-center p-2 rounded-2xl bg-theme-surface/70 border border-theme/60">
+                <div className="w-36 h-36 sm:w-44 sm:h-44 relative flex items-center justify-center">
                   <img
                     src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentCase.id}.png`}
                     alt={currentCase.name}
@@ -707,7 +707,7 @@ export default function DexDetectiveGame({ pokemonList = [], onSelectPokemon }) 
                         : "bg-rose-500/20 text-rose-300 border-rose-500/40"
                     }`}
                   >
-                    {isSolved ? "Case Solved (+1 Streak)" : "Case Closed — Suspect Identified"}
+                    {isSolved ? "Correct Guess (+1 Streak)" : "Out of Leads — Suspect Identified"}
                   </span>
                   <span className="font-mono-tech text-xs text-theme-secondary font-bold">
                     #{String(currentCase.id).padStart(4, "0")}
